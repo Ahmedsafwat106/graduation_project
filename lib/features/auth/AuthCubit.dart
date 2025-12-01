@@ -1,0 +1,98 @@
+import 'dart:convert';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../core/api_service.dart';
+import 'AuthState.dart';
+
+class AuthCubit extends Cubit<AuthState> {
+  final ApiService api;
+  AuthCubit(this.api) : super(AuthInitial());
+
+  // -------------------------
+  // LOGIN
+  // -------------------------
+  Future<void> login(String email, String password, String role) async {
+    emit(AuthLoading());
+    try {
+      final result = await api.login(email, password);
+
+      final token =
+          result["token"] ??
+              result["Token"] ??
+              result["accessToken"] ??
+              "";
+
+      if (token.isEmpty) {
+        throw Exception("Login failed: No token returned from server");
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("token", token);
+      await prefs.setString("role", role);
+      await prefs.setString("email", email);
+
+      emit(AuthSuccess("LOGIN_SUCCESS"));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  // -------------------------
+  // REGISTER DEVELOPER
+  // -------------------------
+  Future<void> registerDeveloper(
+      String name, String email, String password) async {
+    emit(AuthLoading());
+    try {
+      await api.registerDeveloper(name, email, password);
+      emit(AuthSuccess("REGISTERED_DEVELOPER"));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  // -------------------------
+  // REGISTER COMPANY
+  // -------------------------
+  Future<void> registerCompany(
+      String name,
+      String serial,
+      String phone,
+      String email,
+      String password,
+      ) async {
+    emit(AuthLoading());
+    try {
+      // لاحظ ترتيب الباراميتر صح
+      await api.registerCompany(name, serial, phone, email, password);
+
+      emit(AuthSuccess("REGISTERED_COMPANY"));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  // -------------------------
+  // AUTO LOGIN
+  // -------------------------
+  Future<void> tryAutoLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+
+    if (token != null && token.isNotEmpty) {
+      emit(AuthAuthenticated(token));
+    } else {
+      emit(AuthInitial());
+    }
+  }
+
+  // -------------------------
+  // LOGOUT
+  // -------------------------
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    emit(AuthInitial());
+  }
+}
