@@ -4,9 +4,6 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static const base = "http://devjob.runasp.net/api/Auth";
 
-  // -----------------------
-  // REGISTER DEVELOPER
-  // -----------------------
   Future<Map<String, dynamic>> registerDeveloper(
       String fullName, String email, String password) async {
     final parts = fullName.trim().split(' ');
@@ -30,14 +27,11 @@ class ApiService {
     return _handle(r, "Developer Register Failed");
   }
 
-  // -----------------------
-  // REGISTER COMPANY
-  // -----------------------
   Future<Map<String, dynamic>> registerCompany(
       String name, String serial, String phone, String email, String password) async {
     final body = {
       "CompanyName": name.trim(),
-      "SerailNumber": serial.trim(),  // نفس السبيلنج الغلط من السيرفر
+      "SerailNumber": serial.trim(),
       "Phone": phone.trim(),
       "Email": email.trim(),
       "Password": password.trim(),
@@ -53,9 +47,7 @@ class ApiService {
     return _handle(r, "Company Register Failed");
   }
 
-  // -----------------------
-  // LOGIN
-  // -----------------------
+
   Future<Map<String, dynamic>> login(String email, String password) async {
     final r = await http.post(
       Uri.parse("$base/Login"),
@@ -69,9 +61,6 @@ class ApiService {
     return _handle(r, "Login Failed");
   }
 
-  // -----------------------
-  // FORGOT PASSWORD
-  // -----------------------
   Future<Map<String, dynamic>> forgot(String email) async {
     final r = await http.post(
       Uri.parse("$base/forget-password"),
@@ -85,9 +74,7 @@ class ApiService {
     return _handle(r, "Forgot Password Failed");
   }
 
-  // -----------------------
-  // RESET PASSWORD
-  // -----------------------
+
   Future<Map<String, dynamic>> resetPassword(
       String token,
       String email,
@@ -108,9 +95,6 @@ class ApiService {
     return _handle(r, "Reset Password Failed");
   }
 
-  // -----------------------
-  // UNIVERSAL HANDLER
-  // -----------------------
   Map<String, dynamic> _handle(http.Response r, String message) {
     if (r.statusCode == 200 || r.statusCode == 201) {
       if (r.body.isEmpty) return {"success": true};

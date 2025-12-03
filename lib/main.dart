@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/api_service.dart';
 import 'features/auth/AuthCubit.dart';
 
-// Screens
+
 import 'screens/splash_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/LoginScreen.dart';

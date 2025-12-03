@@ -75,9 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: 30),
 
-                // -------------------------
-                //      ROLE SWITCHER
-                // -------------------------
+
                 Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F3F5),
@@ -93,9 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: 25),
 
-                // -------------------------
-                //   DEVELOPER FORM
-                // -------------------------
+
                 if (role == "developer") ...[
                   _field("Full Name", devName, Icons.person),
                   _field("Email", devEmail, Icons.email),
@@ -104,9 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       isPass: true),
                 ]
 
-                // -------------------------
-                //   COMPANY FORM
-                // -------------------------
+
                 else ...[
                   _field("Company Name", comName, Icons.business),
                   _field("Email", comEmail, Icons.email),
@@ -119,9 +113,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: 20),
 
-                // -------------------------
-                //   SUBMIT BUTTON
-                // -------------------------
+
                 state is AuthLoading
                     ? const CircularProgressIndicator()
                     : GestureDetector(
@@ -200,9 +192,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // -------------------------
-  //   ROLE BUTTON
-  // -------------------------
+
   Widget _roleButton(String r) {
     return GestureDetector(
       onTap: () => setState(() => role = r),
@@ -225,9 +215,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // -------------------------
-  //  TEXT FIELD
-  // -------------------------
+
   Widget _field(String hint, TextEditingController c, IconData icon,
       {bool isPass = false}) {
     return Container(
@@ -248,9 +236,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // -------------------------
-  //   ERROR SNACKBAR
-  // -------------------------
+
   void _error(String msg) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(msg)));

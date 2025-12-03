@@ -85,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // ROLE SWITCHER
+
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F3F5),
@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 20),
 
-                      // FIELDS
+
                       if (role == "developer") ...[
                         _field("Email", devEmail, Icons.email),
                         _field("Password", devPass, Icons.lock, isPass: true),

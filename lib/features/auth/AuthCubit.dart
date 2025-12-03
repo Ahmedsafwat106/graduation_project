@@ -9,9 +9,7 @@ class AuthCubit extends Cubit<AuthState> {
   final ApiService api;
   AuthCubit(this.api) : super(AuthInitial());
 
-  // -------------------------
-  // LOGIN
-  // -------------------------
+
   Future<void> login(String email, String password, String role) async {
     emit(AuthLoading());
     try {
@@ -38,9 +36,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // -------------------------
-  // REGISTER DEVELOPER
-  // -------------------------
   Future<void> registerDeveloper(
       String name, String email, String password) async {
     emit(AuthLoading());
@@ -52,9 +47,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // -------------------------
-  // REGISTER COMPANY
-  // -------------------------
   Future<void> registerCompany(
       String name,
       String serial,
@@ -64,7 +56,7 @@ class AuthCubit extends Cubit<AuthState> {
       ) async {
     emit(AuthLoading());
     try {
-      // لاحظ ترتيب الباراميتر صح
+
       await api.registerCompany(name, serial, phone, email, password);
 
       emit(AuthSuccess("REGISTERED_COMPANY"));
@@ -73,9 +65,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // -------------------------
-  // AUTO LOGIN
-  // -------------------------
+
   Future<void> tryAutoLogin() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
@@ -87,9 +77,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // -------------------------
-  // LOGOUT
-  // -------------------------
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();

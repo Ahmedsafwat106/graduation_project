@@ -72,12 +72,12 @@ class ForgotPasswordScreen extends StatelessWidget {
                           final api = ApiService();
                           await api.forgot(email.text);
 
-                          // نروح لصفحة الريست بدون توكن
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => ResetPasswordScreen(
-                                token: "",     // المستخدم هيدخّله بنفسه
+                                token: "",
                                 email: email.text,
                               ),
                             ),
