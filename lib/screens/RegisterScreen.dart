@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
-import 'DeveloperHomeScreen.dart';
 
 class RegisterScreen extends StatefulWidget {
   final String role;
@@ -44,12 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const DeveloperHomeScreen(),
-              ),
-            );
+            Navigator.pushReplacementNamed(context, "/upload-cv");
           }
 
           if (state is AuthFailure) {
@@ -75,7 +69,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: 30),
 
-
                 Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F3F5),
@@ -91,28 +84,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: 25),
 
-
                 if (role == "developer") ...[
                   _field("Full Name", devName, Icons.person),
                   _field("Email", devEmail, Icons.email),
                   _field("Password", devPass, Icons.lock, isPass: true),
-                  _field("Confirm Password", devConfirm, Icons.lock,
-                      isPass: true),
-                ]
-
-
-                else ...[
+                  _field("Confirm Password", devConfirm, Icons.lock, isPass: true),
+                ] else ...[
                   _field("Company Name", comName, Icons.business),
                   _field("Email", comEmail, Icons.email),
                   _field("Serial Number", comSerial, Icons.confirmation_number),
                   _field("Phone Number", comPhone, Icons.phone),
                   _field("Password", comPass, Icons.lock, isPass: true),
-                  _field("Confirm Password", comConfirm, Icons.lock,
-                      isPass: true),
+                  _field("Confirm Password", comConfirm, Icons.lock, isPass: true),
                 ],
 
                 const SizedBox(height: 20),
-
 
                 state is AuthLoading
                     ? const CircularProgressIndicator()
@@ -192,7 +178,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-
   Widget _roleButton(String r) {
     return GestureDetector(
       onTap: () => setState(() => role = r),
@@ -215,7 +200,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-
   Widget _field(String hint, TextEditingController c, IconData icon,
       {bool isPass = false}) {
     return Container(
@@ -235,7 +219,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
-
 
   void _error(String msg) {
     ScaffoldMessenger.of(context)

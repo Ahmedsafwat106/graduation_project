@@ -32,3 +32,20 @@ class AuthAuthenticated extends AuthState {
   @override
   List<Object?> get props => [token];
 }
+
+// ===== بعد التصحيح =====
+class ProfileLoaded extends AuthState {
+  final Map<String, dynamic> user;
+  ProfileLoaded(this.user);
+
+  @override
+  List<Object?> get props => [user];
+}
+
+class CompanyProfileLoaded extends AuthState {
+  final Map<String, dynamic> data;
+  CompanyProfileLoaded(this.data);
+
+  @override
+  List<Object?> get props => [data];
+}

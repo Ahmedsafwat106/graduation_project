@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
-import 'DeveloperHomeScreen.dart';
 import 'ForgotPasswordScreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -57,14 +56,10 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               child: BlocConsumer<AuthCubit, AuthState>(
                 listener: (context, state) {
-                  if (state is AuthSuccess) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DeveloperHomeScreen(),
-                      ),
-                    );
+                  if (state is AuthSuccess && state.message == "LOGIN_SUCCESS") {
+                    Navigator.pushReplacementNamed(context, "/upload-cv");
                   }
+
                   if (state is AuthFailure) {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text(state.message)));
@@ -85,7 +80,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 20),
 
-
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F3F5),
@@ -93,18 +87,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         child: Row(
                           children: [
-                            Expanded(
-                              child: _roleButton("developer"),
-                            ),
-                            Expanded(
-                              child: _roleButton("company"),
-                            ),
+                            Expanded(child: _roleButton("developer")),
+                            Expanded(child: _roleButton("company")),
                           ],
                         ),
                       ),
 
                       const SizedBox(height: 20),
-
 
                       if (role == "developer") ...[
                         _field("Email", devEmail, Icons.email),
@@ -140,8 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           : ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4CAF50),
-                          minimumSize:
-                          const Size(double.infinity, 52),
+                          minimumSize: const Size(double.infinity, 52),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -179,10 +167,9 @@ class _LoginScreenState extends State<LoginScreen> {
               child: const Text(
                 "Create Account",
                 style: TextStyle(
-                  color: Color(0xFF4CAF50),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                    color: Color(0xFF4CAF50),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600),
               ),
             ),
 
