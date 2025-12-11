@@ -7,7 +7,9 @@ class AuthCubit extends Cubit<AuthState> {
   final ApiService api;
   AuthCubit(this.api) : super(AuthInitial());
 
-
+  // ============================
+  // LOGIN
+  // ============================
   Future<void> login(String email, String password, String role) async {
     emit(AuthLoading());
     try {
@@ -31,7 +33,9 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-
+  // ============================
+  // REGISTER DEVELOPER
+  // ============================
   Future<void> registerDeveloper(
       String name, String email, String password) async {
     emit(AuthLoading());
@@ -43,7 +47,9 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-
+  // ============================
+  // REGISTER COMPANY
+  // ============================
   Future<void> registerCompany(
       String name,
       String serial,
@@ -59,7 +65,26 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  // ============================
+  // LOAD JOBS ⭐⭐ الجديد ⭐⭐
+  // ============================
+  Future<void> loadJobs() async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
 
+      final jobs = await api.getJobs(token);
+
+      emit(JobsLoaded(jobs));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  // ============================
+  // AUTO LOGIN
+  // ============================
   Future<void> tryAutoLogin() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
@@ -71,14 +96,18 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-
+  // ============================
+  // LOGOUT
+  // ============================
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     emit(AuthInitial());
   }
 
-
+  // ============================
+  // UPLOAD CV (لمسناهش)
+  // ============================
   Future<void> uploadCv(String filePath) async {
     emit(AuthLoading());
     try {
@@ -92,6 +121,9 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  // ============================
+  // LOAD USER PROFILE
+  // ============================
   Future<void> loadUserProfile() async {
     emit(AuthLoading());
     try {
@@ -106,7 +138,9 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-
+  // ============================
+  // UPDATE USER PROFILE
+  // ============================
   Future<void> updateUserProfile(
       String first, String last, String phone, String city) async {
     emit(AuthLoading());
@@ -122,7 +156,9 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-
+  // ============================
+  // UPDATE COMPANY
+  // ============================
   Future<void> updateCompany(
       String company, String phone, String city, String field) async {
     emit(AuthLoading());
@@ -138,7 +174,9 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-
+  // ============================
+  // CHANGE EMAIL
+  // ============================
   Future<void> changeEmail(String newEmail) async {
     emit(AuthLoading());
     try {
@@ -148,6 +186,34 @@ class AuthCubit extends Cubit<AuthState> {
       await api.changeEmail(token, newEmail);
 
       emit(AuthSuccess("EMAIL_CHANGED"));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  // ============================
+  // ADD JOB ⭐⭐ الجديد ⭐⭐
+  // ============================
+  Future<void> addJob(
+      String title,
+      String description,
+      String location,
+      String salary) async {
+
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      await api.addJob(
+        token,
+        title,
+        description,
+        location,
+        salary,
+      );
+
+      emit(AuthSuccess("JOB_ADDED"));
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }

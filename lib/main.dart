@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'core/api_service.dart';
 import 'features/auth/AuthCubit.dart';
 
@@ -9,11 +10,14 @@ import 'screens/LoginScreen.dart';
 import 'screens/RegisterScreen.dart';
 import 'screens/ForgotPasswordScreen.dart';
 import 'screens/ResetPasswordScreen.dart';
-import 'screens/DeveloperHomeScreen.dart';
+import 'screens/JobListScreen.dart';
 import 'screens/UploadCvScreen.dart';
 import 'screens/ProfileScreen.dart';
 import 'screens/EditProfileScreen.dart';
 import 'screens/EditCompanyScreen.dart';
+import 'screens/AddJobScreen.dart';
+import 'screens/CompanyDashboardScreen.dart';
+import 'screens/DeveloperDashboardScreen.dart';
 
 void main() {
   runApp(const DevJobApp());
@@ -31,7 +35,6 @@ class DevJobApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: "DevJob",
-        theme: ThemeData(fontFamily: "Poppins"),
 
         onGenerateRoute: (settings) {
           switch (settings.name) {
@@ -63,8 +66,14 @@ class DevJobApp extends StatelessWidget {
             case "/upload-cv":
               return MaterialPageRoute(builder: (_) => const UploadCvScreen());
 
-            case "/dashboard":
-              return MaterialPageRoute(builder: (_) => const DeveloperHomeScreen());
+            case "/developer-dashboard":
+              return MaterialPageRoute(builder: (_) => const DeveloperDashboardScreen());
+
+            case "/company-dashboard":
+              return MaterialPageRoute(builder: (_) => const CompanyDashboardScreen());
+
+            case "/jobs":
+              return MaterialPageRoute(builder: (_) => const JobListScreen());
 
             case "/profile":
               return MaterialPageRoute(builder: (_) => const ProfileScreen());
@@ -80,6 +89,9 @@ class DevJobApp extends StatelessWidget {
               return MaterialPageRoute(
                 builder: (_) => EditCompanyScreen(data: data),
               );
+
+            case "/add-job":
+              return MaterialPageRoute(builder: (_) => const AddJobScreen());
 
             default:
               return MaterialPageRoute(builder: (_) => const SplashScreen());

@@ -57,7 +57,11 @@ class _LoginScreenState extends State<LoginScreen> {
               child: BlocConsumer<AuthCubit, AuthState>(
                 listener: (context, state) {
                   if (state is AuthSuccess && state.message == "LOGIN_SUCCESS") {
-                    Navigator.pushReplacementNamed(context, "/upload-cv");
+                    if (role == "developer") {
+                      Navigator.pushReplacementNamed(context, "/upload-cv");
+                    } else {
+                      Navigator.pushReplacementNamed(context, "/company-dashboard");
+                    }
                   }
 
                   if (state is AuthFailure) {
@@ -162,8 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 20),
 
             GestureDetector(
-              onTap: () =>
-                  Navigator.pushNamed(context, "/register"),
+              onTap: () => Navigator.pushNamed(context, "/register"),
               child: const Text(
                 "Create Account",
                 style: TextStyle(

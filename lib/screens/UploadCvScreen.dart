@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
 
@@ -32,8 +33,9 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
       ),
 
       body: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is AuthSuccess && state.message == "CV_UPLOADED") {
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text("CV Uploaded Successfully! 🎉"),
@@ -41,7 +43,14 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
               ),
             );
 
-            Navigator.pushReplacementNamed(context, "/dashboard");
+            final prefs = await SharedPreferences.getInstance();
+            final role = prefs.getString("role") ?? "developer";
+
+            if (role == "developer") {
+              Navigator.pushReplacementNamed(context, "/developer-dashboard");
+            } else {
+              Navigator.pushReplacementNamed(context, "/company-dashboard");
+            }
           }
 
           if (state is AuthFailure) {
@@ -120,19 +129,24 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                 state is AuthLoading
                     ? const CircularProgressIndicator()
                     : GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     if (selectedFile == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content:
-                            Text("Please select a CV first!")),
+                            content: Text("Please select a CV first!")),
                       );
                       return;
                     }
 
-                    context
-                        .read<AuthCubit>()
-                        .uploadCv(selectedFile!);
+                    if (!selectedFile!.endsWith(".pdf")) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("File must be a PDF!")),
+                      );
+                      return;
+                    }
+
+                    context.read<AuthCubit>().uploadCv(selectedFile!);
                   },
                   child: Container(
                     height: 55,
