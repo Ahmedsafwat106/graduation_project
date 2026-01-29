@@ -34,9 +34,15 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   build_runner: ^2.4.10
   json_serializable: ^6.9.0
+  flutter_launcher_icons: ^0.13.1   # ✅ NEW
 
 flutter:
   uses-material-design: true
 
   assets:
     - assets/images/
+
+flutter_icons:                       # ✅ NEW
+  android: true
+  ios: false
+  image_path: "assets/images/icon.png"

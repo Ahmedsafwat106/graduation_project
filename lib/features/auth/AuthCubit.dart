@@ -120,6 +120,39 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthFailure(e.toString()));
     }
   }
+  // ============================
+// LOAD CVS
+// ============================
+  Future<void> loadCvs() async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      final cvs = await api.getAllCvs(token);
+      emit(CvsLoaded(cvs));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+// ============================
+// DELETE CV
+// ============================
+  Future<void> deleteCv(int cvId) async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      await api.deleteCv(token, cvId);
+      emit(AuthSuccess("CV_DELETED"));
+      loadCvs(); // refresh list
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
 
   // ============================
   // LOAD USER PROFILE
@@ -218,4 +251,5 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthFailure(e.toString()));
     }
   }
+
 }

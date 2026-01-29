@@ -118,13 +118,16 @@ class ApiService {
   Future<Map<String, dynamic>> uploadCv(String filePath, String token) async {
     final request = http.MultipartRequest(
       "POST",
-      Uri.parse("$baseCv/Upload"),
+      Uri.parse("http://devjob.runasp.net/api/CV/Upload"),
     );
 
     request.headers["Authorization"] = "Bearer $token";
 
     request.files.add(
-      await http.MultipartFile.fromPath("Cv", filePath),
+      await http.MultipartFile.fromPath(
+        "file", // ✅ اسم الفيلد الصح
+        filePath,
+      ),
     );
 
     final streamed = await request.send();
@@ -259,6 +262,40 @@ class ApiService {
 
     throw Exception("Failed to load jobs: ${r.body}");
   }
+  // ================================
+// GET ALL CVS
+// ================================
+  Future<List> getAllCvs(String token) async {
+    final r = await http.get(
+      Uri.parse("http://devjob.runasp.net/api/cv/all-cv"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (r.statusCode == 200) {
+      return jsonDecode(r.body);
+    }
+
+    throw Exception("Get CVs Failed: ${r.body}");
+  }
+
+// ================================
+// DELETE CV
+// ================================
+  Future<void> deleteCv(String token, int cvId) async {
+    final r = await http.delete(
+      Uri.parse("http://devjob.runasp.net/api/cv?cvid=$cvId"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (r.statusCode != 200 && r.statusCode != 204) {
+      throw Exception("Delete CV Failed: ${r.body}");
+    }
+  }
+
 
   // ================================
   // UNIVERSAL HANDLER (معدّل)

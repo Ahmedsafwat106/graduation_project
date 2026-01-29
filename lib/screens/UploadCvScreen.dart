@@ -14,6 +14,21 @@ class UploadCvScreen extends StatefulWidget {
 
 class _UploadCvScreenState extends State<UploadCvScreen> {
   String? selectedFile;
+  String role = "developer";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRole();
+    context.read<AuthCubit>().loadCvs();
+  }
+
+  Future<void> _loadRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      role = prefs.getString("role") ?? "developer";
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,33 +39,30 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
         elevation: 0,
         title: const Text(
           "Upload CV",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
       ),
 
       body: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) async {
+        listener: (context, state) {
           if (state is AuthSuccess && state.message == "CV_UPLOADED") {
-
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text("CV Uploaded Successfully! 🎉"),
+                content: Text("CV Uploaded Successfully 🎉"),
                 backgroundColor: Colors.green,
               ),
             );
+            context.read<AuthCubit>().loadCvs();
+          }
 
-            final prefs = await SharedPreferences.getInstance();
-            final role = prefs.getString("role") ?? "developer";
-
-            if (role == "developer") {
-              Navigator.pushReplacementNamed(context, "/developer-dashboard");
-            } else {
-              Navigator.pushReplacementNamed(context, "/company-dashboard");
-            }
+          if (state is AuthSuccess && state.message == "CV_DELETED") {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("CV deleted successfully"),
+                backgroundColor: Colors.green,
+              ),
+            );
           }
 
           if (state is AuthFailure) {
@@ -61,6 +73,75 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
         },
 
         builder: (context, state) {
+          if (state is AuthLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // =========================
+          // USER ALREADY HAS CV
+          // =========================
+          if (state is CvsLoaded && state.cvs.isNotEmpty) {
+            final cv = state.cvs.first;
+
+            return Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.picture_as_pdf,
+                      size: 80, color: Colors.green),
+
+                  const SizedBox(height: 15),
+
+                  const Text(
+                    "You already uploaded a CV",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // 🔥 NEW BUTTON
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(
+                          context, "/developer-dashboard");
+                    },
+                    child: const Text(
+                      "Go to Dashboard",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                    onPressed: () {
+                      context.read<AuthCubit>().deleteCv(cv["id"]);
+                    },
+                    child: const Text(
+                      "Delete CV",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // =========================
+          // NO CV → UPLOAD
+          // =========================
           return Padding(
             padding: const EdgeInsets.all(22),
             child: Column(
@@ -82,10 +163,12 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                     children: [
                       const Icon(Icons.upload_file,
                           size: 60, color: Color(0xFF4CAF50)),
+
                       const SizedBox(height: 16),
 
                       Text(
                         selectedFile ?? "No file selected",
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: selectedFile == null
                               ? Colors.grey
@@ -98,12 +181,10 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4CAF50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
                         ),
                         onPressed: () async {
-                          final result = await FilePicker.platform.pickFiles(
+                          final result =
+                          await FilePicker.platform.pickFiles(
                             type: FileType.custom,
                             allowedExtensions: ['pdf'],
                           );
@@ -115,10 +196,7 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                             });
                           }
                         },
-                        child: const Text(
-                          "Choose PDF",
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        child: const Text("Choose PDF"),
                       ),
                     ],
                   ),
@@ -126,22 +204,12 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
 
                 const SizedBox(height: 35),
 
-                state is AuthLoading
-                    ? const CircularProgressIndicator()
-                    : GestureDetector(
-                  onTap: () async {
+                GestureDetector(
+                  onTap: () {
                     if (selectedFile == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text("Please select a CV first!")),
-                      );
-                      return;
-                    }
-
-                    if (!selectedFile!.endsWith(".pdf")) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text("File must be a PDF!")),
+                            content: Text("Please select a CV first")),
                       );
                       return;
                     }

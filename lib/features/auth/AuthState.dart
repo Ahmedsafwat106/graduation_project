@@ -53,7 +53,7 @@ class CompanyProfileLoaded extends AuthState {
 }
 
 // ==========================
-// JOBS LOADED ⭐⭐
+// JOBS LOADED
 // ==========================
 class JobsLoaded extends AuthState {
   final List jobs;
@@ -61,4 +61,15 @@ class JobsLoaded extends AuthState {
 
   @override
   List<Object?> get props => [jobs];
+}
+
+// ==========================
+// CVS LOADED ✅ (برا لوحدها)
+// ==========================
+class CvsLoaded extends AuthState {
+  final List cvs;
+  CvsLoaded(this.cvs);
+
+  @override
+  List<Object?> get props => [cvs];
 }
