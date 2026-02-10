@@ -4,8 +4,15 @@ import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
 import 'ApplyJobScreen.dart';
 
+enum JobLoadType { all, recommended }
+
 class JobListScreen extends StatefulWidget {
-  const JobListScreen({super.key});
+  final JobLoadType loadType;
+
+  const JobListScreen({
+    super.key,
+    required this.loadType,
+  });
 
   @override
   State<JobListScreen> createState() => _JobListScreenState();
@@ -15,53 +22,49 @@ class _JobListScreenState extends State<JobListScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<AuthCubit>().loadJobs();
+
+    if (widget.loadType == JobLoadType.all) {
+      context.read<AuthCubit>().loadJobs();
+    } else {
+      context.read<AuthCubit>().loadRecommendedJobs();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Available Jobs"),
-        backgroundColor: Colors.green,
-      ),
-      body: BlocBuilder<AuthCubit, AuthState>(
-        builder: (context, state) {
-          if (state is AuthLoading) {
-            return const Center(child: CircularProgressIndicator());
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        if (state is AuthLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is JobsLoaded) {
+          if (state.jobs.isEmpty) {
+            return const Center(child: Text("No jobs available"));
           }
 
-          if (state is JobsLoaded) {
-            if (state.jobs.isEmpty) {
-              return const Center(child: Text("No jobs available"));
-            }
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: state.jobs.length,
+            itemBuilder: (context, index) {
+              final job = state.jobs[index];
+              return _jobCard(context, job);
+            },
+          );
+        }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: state.jobs.length,
-              itemBuilder: (context, index) {
-                final job = state.jobs[index];
+        if (state is AuthFailure) {
+          return Center(child: Text(state.message));
+        }
 
-                // ✅ اطبع شكل الـ job الحقيقي اللي جاي من الباك
-                print("JOB FROM API => $job");
-
-                return _jobCard(job);
-              },
-            );
-          }
-
-          if (state is AuthFailure) {
-            return Center(child: Text(state.message));
-          }
-
-          return const Center(child: Text("Something went wrong"));
-        },
-      ),
+        return const SizedBox();
+      },
     );
   }
 
-  Widget _jobCard(Map job) {
-    final extensions = job["detected_extensions"] ?? {};
+  Widget _jobCard(BuildContext context, Map job) {
+    final int? jobId = job["id"] ?? job["jobId"];
+    final bool canApply = jobId != null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -87,20 +90,23 @@ class _JobListScreenState extends State<JobListScreen> {
           const SizedBox(height: 6),
 
           Text(
-            job["company_name"] ?? "Unknown Company",
+            job["company_name"] ??
+                job["companyName"] ??
+                "Unknown Company",
             style: const TextStyle(color: Colors.grey),
           ),
 
           const SizedBox(height: 10),
 
-          Text(job["description"] ?? ""),
+          Text(
+            job["description"] ?? "",
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+          ),
 
           const SizedBox(height: 10),
 
           Text("📍 Location: ${job["location"] ?? "N/A"}"),
-          Text("💼 Type: ${extensions["schedule_type"] ?? "N/A"}"),
-          Text("💰 Salary: ${job["salary"] ?? "Not specified"}"),
-          Text("🕒 Posted: ${extensions["posted_at"] ?? ""}"),
 
           const SizedBox(height: 14),
 
@@ -108,20 +114,22 @@ class _JobListScreenState extends State<JobListScreen> {
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: canApply ? Colors.green : Colors.grey,
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              onPressed: () {
+              onPressed: canApply
+                  ? () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => ApplyJobScreen(job: job),
                   ),
                 );
-              },
-              child: const Text(
-                "Apply",
-                style: TextStyle(color: Colors.white),
+              }
+                  : null,
+              child: Text(
+                canApply ? "Apply" : "External Job",
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           ),

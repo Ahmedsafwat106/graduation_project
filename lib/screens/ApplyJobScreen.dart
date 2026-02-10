@@ -11,10 +11,9 @@ class ApplyJobScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int? jobId = job["jobId"] is int
-        ? job["jobId"]
-        : int.tryParse(job["jobId"]?.toString() ?? "");
-
+    final int? jobId = job["id"] is int
+        ? job["id"]
+        : int.tryParse(job["id"]?.toString() ?? "");
 
     if (jobId == null) {
       return Scaffold(

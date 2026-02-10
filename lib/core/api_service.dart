@@ -271,6 +271,20 @@ class ApiService {
     }
   }
 
+  Future<List> getRecommendedJobs(String token) async {
+    final r = await http.get(
+      Uri.parse("http://devjob.runasp.net/api/jobs/Recommended-jobs"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (r.statusCode == 200) {
+      return jsonDecode(r.body);
+    }
+
+    throw Exception("Failed to load recommended jobs");
+  }
 
 
 

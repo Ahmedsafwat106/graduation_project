@@ -243,6 +243,20 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  Future<void> loadRecommendedJobs() async {
+    emit(AuthLoading());
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token") ?? "";
+
+    if (token.isEmpty) {
+      emit(AuthFailure("No token found"));
+      return;
+    }
+
+    final jobs = await api.getRecommendedJobs(token);
+    emit(JobsLoaded(jobs));
+  }
 
 
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:graduation_project/screens/CompanyJobsScreen.dart';
 import 'package:graduation_project/screens/EditJobScreen..dart';
 
 import 'core/api_service.dart';
@@ -23,6 +22,8 @@ import 'screens/CompanyDashboardScreen.dart';
 import 'screens/DeveloperDashboardScreen.dart';
 import 'screens/MyApplicationsScreen.dart';
 import 'screens/CompanyApplicantsScreen.dart';
+import 'screens/CompanyJobsScreen.dart';
+
 
 void main() {
   runApp(const DevJobApp());
@@ -93,9 +94,12 @@ class DevJobApp extends StatelessWidget {
                 builder: (_) => const DeveloperDashboardScreen(),
               );
 
+          /// 🔹 لو محتاج تفتح JobList مباشرة
             case "/jobs":
               return MaterialPageRoute(
-                builder: (_) => const JobListScreen(),
+                builder: (_) => const JobListScreen(
+                  loadType: JobLoadType.all,
+                ),
               );
 
             case "/upload-cv":
