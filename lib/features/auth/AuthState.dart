@@ -64,6 +64,29 @@ class JobsLoaded extends AuthState {
 }
 
 // ==========================
+// APPLICATIONS (DEVELOPER)
+// ==========================
+class ApplicationsLoaded extends AuthState {
+  final List applications;
+  ApplicationsLoaded(this.applications);
+
+  @override
+  List<Object?> get props => [applications];
+}
+
+// ==========================
+// APPLICANTS (COMPANY)
+// ==========================
+class ApplicantsLoaded extends AuthState {
+  final List applicants;
+  ApplicantsLoaded(this.applicants);
+
+  @override
+  List<Object?> get props => [applicants];
+}
+
+
+// ==========================
 // CVS LOADED ✅ (برا لوحدها)
 // ==========================
 class CvsLoaded extends AuthState {
@@ -73,3 +96,5 @@ class CvsLoaded extends AuthState {
   @override
   List<Object?> get props => [cvs];
 }
+
+

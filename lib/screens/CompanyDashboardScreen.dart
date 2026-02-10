@@ -7,20 +7,23 @@ class CompanyDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
       appBar: AppBar(
         title: const Text("Company Dashboard"),
         backgroundColor: Colors.green,
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+
+            // ADD JOB
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 minimumSize: const Size(double.infinity, 55),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               onPressed: () {
                 Navigator.pushNamed(context, "/add-job");
@@ -31,12 +34,36 @@ class CompanyDashboardScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 25),
+            const SizedBox(height: 20),
 
+            // MY JOBS
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.shade700,
+                backgroundColor: Colors.green.shade600,
                 minimumSize: const Size(double.infinity, 55),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, "/company-jobs");
+              },
+              child: const Text(
+                "My Jobs",
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // PROFILE
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade800,
+                minimumSize: const Size(double.infinity, 55),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               onPressed: () {
                 Navigator.pushNamed(context, "/profile");

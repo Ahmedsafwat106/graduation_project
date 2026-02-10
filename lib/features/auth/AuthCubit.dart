@@ -25,7 +25,6 @@ class AuthCubit extends Cubit<AuthState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("token", token);
       await prefs.setString("role", role);
-      await prefs.setString("email", email);
 
       emit(AuthSuccess("LOGIN_SUCCESS"));
     } catch (e) {
@@ -33,7 +32,229 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+
+// LOAD PUBLIC JOBS (DEVELOPER) ✅
+// ============================
+  Future<void> loadJobs() async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        throw Exception("User not logged in");
+      }
+
+      final jobs = await api.getJobs(token);
+      emit(JobsLoaded(jobs));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+// ============================
+// APPLY JOB (DEVELOPER) ✅
+// ============================
+  Future<void> applyJob(int jobId) async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        throw Exception("User not logged in");
+      }
+
+      await api.applyJob(token, jobId);
+      emit(AuthSuccess("JOB_APPLIED"));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+
+// ============================
+// LOAD COMPANY JOBS (COMPANY) ✅
+// ============================
+  Future<void> loadCompanyJobs() async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        emit(AuthFailure("No token found"));
+        return;
+      }
+
+      final jobs = await api.getAllCompanyJobs(token);
+
+      print("MY JOBS COUNT => ${jobs.length}");
+      print(jobs);
+
+      emit(JobsLoaded(jobs));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+
   // ============================
+// LOAD MY APPLICATIONS
+// ============================
+  Future<void> loadMyApplications() async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      final apps = await api.getMyApplications(token);
+      emit(ApplicationsLoaded(apps));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  // ================= ADD JOB =================
+  Future<void> addJob(
+      String title,
+      String description,
+      String location,
+      int minExp,
+      int maxExp,
+      String jobLevel,
+      String employmentType,
+      String jobType,
+      ) async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        emit(AuthFailure("No token found"));
+        return;
+      }
+
+      final result = await api.addJob(
+        token,
+        title,
+        description,
+        location,
+        minExp,
+        maxExp,
+        jobLevel,
+        employmentType,
+        jobType,
+      );
+
+      if (result["success"] == true) {
+        emit(AuthSuccess("JOB_ADDED"));
+      } else {
+        emit(AuthFailure(
+          "Add Job Failed\n"
+              "Status: ${result["statusCode"]}\n"
+              "Error: ${result["error"]}",
+        ));
+      }
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+
+
+
+
+// ============================
+// LOAD JOB APPLICANTS
+// ============================
+  Future<void> loadJobApplicants(int jobId) async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      final users = await api.getJobApplicants(token, jobId);
+      emit(ApplicantsLoaded(users));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> updateJob(
+      int jobId,
+      String title,
+      String description,
+      String location,
+      String jobType,
+      String jobLevel,
+      String employmentType,
+      ) async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        emit(AuthFailure("No token found"));
+        return;
+      }
+
+      await api.updateJob(
+        token,
+        jobId,
+        title,
+        description,
+        location,
+        jobType,
+        jobLevel,
+        employmentType,
+      );
+
+      emit(AuthSuccess("JOB_UPDATED"));
+      await loadCompanyJobs();
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+
+
+
+
+  Future<void> deleteJob(int jobId) async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        emit(AuthFailure("No token found"));
+        return;
+      }
+
+      await api.deleteJob(token, jobId);
+
+      emit(AuthSuccess("JOB_DELETED"));
+      loadCompanyJobs(); // 🔄 reload list
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+
+
+
+
+// ============================
+// باقي الكود زي ما هو
+// ============================
+// register / uploadCv / loadCvs / deleteCv / profile / addJob
+
+
+
+// ============================
   // REGISTER DEVELOPER
   // ============================
   Future<void> registerDeveloper(
@@ -60,23 +281,6 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await api.registerCompany(name, serial, phone, email, password);
       emit(AuthSuccess("REGISTERED_COMPANY"));
-    } catch (e) {
-      emit(AuthFailure(e.toString()));
-    }
-  }
-
-  // ============================
-  // LOAD JOBS ⭐⭐ الجديد ⭐⭐
-  // ============================
-  Future<void> loadJobs() async {
-    emit(AuthLoading());
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("token") ?? "";
-
-      final jobs = await api.getJobs(token);
-
-      emit(JobsLoaded(jobs));
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }
@@ -224,32 +428,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // ============================
-  // ADD JOB ⭐⭐ الجديد ⭐⭐
-  // ============================
-  Future<void> addJob(
-      String title,
-      String description,
-      String location,
-      String salary) async {
 
-    emit(AuthLoading());
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("token") ?? "";
 
-      await api.addJob(
-        token,
-        title,
-        description,
-        location,
-        salary,
-      );
-
-      emit(AuthSuccess("JOB_ADDED"));
-    } catch (e) {
-      emit(AuthFailure(e.toString()));
-    }
-  }
 
 }
