@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
+import '../features/profile/profile_cubit.dart';
+import '../features/profile/profile_state..dart';
 
 class EditProfileScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -37,7 +39,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         elevation: 0,
       ),
 
-      body: BlocConsumer<AuthCubit, AuthState>(
+      body: BlocConsumer<ProfileCubit, ProfileState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -66,7 +68,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     minimumSize: const Size(double.infinity, 52),
                   ),
                   onPressed: () {
-                    context.read<AuthCubit>().updateUserProfile(
+                    context.read<ProfileCubit>().updateUserProfile(
                       first.text,
                       last.text,
                       phone.text,

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
+import '../features/profile/profile_cubit.dart';
+import '../features/profile/profile_state..dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,7 +20,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadRole();
-    context.read<AuthCubit>().loadUserProfile();
+    context.read<ProfileCubit>().loadUserProfile();
+
   }
 
   Future<void> _loadRole() async {
@@ -38,7 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
       ),
 
-      body: BlocBuilder<AuthCubit, AuthState>(
+      body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
           if (state is AuthLoading) {
             return const Center(child: CircularProgressIndicator());

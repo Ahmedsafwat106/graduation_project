@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
+import '../features/jobs/jobs_cubit.dart';
+import '../features/jobs/jobs_state..dart';
 
 class EditJobScreen extends StatefulWidget {
   final Map job;
@@ -55,13 +57,14 @@ class _EditJobScreenState extends State<EditJobScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: BlocConsumer<AuthCubit, AuthState>(
+        child: BlocConsumer<JobsCubit, JobsState>(
           listener: (context, state) {
-            if (state is AuthSuccess && state.message == "JOB_UPDATED") {
+            if (state is JobActionSuccess && state.message == "JOB_UPDATED") {
               Navigator.pop(context); // رجوع My Jobs
             }
 
-            if (state is AuthFailure) {
+            if (state is JobsFailure)
+            {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.message)),
               );
@@ -84,7 +87,7 @@ class _EditJobScreenState extends State<EditJobScreen> {
                   onPressed: state is AuthLoading
                       ? null
                       : () {
-                    context.read<AuthCubit>().updateJob(
+                    context.read<JobsCubit>().updateJob(
                       jobId,
                       title.text.trim(),
                       description.text.trim(),
@@ -93,6 +96,7 @@ class _EditJobScreenState extends State<EditJobScreen> {
                       jobLevel,
                       employmentType,
                     );
+
                   },
                   child: state is AuthLoading
                       ? const CircularProgressIndicator(color: Colors.white)

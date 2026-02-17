@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
+import '../features/profile/profile_cubit.dart';
+import '../features/profile/profile_state..dart';
 
 class EditCompanyScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -37,7 +39,7 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
         elevation: 0,
       ),
 
-      body: BlocConsumer<AuthCubit, AuthState>(
+      body: BlocConsumer<ProfileCubit, ProfileState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
             ScaffoldMessenger.of(context)
@@ -66,7 +68,7 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
                     minimumSize: const Size(double.infinity, 52),
                   ),
                   onPressed: () {
-                    context.read<AuthCubit>().updateCompany(
+                    context.read<ProfileCubit>().updateCompany(
                       company.text,
                       phone.text,
                       city.text,

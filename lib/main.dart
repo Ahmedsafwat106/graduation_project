@@ -3,9 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graduation_project/screens/EditJobScreen..dart';
 
 import 'core/api_service.dart';
+import 'features/applications/applications_cubit.dart';
 import 'features/auth/AuthCubit.dart';
 
 // Screens
+import 'features/cv/cv_cubit.dart';
+import 'features/jobs/jobs_cubit.dart';
+import 'features/profile/profile_cubit.dart';
 import 'screens/splash_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/LoginScreen.dart';
@@ -39,9 +43,22 @@ class DevJobApp extends StatelessWidget {
         BlocProvider<AuthCubit>(
           create: (_) => AuthCubit(ApiService()),
         ),
+        BlocProvider<JobsCubit>(
+          create: (_) => JobsCubit(ApiService()),
+        ),
+        BlocProvider<CvCubit>(
+          create: (_) => CvCubit(ApiService()),
+        ),
+        BlocProvider<ProfileCubit>(
+          create: (_) => ProfileCubit(ApiService()),
+        ),
+        BlocProvider<ApplicationsCubit>(
+          create: (_) => ApplicationsCubit(ApiService()),
+        ),
       ],
       child: MaterialApp(
-        debugShowCheckedModeBanner: false,
+
+      debugShowCheckedModeBanner: false,
         title: "DevJob",
         initialRoute: "/splash",
 

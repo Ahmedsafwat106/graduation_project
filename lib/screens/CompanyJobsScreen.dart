@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../features/applications/applications_state..dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
+import '../features/jobs/jobs_cubit.dart';
+import '../features/jobs/jobs_state..dart';
 
 class CompanyJobsScreen extends StatefulWidget {
   const CompanyJobsScreen({super.key});
@@ -15,7 +18,8 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
   void initState() {
     super.initState();
     // ✅ الصح: نجيب وظائف الشركة
-    context.read<AuthCubit>().loadCompanyJobs();
+    context.read<JobsCubit>().loadCompanyJobs();
+
   }
 
   @override
@@ -25,9 +29,10 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
         title: const Text("My Jobs"),
         backgroundColor: Colors.green,
       ),
-      body: BlocBuilder<AuthCubit, AuthState>(
+      body: BlocBuilder<JobsCubit, JobsState>(
         builder: (context, state) {
-          if (state is AuthLoading) {
+          if (state is JobsLoading)
+          {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -85,7 +90,8 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () {
-                            context.read<AuthCubit>().deleteJob(jobId);
+                            context.read<JobsCubit>().deleteJob(jobId);
+
                           },
                         ),
                       ],
@@ -96,7 +102,8 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
             );
           }
 
-          if (state is AuthFailure) {
+          if (state is JobsFailure)
+           {
             return Center(child: Text(state.message));
           }
 

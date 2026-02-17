@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../features/applications/applications_cubit.dart';
+import '../features/applications/applications_state..dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
 
@@ -15,7 +17,8 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<AuthCubit>().loadMyApplications();
+    context.read<ApplicationsCubit>().loadMyApplications();
+
   }
 
   @override
@@ -25,7 +28,7 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
         title: const Text("My Applications"),
         backgroundColor: Colors.green,
       ),
-      body: BlocBuilder<AuthCubit, AuthState>(
+      body: BlocBuilder<ApplicationsCubit, ApplicationsState>(
         builder: (context, state) {
           if (state is AuthLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -46,7 +49,7 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
             );
           }
 
-          if (state is AuthFailure) {
+          if (state is ApplicationsFailure) {
             return Center(child: Text(state.message));
           }
 

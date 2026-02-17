@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
+import '../features/jobs/jobs_cubit.dart';
+import '../features/jobs/jobs_state..dart';
 
 class AddJobScreen extends StatefulWidget {
   const AddJobScreen({super.key});
@@ -38,17 +40,18 @@ class _AddJobScreenState extends State<AddJobScreen> {
         title: const Text("Add New Job"),
         backgroundColor: Colors.green,
       ),
-      body: BlocConsumer<AuthCubit, AuthState>(
+      body: BlocConsumer<JobsCubit, JobsState>(
         listener: (context, state) {
-          if (state is AuthSuccess && state.message == "JOB_ADDED") {
+          if (state is JobActionSuccess && state.message == "JOB_ADDED") {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Job Added Successfully ✅")),
             );
-            context.read<AuthCubit>().loadCompanyJobs();
+            context.read<JobsCubit>().loadCompanyJobs();
+
             Navigator.pushReplacementNamed(context, "/company-jobs");
           }
 
-          if (state is AuthFailure) {
+          if (state is JobsFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
@@ -125,8 +128,9 @@ class _AddJobScreenState extends State<AddJobScreen> {
                         return;
                       }
 
-                      context.read<AuthCubit>().addJob(
-                        title.text.trim(),
+                      context.read<JobsCubit>().addJob(
+
+                      title.text.trim(),
                         description.text.trim(),
                         location.text.trim(),
                         min,

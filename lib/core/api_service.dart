@@ -146,21 +146,37 @@ class ApiService {
 
 
 
+
   // ================= APPLY JOB =================
-  Future<void> applyJob(String token, int jobId) async {
+  Future<Map<String, dynamic>> applyJob(
+      String token,
+      int jobId,
+      int cvId,
+      ) async {
+
+    final url =
+        "http://devjob.runasp.net/api/jobs/apply?jobId=$jobId&cvId=$cvId";
+
     final r = await http.post(
-      Uri.parse(
-        "http://devjob.runasp.net/api/jobs/apply?jobId=$jobId",
-      ),
+      Uri.parse(url),
       headers: {
         "Authorization": "Bearer $token",
+        "Accept": "application/json",
       },
     );
 
-    if (r.statusCode != 200 && r.statusCode != 201) {
-      throw Exception("Apply Job Failed: ${r.body}");
+    print("APPLY STATUS => ${r.statusCode}");
+    print("APPLY BODY => ${r.body}");
+
+    final decoded = jsonDecode(r.body);
+
+    if (r.statusCode == 200 && decoded["success"] == true) {
+      return decoded;
     }
+
+    throw Exception(decoded["message"] ?? "Apply Job Failed");
   }
+
 
   // ================= DELETE JOB =================
   Future<void> deleteJob(String token, int jobId) async {
@@ -279,17 +295,23 @@ class ApiService {
       },
     );
 
+    // 👇 هنا تحطهم
+    print("RECOMMENDED STATUS => ${r.statusCode}");
+    print("RECOMMENDED BODY => ${r.body}");
+
     if (r.statusCode == 200) {
-      return jsonDecode(r.body);
+      final decoded = jsonDecode(r.body);
+
+      if (decoded["success"] == true &&
+          decoded["recommendedJobs"] != null) {
+        return decoded["recommendedJobs"];
+      }
+
+      return [];
     }
 
-    throw Exception("Failed to load recommended jobs");
+    throw Exception("Failed to load recommended jobs: ${r.body}");
   }
-
-
-
-
-
 
 
 // FORGOT PASSWORD
@@ -445,12 +467,32 @@ class ApiService {
       },
     );
 
+    print("CV STATUS => ${r.statusCode}");
+    print("CV BODY => ${r.body}");
+
+    if (r.statusCode == 204) {
+      // مفيش CV
+      return [];
+    }
+
     if (r.statusCode == 200) {
-      return jsonDecode(r.body);
+      final decoded = jsonDecode(r.body);
+
+      if (decoded is List) {
+        return decoded;
+      }
+
+      if (decoded is Map && decoded["cvs"] != null) {
+        return decoded["cvs"];
+      }
+
+      return [];
     }
 
     throw Exception("Get CVs Failed: ${r.body}");
   }
+
+
 
 // ================================
 // DELETE CV
@@ -490,4 +532,3 @@ class ApiService {
     throw Exception("$msg: ${r.body}");
   }
 }
-

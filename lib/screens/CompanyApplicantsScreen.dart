@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../features/applications/applications_cubit.dart';
+import '../features/applications/applications_state..dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
 
@@ -17,7 +19,8 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<AuthCubit>().loadJobApplicants(widget.jobId);
+    context.read<ApplicationsCubit>().loadJobApplicants(widget.jobId);
+
   }
 
   @override
@@ -27,7 +30,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
         title: const Text("Job Applicants"),
         backgroundColor: Colors.green,
       ),
-      body: BlocBuilder<AuthCubit, AuthState>(
+      body:BlocBuilder<ApplicationsCubit, ApplicationsState>(
         builder: (context, state) {
           if (state is AuthLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -48,7 +51,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
             );
           }
 
-          if (state is AuthFailure) {
+          if (state is ApplicationsFailure) {
             return Center(child: Text(state.message));
           }
 

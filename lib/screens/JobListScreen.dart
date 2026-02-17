@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
+import '../features/jobs/jobs_cubit.dart';
+import '../features/jobs/jobs_state..dart';
 import 'ApplyJobScreen.dart';
 
 enum JobLoadType { all, recommended }
@@ -24,21 +26,24 @@ class _JobListScreenState extends State<JobListScreen> {
     super.initState();
 
     if (widget.loadType == JobLoadType.all) {
-      context.read<AuthCubit>().loadJobs();
+      context.read<JobsCubit>().loadJobs();
+
     } else {
-      context.read<AuthCubit>().loadRecommendedJobs();
+      context.read<JobsCubit>().loadRecommendedJobs();
+
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthCubit, AuthState>(
+    return BlocBuilder<JobsCubit, JobsState>(
       builder: (context, state) {
-        if (state is AuthLoading) {
+        if (state is JobsLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (state is JobsLoaded) {
+        if (state is JobsLoaded){
+
           if (state.jobs.isEmpty) {
             return const Center(child: Text("No jobs available"));
           }
@@ -53,7 +58,7 @@ class _JobListScreenState extends State<JobListScreen> {
           );
         }
 
-        if (state is AuthFailure) {
+        if (state is JobsFailure) {
           return Center(child: Text(state.message));
         }
 
@@ -63,7 +68,11 @@ class _JobListScreenState extends State<JobListScreen> {
   }
 
   Widget _jobCard(BuildContext context, Map job) {
-    final int? jobId = job["id"] ?? job["jobId"];
+    final int? jobId =
+        job["id"] ??
+            job["jobId"] ??
+            job["job_id"];
+
     final bool canApply = jobId != null;
 
     return Container(
@@ -99,7 +108,10 @@ class _JobListScreenState extends State<JobListScreen> {
           const SizedBox(height: 10),
 
           Text(
-            job["description"] ?? "",
+            job["description"] ??
+                job["desctiption"] ??
+                "",
+
             maxLines: 4,
             overflow: TextOverflow.ellipsis,
           ),
