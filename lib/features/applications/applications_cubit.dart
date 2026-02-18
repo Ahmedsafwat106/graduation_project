@@ -46,10 +46,32 @@ class ApplicationsCubit extends Cubit<ApplicationsState> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
 
-      final users = await api.getJobApplicants(token, jobId);
+      final users = await api.getAllApplicants(token, jobId);
+
       emit(ApplicantsLoaded(users));
     } catch (e) {
       emit(ApplicationsFailure(e.toString()));
     }
   }
+
+  Future<void> updateStatus(
+      int jobId,
+      int userId,
+      String status,
+      ) async {
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      await api.updateApplicantStatus(token, jobId, userId, status);
+
+      // نعيد تحميل المتقدمين بعد التحديث
+      await loadJobApplicants(jobId);
+
+    } catch (e) {
+      emit(ApplicationsFailure(e.toString()));
+    }
+  }
+
 }

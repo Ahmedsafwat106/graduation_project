@@ -210,6 +210,70 @@ class ApiService {
 
     throw Exception("Failed to load my applications");
   }
+  // ================================
+// GET ALL APPLICANTS (NEW API)
+// ================================
+  Future<List> getAllApplicants(String token, int jobId) async {
+    final r = await http.get(
+      Uri.parse(
+        "http://devjob.runasp.net/api/jobs/get-all-applicants?jobId=$jobId",
+      ),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+
+      if (decoded["success"] == true &&
+          decoded["getApplicantDtos"] != null) {
+        return decoded["getApplicantDtos"];
+      }
+
+      return [];
+    }
+
+    throw Exception("Failed to load applicants: ${r.body}");
+  }
+
+  Future<Map<String, dynamic>> getCompanyProfile(String token) async {
+    final r = await http.get(
+      Uri.parse("http://devjob.runasp.net/api/company/get-company-data"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    return _handle(r, "Get Company Data Failed");
+  }
+
+// ================================
+// UPDATE APPLICANT STATUS (COMPANY)
+// ================================
+  Future<Map<String, dynamic>> updateApplicantStatus(
+      String token,
+      int jobId,
+      int userId,
+      String status,
+      ) async {
+
+    final r = await http.put(
+      Uri.parse("http://devjob.runasp.net/api/jobs/update-state"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "JobId": jobId,
+        "UserId": userId,
+        "status": status, // لازم نفس enum بالظبط
+      }),
+    );
+
+    return _handle(r, "Update Status Failed");
+  }
+
 
 // ================================
 // JOB APPLICANTS (COMPANY)

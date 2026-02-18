@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../features/applications/applications_state..dart';
-import '../features/auth/AuthCubit.dart';
-import '../features/auth/AuthState.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
 
@@ -17,9 +14,7 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
   @override
   void initState() {
     super.initState();
-    // ✅ الصح: نجيب وظائف الشركة
     context.read<JobsCubit>().loadCompanyJobs();
-
   }
 
   @override
@@ -31,8 +26,7 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
       ),
       body: BlocBuilder<JobsCubit, JobsState>(
         builder: (context, state) {
-          if (state is JobsLoading)
-          {
+          if (state is JobsLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -46,9 +40,8 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
               itemCount: state.jobs.length,
               itemBuilder: (context, index) {
                 final job = state.jobs[index];
-
-                // ✅ التأكيد الصح على الـ ID
                 final int? jobId = job["id"];
+                final int count = job["count"] ?? 0;
 
                 if (jobId == null) {
                   return const SizedBox();
@@ -58,23 +51,37 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     title: Text(job["title"] ?? ""),
-                    subtitle: Text(job["location"] ?? ""),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(job["location"] ?? ""),
+                        const SizedBox(height: 4),
+                        Text(
+                          "$count Applicants",
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+
                         // 👥 Applicants
                         IconButton(
                           icon: const Icon(Icons.people, color: Colors.blue),
                           onPressed: () {
                             Navigator.pushNamed(
                               context,
-                              "/job-applicants",
+                              "/company-applicants", // ✅ الصح
                               arguments: jobId,
                             );
                           },
                         ),
 
-                        // ✏️ Edit (لو عندك شاشة تعديل)
+                        // ✏️ Edit
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.orange),
                           onPressed: () {
@@ -91,7 +98,6 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () {
                             context.read<JobsCubit>().deleteJob(jobId);
-
                           },
                         ),
                       ],
@@ -102,8 +108,7 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
             );
           }
 
-          if (state is JobsFailure)
-           {
+          if (state is JobsFailure) {
             return Center(child: Text(state.message));
           }
 

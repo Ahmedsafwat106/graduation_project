@@ -12,12 +12,22 @@ class ProfileCubit extends Cubit<ProfileState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
-      final data = await api.getUserData(token);
+      final role = prefs.getString("role") ?? "";
+
+      Map<String, dynamic> data;
+
+      if (role.toLowerCase() == "company") {
+        data = await api.getCompanyProfile(token);
+      } else {
+        data = await api.getUserData(token);
+      }
+
       emit(ProfileLoaded(data));
     } catch (e) {
       emit(ProfileFailure(e.toString()));
     }
   }
+
 
   Future<void> updateUserProfile(
       String first, String last, String phone, String city) async {

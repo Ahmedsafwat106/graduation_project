@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../features/auth/AuthCubit.dart';
-import '../features/auth/AuthState.dart';
+
+import '../features/jobs/jobs_cubit.dart';
+import '../features/jobs/jobs_state..dart';
 import '../features/profile/profile_cubit.dart';
 import '../features/profile/profile_state..dart';
 
@@ -21,7 +22,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _loadRole();
     context.read<ProfileCubit>().loadUserProfile();
-
   }
 
   Future<void> _loadRole() async {
@@ -29,6 +29,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       role = prefs.getString("role") ?? "developer";
     });
+  }
+
+  void _openApplicants(BuildContext context) async {
+    final jobsCubit = context.read<JobsCubit>();
+    await jobsCubit.loadCompanyJobs();
+
+    final state = jobsCubit.state;
+
+    if (state is JobsLoaded && state.jobs.isNotEmpty) {
+      final int jobId = state.jobs.first["id"];
+
+      Navigator.pushNamed(
+        context,
+        "/company-applicants",
+        arguments: jobId,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No jobs found")),
+      );
+    }
   }
 
   @override
@@ -40,13 +61,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
-          if (state is AuthLoading) {
+
+          // ✅ Loading
+          if (state is ProfileLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
+          // ✅ Failure (يعرضلك الخطأ الحقيقي)
+          if (state is ProfileFailure) {
+            return Center(
+              child: Text(state.message),
+            );
+          }
+
+          // ✅ Success Load
           if (state is ProfileLoaded) {
             final data = state.user;
 
@@ -57,87 +87,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const CircleAvatar(
                     radius: 45,
                     backgroundColor: Color(0xFF4CAF50),
-                    child: Icon(Icons.person, size: 55, color: Colors.white),
+                    child: Icon(Icons.person,
+                        size: 55, color: Colors.white),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // ======= Developer =======
-                  if (role == "developer") ...[
-                    _info("Name", "${data['firstName']} ${data['lastName']}"),
-                    _info("Email", data["email"]),
-                    _info("Phone", data["phone"] ?? "Not set"),
-                    _info("City", data["city"] ?? "Not set"),
-                  ],
-
-                  // ======= Company =======
                   if (role == "company") ...[
-                    _info("Company", data["companyName"]),
-                    _info("Email", data["email"]),
+                    _info("Company", data["companyName"] ?? ""),
+                    _info("Email", data["email"] ?? ""),
                     _info("Phone", data["phone"] ?? "Not set"),
                     _info("City", data["city"] ?? "Not set"),
                     _info("Field", data["field"] ?? "Not set"),
+
+                    const SizedBox(height: 30),
+
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        minimumSize:
+                        const Size(double.infinity, 50),
+                      ),
+                      onPressed: () => _openApplicants(context),
+                      child: const Text(
+                        "View Applicants",
+                        style:
+                        TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ],
 
-                  const SizedBox(height: 35),
-
-
-                  const Text(
-                    "Choose edit mode",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
-                    ),
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            minimumSize: const Size(double.infinity, 48),
-                          ),
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              "/edit-profile",
-                              arguments: data,
-                            );
-                          },
-                          child: const Text("Edit Developer"),
-                        ),
-                      ),
-
-                      const SizedBox(width: 10),
-
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueGrey,
-                            minimumSize: const Size(double.infinity, 48),
-                          ),
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              "/edit-company",
-                              arguments: data,
-                            );
-                          },
-                          child: const Text("Edit Company"),
-                        ),
-                      ),
-                    ],
-                  ),
+                  if (role == "developer") ...[
+                    _info("Name",
+                        "${data['firstName'] ?? ""} ${data['lastName'] ?? ""}"),
+                    _info("Email", data["email"] ?? ""),
+                    _info("Phone", data["phone"] ?? "Not set"),
+                    _info("City", data["city"] ?? "Not set"),
+                  ],
                 ],
               ),
             );
           }
 
-          return const Center(child: Text("Unable to load profile"));
+          return const SizedBox();
         },
       ),
     );
@@ -155,10 +147,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment:
+        MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(color: Colors.grey)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(title,
+              style: const TextStyle(color: Colors.grey)),
+          Text(value,
+              style:
+              const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );
