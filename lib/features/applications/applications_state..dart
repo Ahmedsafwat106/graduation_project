@@ -40,3 +40,25 @@ class ApplicationsFailure extends ApplicationsState {
   @override
   List<Object?> get props => [message];
 }
+class ApplicantCountLoaded extends ApplicationsState {
+  final Map<String, dynamic> counts;
+
+  ApplicantCountLoaded(this.counts);
+
+  @override
+  List<Object?> get props => [counts];
+}
+
+class ApplicantsScreenLoaded extends ApplicationsState {
+  final List applicants;
+  final Map<String, dynamic> counts;
+
+  ApplicantsScreenLoaded({
+    required this.applicants,
+    required this.counts,
+  });
+
+  @override
+  List<Object?> get props => [applicants, counts];
+}
+

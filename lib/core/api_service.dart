@@ -274,6 +274,82 @@ class ApiService {
     return _handle(r, "Update Status Failed");
   }
 
+  // ================================
+// GET APPLICANT COUNT (COMPANY)
+// ================================
+  Future<Map<String, dynamic>> getApplicantCount(
+      String token,
+      int jobId,
+      ) async {
+
+    final r = await http.get(
+      Uri.parse(
+          "http://devjob.runasp.net/api/jobs/applicant-count?jobId=$jobId"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+
+      if (decoded["success"] == true &&
+          decoded["applicantsCount"] != null) {
+        return decoded["applicantsCount"];
+      }
+    }
+
+    throw Exception("Failed to load applicant count");
+  }
+
+  // ================================
+// SAVE USER PREFERENCES (DEVELOPER)
+// ================================
+  Future<Map<String, dynamic>> saveUserPreferences(
+      String token,
+      List<String> jobTypes,
+      String jobLevel,
+      List<String> skills,
+      int minimumSalary,
+      ) async {
+
+    final r = await http.post(
+      Uri.parse("http://devjob.runasp.net/api/jobs/user-prefare"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "jobTypes": jobTypes,
+        "JobLevel": jobLevel,
+        "skills": skills,
+        "MinimumSalar": minimumSalary,
+      }),
+    );
+
+    return _handle(r, "Save Preferences Failed");
+  }
+
+  // ================================
+// GET ALL SKILLS (NO AUTH)
+// ================================
+  Future<List<String>> getAllSkills() async {
+
+    final r = await http.get(
+      Uri.parse("http://devjob.runasp.net/api/jobs/all-skills"),
+    );
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+
+      if (decoded is List) {
+        return decoded.cast<String>();
+      }
+    }
+
+    throw Exception("Failed to load skills");
+  }
+
 
 // ================================
 // JOB APPLICANTS (COMPANY)

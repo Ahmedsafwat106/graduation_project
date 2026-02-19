@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graduation_project/screens/AdvancedFilterScreen.dart';
 import 'package:graduation_project/screens/EditJobScreen..dart';
 
 import 'core/api_service.dart';
@@ -175,6 +176,12 @@ class DevJobApp extends StatelessWidget {
               return MaterialPageRoute(
                 builder: (_) => EditJobScreen(job: job),
               );
+
+            case "/advanced-filter":
+              return MaterialPageRoute(
+                builder: (_) => const AdvancedFilterScreen(),
+              );
+
 
           // =====================
           // FALLBACK

@@ -15,15 +15,16 @@ class CompanyApplicantsScreen extends StatefulWidget {
 class _CompanyApplicantsScreenState
     extends State<CompanyApplicantsScreen> {
 
+  String searchQuery = "";
+
   @override
   void initState() {
     super.initState();
     context
         .read<ApplicationsCubit>()
-        .loadJobApplicants(widget.jobId);
+        .loadApplicantsScreen(widget.jobId);
   }
 
-  // ✅ تحديد لون الحالة
   Color _getStatusColor(String status) {
     switch (status) {
       case "New":
@@ -42,65 +43,224 @@ class _CompanyApplicantsScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Job Applicants"),
-        backgroundColor: Colors.green,
-      ),
-      body: BlocBuilder<ApplicationsCubit, ApplicationsState>(
-        builder: (context, state) {
+      backgroundColor: const Color(0xFFF4F7F6),
+      body: SafeArea(
+        child: Column(
+          children: [
 
-          if (state is ApplicationsLoading) {
-            return const Center(
-                child: CircularProgressIndicator());
-          }
+            // ================= HEADER =================
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
-          if (state is ApplicantsLoaded) {
-            if (state.applicants.isEmpty) {
-              return const Center(
-                  child: Text("No applicants yet"));
-            }
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back,
+                            color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        "Applicants",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: state.applicants.length,
-              itemBuilder: (context, index) {
-                final user = state.applicants[index];
-                return _applicantCard(user);
-              },
-            );
-          }
+                  const SizedBox(height: 15),
 
-          if (state is ApplicationsFailure) {
-            return Center(child: Text(state.message));
-          }
+                  // SEARCH
+                  Container(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 15),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                      BorderRadius.circular(15),
+                    ),
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value.toLowerCase();
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.search),
+                        hintText: "Search applicants...",
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
 
-          return const SizedBox();
-        },
+                  const SizedBox(height: 15),
+
+                  // COUNTS
+                  BlocBuilder<ApplicationsCubit,
+                      ApplicationsState>(
+                    builder: (context, state) {
+
+                      if (state is ApplicantsScreenLoaded) {
+
+                        final c = state.counts;
+
+                        return Container(
+                          padding:
+                          const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                            BorderRadius.circular(20),
+                            boxShadow: const [
+                              BoxShadow(
+                                  color:
+                                  Colors.black12,
+                                  blurRadius: 5)
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceAround,
+                            children: [
+                              _countItem(
+                                  c["totalApplicant"] ?? 0,
+                                  "Total",
+                                  Colors.black),
+                              _countItem(
+                                  c["totalNew"] ?? 0,
+                                  "New",
+                                  Colors.blue),
+                              _countItem(
+                                  c["totalInterview"] ?? 0,
+                                  "Interview",
+                                  Colors.green),
+                              _countItem(
+                                  c["totalReviewed"] ?? 0,
+                                  "Reviewed",
+                                  Colors.orange),
+                            ],
+                          ),
+                        );
+                      }
+
+                      return const SizedBox();
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            // ================= LIST =================
+            Expanded(
+              child: BlocBuilder<ApplicationsCubit,
+                  ApplicationsState>(
+                builder: (context, state) {
+
+                  if (state is ApplicationsLoading) {
+                    return const Center(
+                        child:
+                        CircularProgressIndicator());
+                  }
+
+                  if (state is ApplicantsScreenLoaded) {
+
+                    final filtered = state.applicants
+                        .where((user) =>
+                        (user["name"] ?? "")
+                            .toString()
+                            .toLowerCase()
+                            .contains(searchQuery))
+                        .toList();
+
+                    if (filtered.isEmpty) {
+                      return const Center(
+                          child: Text("No applicants found"));
+                    }
+
+                    return ListView.builder(
+                      padding:
+                      const EdgeInsets.all(16),
+                      itemCount: filtered.length,
+                      itemBuilder:
+                          (context, index) {
+
+                        final user = filtered[index];
+                        return _applicantCard(user);
+                      },
+                    );
+                  }
+
+                  if (state is ApplicationsFailure) {
+                    return Center(child: Text(state.message));
+                  }
+
+                  return const SizedBox();
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // ✅ كارت المتقدم النهائي
+  Widget _countItem(
+      int number,
+      String label,
+      Color color,
+      ) {
+    return Column(
+      children: [
+        Text(
+          number.toString(),
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: color),
+        ),
+        Text(label),
+      ],
+    );
+  }
+
   Widget _applicantCard(Map user) {
 
-    final String status = user["status"] ?? "New";
-    final Color statusColor = _getStatusColor(status);
+    final status = user["status"] ?? "New";
+    final statusColor = _getStatusColor(status);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin:
+      const EdgeInsets.only(bottom: 16),
+      padding:
+      const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius:
+        BorderRadius.circular(16),
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 6),
+          BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
         children: [
 
-          // الاسم + Match Score
           Row(
             mainAxisAlignment:
             MainAxisAlignment.spaceBetween,
@@ -113,9 +273,12 @@ class _CompanyApplicantsScreenState
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
+                padding:
+                const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4),
+                decoration:
+                BoxDecoration(
                   color: Colors.green.withOpacity(0.1),
                   borderRadius:
                   BorderRadius.circular(12),
@@ -135,21 +298,21 @@ class _CompanyApplicantsScreenState
 
           Text(
             "${user["yearOfex"] ?? 0} years experience",
-            style:
-            const TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
 
           const SizedBox(height: 10),
 
-          // Skills
           Wrap(
             spacing: 6,
-            children: (user["skillName"] as List?)
-                ?.map((skill) => Chip(
-              label: Text(skill),
-              backgroundColor:
-              Colors.grey.shade100,
-            ))
+            children:
+            (user["skillName"] as List?)
+                ?.map((skill) =>
+                Chip(
+                  label: Text(skill),
+                  backgroundColor:
+                  Colors.grey.shade100,
+                ))
                 .toList() ??
                 [],
           ),
@@ -158,27 +321,27 @@ class _CompanyApplicantsScreenState
 
           Text(
             "Applied: ${user["applyDate"] ?? ""}",
-            style:
-            const TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
 
           const SizedBox(height: 10),
 
-          // ✅ Dropdown ملون حسب الحالة
           Container(
             padding:
             const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color:
-              statusColor.withOpacity(0.1),
+            decoration:
+            BoxDecoration(
+              color: statusColor.withOpacity(0.1),
               borderRadius:
               BorderRadius.circular(20),
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
+            child:
+            DropdownButtonHideUnderline(
+              child:
+              DropdownButton<String>(
                 value: status,
-                iconEnabledColor: statusColor,
-                dropdownColor: Colors.white,
+                iconEnabledColor:
+                statusColor,
                 items: const [
                   DropdownMenuItem(
                       value: "New",
@@ -193,10 +356,12 @@ class _CompanyApplicantsScreenState
                       value: "Rejected",
                       child: Text("Rejected")),
                 ],
-                onChanged: (value) {
+                onChanged:
+                    (value) {
                   if (value != null) {
                     context
-                        .read<ApplicationsCubit>()
+                        .read<
+                        ApplicationsCubit>()
                         .updateStatus(
                       widget.jobId,
                       user["userId"],
@@ -205,7 +370,8 @@ class _CompanyApplicantsScreenState
                   }
                 },
                 style: TextStyle(
-                  color: statusColor,
+                  color:
+                  statusColor,
                   fontWeight:
                   FontWeight.bold,
                 ),

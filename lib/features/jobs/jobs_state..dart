@@ -32,3 +32,12 @@ class JobsFailure extends JobsState {
   @override
   List<Object?> get props => [message];
 }
+
+class SkillsLoaded extends JobsState {
+  final List<String> skills;
+
+  SkillsLoaded(this.skills);
+
+  @override
+  List<Object?> get props => [skills];
+}

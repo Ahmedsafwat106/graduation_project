@@ -36,7 +36,22 @@ class _JobListScreenState extends State<JobListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<JobsCubit, JobsState>(
+    return Scaffold(
+        appBar: AppBar(
+        title: const Text("Jobs"),
+    actions: [
+    IconButton(
+    icon: const Icon(Icons.filter_list),
+    onPressed: () {
+      Navigator.pushNamed(context, "/advanced-filter").then((_) {
+        context.read<JobsCubit>().loadRecommendedJobs();
+      });
+
+    },
+    ),
+    ],
+    ),
+      body: BlocBuilder<JobsCubit, JobsState>(
       builder: (context, state) {
         if (state is JobsLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -64,6 +79,7 @@ class _JobListScreenState extends State<JobListScreen> {
 
         return const SizedBox();
       },
+    ),
     );
   }
 

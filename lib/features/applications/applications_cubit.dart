@@ -40,19 +40,35 @@ class ApplicationsCubit extends Cubit<ApplicationsState> {
     }
   }
 
-  Future<void> loadJobApplicants(int jobId) async {
+  Future<void> loadApplicantsScreen(int jobId) async {
     emit(ApplicationsLoading());
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
 
-      final users = await api.getAllApplicants(token, jobId);
+      if (token.isEmpty) {
+        throw Exception("No token found");
+      }
 
-      emit(ApplicantsLoaded(users));
+      final applicants =
+      await api.getAllApplicants(token, jobId);
+
+      final counts =
+      await api.getApplicantCount(token, jobId);
+
+      emit(
+        ApplicantsScreenLoaded(
+          applicants: applicants,
+          counts: counts,
+        ),
+      );
+
     } catch (e) {
       emit(ApplicationsFailure(e.toString()));
     }
   }
+
 
   Future<void> updateStatus(
       int jobId,
@@ -64,14 +80,20 @@ class ApplicationsCubit extends Cubit<ApplicationsState> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
 
-      await api.updateApplicantStatus(token, jobId, userId, status);
+      await api.updateApplicantStatus(
+          token,
+          jobId,
+          userId,
+          status);
 
-      // نعيد تحميل المتقدمين بعد التحديث
-      await loadJobApplicants(jobId);
+      await loadApplicantsScreen(jobId);
 
     } catch (e) {
       emit(ApplicationsFailure(e.toString()));
     }
   }
+
+
+
 
 }
