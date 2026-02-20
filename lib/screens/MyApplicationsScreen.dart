@@ -17,8 +17,8 @@ class _MyApplicationsScreenState
   @override
   void initState() {
     super.initState();
-    context.read<ApplicationsCubit>().loadMyApplications();
-    context.read<ApplicationsCubit>().loadApplicantHistoryCount();
+    context.read<ApplicationsCubit>()
+        .loadApplicantHistoryScreen();
   }
 
   Color _getStatusColor(String status) {
@@ -39,58 +39,64 @@ class _MyApplicationsScreenState
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F6),
       body: SafeArea(
-        child: Column(
-          children: [
+        child: BlocBuilder<ApplicationsCubit,
+            ApplicationsState>(
+          builder: (context, state) {
 
-            // ================= HEADER =================
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+            if (state is ApplicationsLoading) {
+              return const Center(
+                  child: CircularProgressIndicator());
+            }
+
+            if (state is ApplicantHistoryScreenLoaded) {
+
+              final history = state.history;
+              final counts = state.counts;
+
+              return Column(
                 children: [
 
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back,
-                            color: Colors.white),
-                        onPressed: () =>
-                            Navigator.pop(context),
+                  // ================= HEADER =================
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30),
                       ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        "Application History",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight:
-                          FontWeight.bold,
+                    ),
+                    child: Column(
+                      crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                      children: [
+
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                  Icons.arrow_back,
+                                  color: Colors.white),
+                              onPressed: () =>
+                                  Navigator.pop(context),
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              "Application History",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight:
+                                FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
 
-                  const SizedBox(height: 20),
+                        const SizedBox(height: 20),
 
-                  // ================= COUNTS =================
-                  BlocBuilder<ApplicationsCubit,
-                      ApplicationsState>(
-                    builder: (context, state) {
-
-                      if (state
-                      is ApplicantHistoryCountLoaded) {
-
-                        final c = state.counts;
-
-                        return Container(
+                        // ================= COUNTS =================
+                        Container(
                           padding:
                           const EdgeInsets.all(15),
                           decoration: BoxDecoration(
@@ -110,76 +116,55 @@ class _MyApplicationsScreenState
                                 .spaceAround,
                             children: [
                               _countItem(
-                                  c["totalApplied"] ?? 0,
+                                  counts["totalApplied"] ?? 0,
                                   "Total Applied",
                                   Colors.black),
                               _countItem(
-                                  c["interview"] ?? 0,
+                                  counts["interview"] ?? 0,
                                   "Interview",
                                   Colors.green),
                               _countItem(
-                                  c["waiting"] ?? 0,
+                                  counts["waiting"] ?? 0,
                                   "Waiting",
                                   Colors.orange),
                             ],
                           ),
-                        );
-                      }
-
-                      return const SizedBox();
-                    },
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
 
-            // ================= LIST =================
-            Expanded(
-              child: BlocBuilder<ApplicationsCubit,
-                  ApplicationsState>(
-                builder: (context, state) {
-
-                  if (state is ApplicationsLoading) {
-                    return const Center(
-                        child:
-                        CircularProgressIndicator());
-                  }
-
-                  if (state is ApplicationsLoaded) {
-
-                    if (state.applications.isEmpty) {
-                      return const Center(
-                          child:
-                          Text("No applications yet"));
-                    }
-
-                    return ListView.builder(
+                  // ================= LIST =================
+                  Expanded(
+                    child: history.isEmpty
+                        ? const Center(
+                        child: Text(
+                            "No applications yet"))
+                        : ListView.builder(
                       padding:
                       const EdgeInsets.all(16),
-                      itemCount:
-                      state.applications.length,
+                      itemCount: history.length,
                       itemBuilder:
                           (context, index) {
 
                         final app =
-                        state.applications[index];
+                        history[index];
 
                         return _applicationCard(app);
                       },
-                    );
-                  }
+                    ),
+                  ),
+                ],
+              );
+            }
 
-                  if (state is ApplicationsFailure) {
-                    return Center(
-                        child:
-                        Text(state.message));
-                  }
+            if (state is ApplicationsFailure) {
+              return Center(
+                  child: Text(state.message));
+            }
 
-                  return const SizedBox();
-                },
-              ),
-            ),
-          ],
+            return const SizedBox();
+          },
         ),
       ),
     );
@@ -209,15 +194,24 @@ class _MyApplicationsScreenState
   // ================= APPLICATION CARD =================
   Widget _applicationCard(Map app) {
 
-    final status = app["status"] ?? "Waiting";
-    final statusColor = _getStatusColor(status);
+    final rawStatus = app["jobStatus"] ?? "New";
+
+    // 👇 نحول New إلى Waiting
+    final status =
+    rawStatus == "New" ? "Waiting" : rawStatus;
+
+    final statusColor =
+    _getStatusColor(status);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      padding: const EdgeInsets.all(16),
+      margin:
+      const EdgeInsets.only(bottom: 18),
+      padding:
+      const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius:
+        BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
@@ -227,21 +221,23 @@ class _MyApplicationsScreenState
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
         children: [
 
-          // ================= TOP ROW =================
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
             children: [
 
-              // 🔹 Icon Container
               Container(
                 width: 45,
                 height: 45,
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color:
+                  Colors.green.withOpacity(0.1),
+                  borderRadius:
+                  BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.work_outline,
@@ -251,43 +247,34 @@ class _MyApplicationsScreenState
 
               const SizedBox(width: 12),
 
-              // 🔹 Title + Company
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      app["jobTitle"] ?? "",
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      app["companyName"] ?? "",
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  app["jobName"] ?? "",
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight:
+                    FontWeight.bold,
+                  ),
                 ),
               ),
 
-              // 🔹 Status Badge
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 5),
+                padding:
+                const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(20),
+                  color: statusColor
+                      .withOpacity(0.12),
+                  borderRadius:
+                  BorderRadius.circular(20),
                 ),
                 child: Text(
                   status,
                   style: TextStyle(
                     color: statusColor,
-                    fontWeight: FontWeight.bold,
+                    fontWeight:
+                    FontWeight.bold,
                     fontSize: 12,
                   ),
                 ),
@@ -296,44 +283,21 @@ class _MyApplicationsScreenState
           ),
 
           const SizedBox(height: 14),
-
-          const Divider(height: 1),
-
+          const Divider(),
           const SizedBox(height: 12),
 
-          // ================= BOTTOM ROW =================
           Row(
-            mainAxisAlignment:
-            MainAxisAlignment.spaceBetween,
             children: [
-
-              // 🔹 Applied Date
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today,
-                      size: 14, color: Colors.grey),
-                  const SizedBox(width: 6),
-                  Text(
-                    "Applied on ${app["appliedDate"] ?? ""}",
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-
-              // 🔹 View Details
-              GestureDetector(
-                onTap: () {
-                  // تقدر تفتح صفحة تفاصيل هنا
-                },
-                child: const Text(
-                  "View Details",
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.w600,
-                  ),
+              const Icon(
+                  Icons.calendar_today,
+                  size: 14,
+                  color: Colors.grey),
+              const SizedBox(width: 6),
+              Text(
+                "Applied on ${app["applyDate"] ?? ""}",
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
                 ),
               ),
             ],

@@ -62,11 +62,15 @@ class ApplicantsScreenLoaded extends ApplicationsState {
   List<Object?> get props => [applicants, counts];
 }
 
-class ApplicantHistoryCountLoaded extends ApplicationsState {
+class ApplicantHistoryScreenLoaded extends ApplicationsState {
+  final List history;
   final Map<String, dynamic> counts;
 
-  ApplicantHistoryCountLoaded(this.counts);
+  ApplicantHistoryScreenLoaded({
+    required this.history,
+    required this.counts,
+  });
 
   @override
-  List<Object?> get props => [counts];
+  List<Object?> get props => [history, counts];
 }

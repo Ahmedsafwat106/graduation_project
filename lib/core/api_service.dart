@@ -236,6 +236,40 @@ class ApiService {
 
     throw Exception("Failed to load applicant history count");
   }
+  Future<List> getApplicantHistory(String token) async {
+    final r = await http.get(
+      Uri.parse("http://devjob.runasp.net/api/user/applicant-history"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+
+      if (decoded is List) {
+        return decoded;
+      }
+    }
+
+    throw Exception("Failed to load applicant history");
+  }
+
+  Future<Map<String, dynamic>> getUserCount(String token) async {
+    final r = await http.get(
+      Uri.parse("http://devjob.runasp.net/api/user/user-count"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (r.statusCode == 200) {
+      return jsonDecode(r.body);
+    }
+
+    throw Exception("Failed to load user count");
+  }
+
   // ================================
 // GET ALL APPLICANTS (NEW API)
 // ================================
@@ -272,6 +306,26 @@ class ApiService {
     );
 
     return _handle(r, "Get Company Data Failed");
+  }
+
+  Future<Map<String, dynamic>> getCompanyCount(String token) async {
+    final r = await http.get(
+      Uri.parse("http://devjob.runasp.net/api/jobs/company-count"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+
+      if (decoded["success"] == true &&
+          decoded["companyCount"] != null) {
+        return decoded["companyCount"];
+      }
+    }
+
+    throw Exception("Failed to load company count");
   }
 
 // ================================
@@ -701,7 +755,7 @@ class ApiService {
 
   Future<void> sendDeviceId(String token, String deviceId) async {
 
-    final url = "http://devjob.runasp.net/api/notification/device-id/f569a688-a5a2-426d-8746-0b080f3a035c";
+    final url = "http://devjob.runasp.net/api/notification/device-id/$deviceId";
 
     print("========== SEND DEVICE ID ==========");
     print("URL => $url");

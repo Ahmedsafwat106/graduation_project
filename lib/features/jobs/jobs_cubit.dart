@@ -201,5 +201,55 @@ class JobsCubit extends Cubit<JobsState> {
       emit(JobsFailure(e.toString()));
     }
   }
+  Future<void> loadCompanyDashboard() async {
+    emit(JobsLoading());
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        throw Exception("No token found");
+      }
+
+      final counts = await api.getCompanyCount(token);
+      final jobs = await api.getAllCompanyJobs(token);
+
+      emit(
+        CompanyDashboardLoaded(
+          counts: counts,
+          jobs: jobs,
+        ),
+      );
+
+    } catch (e) {
+      emit(JobsFailure(e.toString()));
+    }
+  }
+  Future<void> loadDeveloperDashboard() async {
+    emit(JobsLoading());
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        throw Exception("No token found");
+      }
+
+      final counts = await api.getUserCount(token);
+      final jobs = await api.getJobs(token);
+
+      emit(
+        DeveloperDashboardLoaded(
+          counts: counts,
+          jobs: jobs,
+        ),
+      );
+
+    } catch (e) {
+      emit(JobsFailure(e.toString()));
+    }
+  }
 
 }

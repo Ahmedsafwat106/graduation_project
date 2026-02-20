@@ -41,3 +41,28 @@ class SkillsLoaded extends JobsState {
   @override
   List<Object?> get props => [skills];
 }
+
+class CompanyDashboardLoaded extends JobsState {
+  final Map<String, dynamic> counts;
+  final List jobs;
+
+  CompanyDashboardLoaded({
+    required this.counts,
+    required this.jobs,
+  });
+
+  @override
+  List<Object?> get props => [counts, jobs];
+}
+class DeveloperDashboardLoaded extends JobsState {
+  final Map<String, dynamic> counts;
+  final List jobs;
+
+  DeveloperDashboardLoaded({
+    required this.counts,
+    required this.jobs,
+  });
+
+  @override
+  List<Object?> get props => [counts, jobs];
+}

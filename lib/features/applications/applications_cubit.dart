@@ -92,22 +92,30 @@ class ApplicationsCubit extends Cubit<ApplicationsState> {
       emit(ApplicationsFailure(e.toString()));
     }
   }
-  Future<void> loadApplicantHistoryCount() async {
+  Future<void> loadApplicantHistoryScreen() async {
+    emit(ApplicationsLoading());
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
 
-      if (token.isEmpty) return;
+      if (token.isEmpty) {
+        throw Exception("No token found");
+      }
 
-      final data = await api.getApplicantHistoryCount(token);
+      final history = await api.getApplicantHistory(token);
+      final counts = await api.getApplicantHistoryCount(token);
 
-      emit(ApplicantHistoryCountLoaded(data));
+      emit(
+        ApplicantHistoryScreenLoaded(
+          history: history,
+          counts: counts,
+        ),
+      );
 
     } catch (e) {
       emit(ApplicationsFailure(e.toString()));
     }
   }
-
-
 
 }
