@@ -205,10 +205,36 @@ class ApiService {
     );
 
     if (r.statusCode == 200) {
-      return jsonDecode(r.body);
+      final decoded = jsonDecode(r.body);
+
+      if (decoded["success"] == true &&
+          decoded["applications"] != null) {
+        return decoded["applications"];
+      }
     }
 
     throw Exception("Failed to load my applications");
+  }
+
+  Future<Map<String, dynamic>> getApplicantHistoryCount(String token) async {
+
+    final r = await http.get(
+      Uri.parse("http://devjob.runasp.net/api/user/applicant-history-count"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+
+      if (decoded["success"] == true &&
+          decoded["applicantHistoryCount"] != null) {
+        return decoded["applicantHistoryCount"];
+      }
+    }
+
+    throw Exception("Failed to load applicant history count");
   }
   // ================================
 // GET ALL APPLICANTS (NEW API)
@@ -349,6 +375,7 @@ class ApiService {
 
     throw Exception("Failed to load skills");
   }
+
 
 
 // ================================
@@ -671,4 +698,31 @@ class ApiService {
 
     throw Exception("$msg: ${r.body}");
   }
+
+  Future<void> sendDeviceId(String token, String deviceId) async {
+
+    final url = "http://devjob.runasp.net/api/notification/device-id/f569a688-a5a2-426d-8746-0b080f3a035c";
+
+    print("========== SEND DEVICE ID ==========");
+    print("URL => $url");
+    print("TOKEN => $token");
+
+    final r = await http.put(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    print("STATUS CODE => ${r.statusCode}");
+    print("RESPONSE BODY => ${r.body}");
+    print("===================================");
+
+    if (r.statusCode != 200) {
+      throw Exception("Send Device ID Failed: ${r.body}");
+    }
+  }
+
+
 }

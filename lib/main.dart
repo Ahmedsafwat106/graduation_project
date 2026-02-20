@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graduation_project/screens/AdvancedFilterScreen.dart';
 import 'package:graduation_project/screens/EditJobScreen..dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import 'core/api_service.dart';
 import 'features/applications/applications_cubit.dart';
@@ -30,7 +31,19 @@ import 'screens/CompanyApplicantsScreen.dart';
 import 'screens/CompanyJobsScreen.dart';
 
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ حط هنا App ID الحقيقي من OneSignal
+  OneSignal.initialize("98f24ac5-68c3-4427-bcf4-4bf2bd2140d6");
+
+  await OneSignal.Notifications.requestPermission(true);
+
+  // 🔥 ده اللي هيطلعلك Player ID الحقيقي
+  OneSignal.User.pushSubscription.addObserver((state) {
+    print("🔥 GLOBAL PLAYER ID => ${state.current.id}");
+  });
+
   runApp(const DevJobApp());
 }
 

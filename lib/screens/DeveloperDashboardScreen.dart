@@ -12,13 +12,27 @@ class DeveloperDashboardScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Developer Dashboard"),
           backgroundColor: Colors.green,
+
+          // 👇 زرار Application History
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.history),
+              tooltip: "Application History",
+              onPressed: () {
+                Navigator.pushNamed(context, "/my-applications");
+              },
+            ),
+          ],
+
           bottom: const TabBar(
+            indicatorColor: Colors.white,
             tabs: [
               Tab(text: "All Jobs"),
               Tab(text: "Recommended"),
             ],
           ),
         ),
+
         body: const TabBarView(
           children: [
             JobListScreen(loadType: JobLoadType.all),

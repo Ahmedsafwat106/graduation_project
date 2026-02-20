@@ -21,6 +21,15 @@ class _LoginScreenState extends State<LoginScreen> {
   final cmpPass = TextEditingController();
 
   @override
+  void dispose() {
+    devEmail.dispose();
+    devPass.dispose();
+    cmpEmail.dispose();
+    cmpPass.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4FFFA),
@@ -46,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(22),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 25,
@@ -56,17 +65,22 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               child: BlocConsumer<AuthCubit, AuthState>(
                 listener: (context, state) {
-                  if (state is AuthSuccess && state.message == "LOGIN_SUCCESS") {
+                  if (state is AuthSuccess &&
+                      state.message == "LOGIN_SUCCESS") {
+
                     if (role == "developer") {
-                      Navigator.pushReplacementNamed(context, "/upload-cv");
+                      Navigator.pushReplacementNamed(
+                          context, "/upload-cv");
                     } else {
-                      Navigator.pushReplacementNamed(context, "/company-dashboard");
+                      Navigator.pushReplacementNamed(
+                          context, "/company-dashboard");
                     }
                   }
 
                   if (state is AuthFailure) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(state.message)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(state.message)),
+                    );
                   }
                 },
                 builder: (context, state) {
@@ -75,24 +89,33 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Text(
                         "Welcome Back",
                         style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w600),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 5),
                       const Text(
                         "Sign in to continue",
-                        style: TextStyle(color: Colors.grey, fontSize: 15),
+                        style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 15),
                       ),
                       const SizedBox(height: 20),
 
+                      // Role Switch
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F3F5),
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius:
+                          BorderRadius.circular(18),
                         ),
                         child: Row(
                           children: [
-                            Expanded(child: _roleButton("developer")),
-                            Expanded(child: _roleButton("company")),
+                            Expanded(
+                                child:
+                                _roleButton("developer")),
+                            Expanded(
+                                child:
+                                _roleButton("company")),
                           ],
                         ),
                       ),
@@ -100,28 +123,48 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 20),
 
                       if (role == "developer") ...[
-                        _field("Email", devEmail, Icons.email),
-                        _field("Password", devPass, Icons.lock, isPass: true),
+                        _field(
+                            "Email",
+                            devEmail,
+                            Icons.email),
+                        _field(
+                            "Password",
+                            devPass,
+                            Icons.lock,
+                            isPass: true),
                       ] else ...[
-                        _field("Company Email", cmpEmail, Icons.email),
-                        _field("Password", cmpPass, Icons.lock, isPass: true),
+                        _field(
+                            "Company Email",
+                            cmpEmail,
+                            Icons.email),
+                        _field(
+                            "Password",
+                            cmpPass,
+                            Icons.lock,
+                            isPass: true),
                       ],
 
                       const SizedBox(height: 10),
 
                       Align(
-                        alignment: Alignment.centerRight,
+                        alignment:
+                        Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const ForgotPasswordScreen()),
-                          ),
+                          onPressed: () =>
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                    const ForgotPasswordScreen()),
+                              ),
                           child: const Text(
                             "Forgot Password?",
                             style: TextStyle(
-                                color: Color(0xFF4CAF50),
-                                fontWeight: FontWeight.w500),
+                              color:
+                              Color(0xFF4CAF50),
+                              fontWeight:
+                              FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),
@@ -131,30 +174,59 @@ class _LoginScreenState extends State<LoginScreen> {
                       state is AuthLoading
                           ? const CircularProgressIndicator()
                           : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4CAF50),
-                          minimumSize: const Size(double.infinity, 52),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                        style:
+                        ElevatedButton
+                            .styleFrom(
+                          backgroundColor:
+                          const Color(
+                              0xFF4CAF50),
+                          minimumSize:
+                          const Size(
+                              double
+                                  .infinity,
+                              52),
+                          shape:
+                          RoundedRectangleBorder(
+                            borderRadius:
+                            BorderRadius
+                                .circular(
+                                16),
                           ),
                         ),
                         onPressed: () {
-                          final email = role == "developer"
-                              ? devEmail.text
-                              : cmpEmail.text;
+                          final email =
+                          role ==
+                              "developer"
+                              ? devEmail
+                              .text
+                              : cmpEmail
+                              .text;
 
-                          final pass = role == "developer"
-                              ? devPass.text
-                              : cmpPass.text;
+                          final pass =
+                          role ==
+                              "developer"
+                              ? devPass
+                              .text
+                              : cmpPass
+                              .text;
 
                           context
-                              .read<AuthCubit>()
-                              .login(email, pass, role);
+                              .read<
+                              AuthCubit>()
+                              .login(
+                              email,
+                              pass,
+                              role);
                         },
-                        child: const Text(
+                        child:
+                        const Text(
                           "Login",
                           style: TextStyle(
-                              color: Colors.white, fontSize: 17),
+                              color:
+                              Colors
+                                  .white,
+                              fontSize:
+                              17),
                         ),
                       ),
                     ],
@@ -166,13 +238,16 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 20),
 
             GestureDetector(
-              onTap: () => Navigator.pushNamed(context, "/register"),
+              onTap: () =>
+                  Navigator.pushNamed(
+                      context, "/register"),
               child: const Text(
                 "Create Account",
                 style: TextStyle(
                     color: Color(0xFF4CAF50),
                     fontSize: 16,
-                    fontWeight: FontWeight.w600),
+                    fontWeight:
+                    FontWeight.w600),
               ),
             ),
 
@@ -187,39 +262,56 @@ class _LoginScreenState extends State<LoginScreen> {
     return GestureDetector(
       onTap: () => setState(() => role = r),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding:
+        const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: role == r ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(18),
+          color: role == r
+              ? Colors.white
+              : Colors.transparent,
+          borderRadius:
+          BorderRadius.circular(18),
         ),
         alignment: Alignment.center,
         child: Text(
-          r == "developer" ? "Developer" : "Company",
+          r == "developer"
+              ? "Developer"
+              : "Company",
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: role == r ? Colors.black : Colors.grey,
+            color: role == r
+                ? Colors.black
+                : Colors.grey,
           ),
         ),
       ),
     );
   }
 
-  Widget _field(String hint, TextEditingController c, IconData icon,
-      {bool isPass = false}) {
+  Widget _field(
+      String hint,
+      TextEditingController c,
+      IconData icon, {
+        bool isPass = false,
+      }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
+      margin:
+      const EdgeInsets.only(bottom: 15),
       child: TextField(
         controller: c,
         obscureText: isPass,
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon: Icon(icon, color: Colors.grey.shade600),
+          prefixIcon:
+          Icon(icon, color: Colors.grey),
           filled: true,
-          fillColor: const Color(0xFFF3F6FA),
+          fillColor:
+          const Color(0xFFF3F6FA),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide.none,
+            borderRadius:
+            BorderRadius.circular(14),
+            borderSide:
+            BorderSide.none,
           ),
         ),
       ),

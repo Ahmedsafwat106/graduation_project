@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/api_service.dart';
 import 'AuthState.dart';
@@ -18,17 +19,23 @@ class AuthCubit extends Cubit<AuthState> {
           result["accessToken"] ??
           "";
 
-      if (token.isEmpty) throw Exception("Login failed: No token returned");
+      if (token.isEmpty) {
+        throw Exception("Login failed: No token returned");
+      }
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("token", token);
       await prefs.setString("role", role);
+
+      // ✅ أهم سطر ناقص عندك
+      await sendDeviceIdAfterLogin();
 
       emit(AuthSuccess("LOGIN_SUCCESS"));
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }
   }
+
 
   Future<void> registerDeveloper(
       String name, String email, String password) async {
@@ -84,4 +91,41 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthFailure(e.toString()));
     }
   }
+
+  Future<String?> getDeviceId() async {
+    // ده الـ Player ID الحقيقي بتاع الجهاز
+    final deviceId = OneSignal.User.pushSubscription.id;
+
+    // نطبعه في التيرمنال عشان تاخده للباك وتتأكد
+    print("ONESIGNAL PLAYER ID => $deviceId");
+
+    return deviceId;
+  }
+
+
+
+  // ================= SEND DEVICE ID =================
+  Future<void> sendDeviceIdAfterLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token") ?? "";
+
+    if (token.isEmpty) return;
+
+    final deviceId = OneSignal.User.pushSubscription.id;
+
+    if (deviceId != null && deviceId.isNotEmpty) {
+      print("🔥 PLAYER ID => $deviceId");
+
+      try {
+        await api.sendDeviceId(token, deviceId);
+        print("✅ DEVICE ID SENT SUCCESSFULLY");
+      } catch (e) {
+        print("❌ SEND DEVICE ID ERROR: $e");
+      }
+    } else {
+      print("❌ DEVICE ID IS NULL");
+    }
+  }
+
+
 }
