@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graduation_project/screens/AdvancedFilterScreen.dart';
+import 'package:graduation_project/screens/ChatDetailsScreen.dart';
+import 'package:graduation_project/screens/DeveloperChatsScreen..dart';
 import 'package:graduation_project/screens/EditJobScreen..dart';
 import 'package:graduation_project/screens/NotificationScreen.dart';
 import 'package:graduation_project/screens/SavedJobsScreen.dart';
@@ -11,6 +13,7 @@ import 'features/applications/applications_cubit.dart';
 import 'features/auth/AuthCubit.dart';
 
 // Screens
+import 'features/chat/ChatCubit.dart';
 import 'features/cv/cv_cubit.dart';
 import 'features/jobs/jobs_cubit.dart';
 import 'features/profile/profile_cubit.dart';
@@ -70,6 +73,9 @@ class DevJobApp extends StatelessWidget {
         ),
         BlocProvider<ApplicationsCubit>(
           create: (_) => ApplicationsCubit(ApiService()),
+        ),
+        BlocProvider(
+          create: (_) => ChatCubit(ApiService()),
         ),
       ],
       child: MaterialApp(
@@ -208,6 +214,19 @@ class DevJobApp extends StatelessWidget {
                 builder: (_) => const NotificationScreen(),
               );
 
+            case "/developer-chats":
+              return MaterialPageRoute(
+                builder: (_) => const DeveloperChatsScreen(),
+              );
+
+            case "/chat-details":
+              final args = settings.arguments as Map;
+              return MaterialPageRoute(
+                builder: (_) => ChatDetailsScreen(
+                  userId: args["userId"],
+                  jobId: args["jobId"],
+                ),
+              );
 
 
           // =====================

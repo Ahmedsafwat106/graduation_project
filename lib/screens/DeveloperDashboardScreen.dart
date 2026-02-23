@@ -73,7 +73,7 @@ class _DeveloperDashboardScreenState
                               "Welcome back 👋",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize:14,
+                                fontSize:10,
                                 fontWeight:
                                 FontWeight.bold,
                               ),
@@ -101,6 +101,12 @@ class _DeveloperDashboardScreenState
                                       "/edit-profile",
                                       arguments: data,
                                     );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.chat, color: Colors.white),
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, "/developer-chats");
                                   },
                                 ),
 

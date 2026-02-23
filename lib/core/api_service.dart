@@ -491,6 +491,53 @@ class ApiService {
   }
 
 
+// ================= START CONVERSATION (COMPANY) =================
+  Future<Map<String, dynamic>> startConversation(
+      String token,
+      int userId,
+      int jobId,
+      int companyId,
+      ) async {
+
+    final r = await http.post(
+      Uri.parse("http://devjob.runasp.net/api/chat/start-conversation"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "userId": userId,
+        "jobId": jobId,
+        "companyId": companyId,
+      }),
+    );
+
+    return _handle(r, "Start Conversation Failed");
+  }
+
+  // ================= GET ALL CHATS (DEVELOPER) =================
+  Future<List> getAllChats(String token) async {
+
+    final r = await http.get(
+      Uri.parse("http://devjob.runasp.net/api/chat/all-chats"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+
+      if (decoded["success"] == true &&
+          decoded["displayAllConversations"] != null) {
+        return decoded["displayAllConversations"];
+      }
+
+      return [];
+    }
+
+    throw Exception("Load Chats Failed: ${r.body}");
+  }
 
 // ================================
 // JOB APPLICANTS (COMPANY)

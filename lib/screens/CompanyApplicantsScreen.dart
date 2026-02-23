@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/applications/applications_cubit.dart';
 import '../features/applications/applications_state..dart';
+import '../features/chat/ChatCubit.dart';
 
 class CompanyApplicantsScreen extends StatefulWidget {
   final int jobId;
@@ -339,6 +340,7 @@ class _CompanyApplicantsScreenState
             DropdownButtonHideUnderline(
               child:
               DropdownButton<String>(
+
                 value: status,
                 iconEnabledColor:
                 statusColor,
@@ -355,7 +357,9 @@ class _CompanyApplicantsScreenState
                   DropdownMenuItem(
                       value: "Rejected",
                       child: Text("Rejected")),
+
                 ],
+
                 onChanged:
                     (value) {
                   if (value != null) {
@@ -375,6 +379,42 @@ class _CompanyApplicantsScreenState
                   fontWeight:
                   FontWeight.bold,
                 ),
+
+              ),
+            ),
+
+          ),
+          const SizedBox(height: 12),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () async {
+
+                await context.read<ChatCubit>().startConversation(
+                  user["userId"],
+                  widget.jobId,
+                  2,
+                );
+
+                Navigator.pushNamed(
+                  context,
+                  "/chat-details",
+                  arguments: {
+                    "userId": user["userId"],
+                    "jobId": widget.jobId,
+                  },
+                );
+              },
+              child: const Text(
+                "Start Chat",
+                style: TextStyle(color: Colors.white),
               ),
             ),
           ),
