@@ -8,9 +8,9 @@ import 'AuthState.dart';
 class AuthCubit extends Cubit<AuthState> {
   final ApiService api;
   AuthCubit(this.api) : super(AuthInitial());
-
   Future<void> login(String email, String password, String role) async {
     emit(AuthLoading());
+
     try {
       final result = await api.login(email, password);
 
@@ -24,13 +24,28 @@ class AuthCubit extends Cubit<AuthState> {
       }
 
       final prefs = await SharedPreferences.getInstance();
+
       await prefs.setString("token", token);
       await prefs.setString("role", role);
 
-      // ✅ أهم سطر ناقص عندك
+      // ✅ نجيب userId بس لو Developer
+      if (role.toLowerCase() == "developer") {
+        final userData = await api.getUserData(token);
+        final userId = userData["userId"];
+
+        if (userId != null) {
+          await prefs.setInt("userId", userId);
+          print("✅ USER ID SAVED => $userId");
+        } else {
+          print("❌ USER ID STILL NULL");
+        }
+      }
+
+      // ✅ يشتغل للطرفين
       await sendDeviceIdAfterLogin();
 
       emit(AuthSuccess("LOGIN_SUCCESS"));
+
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }

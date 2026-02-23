@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../core/api_service.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
 import 'JobListScreen.dart';
@@ -71,7 +73,7 @@ class _DeveloperDashboardScreenState
                               "Welcome back 👋",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize:14,
                                 fontWeight:
                                 FontWeight.bold,
                               ),
@@ -80,16 +82,61 @@ class _DeveloperDashboardScreenState
                             Row(
                               children: [
 
-                                // 🔔 Notification Icon
+
+                                // 👤 Edit Profile
+                                IconButton(
+                                  icon: const Icon(Icons.person, color: Colors.white),
+                                  onPressed: () async {
+
+                                    final prefs = await SharedPreferences.getInstance();
+                                    final token = prefs.getString("token") ?? "";
+
+                                    if (token.isEmpty) return;
+
+                                    final api = ApiService();
+                                    final data = await api.getUserData(token);
+
+                                    Navigator.pushNamed(
+                                      context,
+                                      "/edit-profile",
+                                      arguments: data,
+                                    );
+                                  },
+                                ),
+
+                                // 🔔 Notifications
+                                IconButton(
+                                  icon: const Icon(Icons.notifications, color: Colors.white),
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, "/notifications");
+                                  },
+                                ),
+
+                                // ❤️ Saved Jobs
                                 IconButton(
                                   icon: const Icon(
-                                    Icons.notifications,
+                                    Icons.favorite,
                                     color: Colors.white,
                                   ),
-                                  onPressed: () {
-                                    Navigator.pushNamed(
+                                  onPressed: () async {
+                                    final prefs = await SharedPreferences.getInstance();
+                                    final userId = prefs.getInt("userId");
+                                    final token = prefs.getString("token");
+
+                                    print("======== DEBUG SAVED JOBS ========");
+                                    print("USER ID => $userId");
+                                    print("TOKEN => $token");
+                                    print("==================================");
+
+                                    if (userId != null) {
+                                      Navigator.pushNamed(
                                         context,
-                                        "/notifications");
+                                        "/saved-jobs",
+                                        arguments: userId,
+                                      );
+                                    } else {
+                                      print("❌ USER ID IS NULL");
+                                    }
                                   },
                                 ),
 

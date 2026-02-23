@@ -42,7 +42,6 @@ class JobsCubit extends Cubit<JobsState> {
       emit(JobsFailure(e.toString()));
     }
   }
-
   Future<void> addJob(
       String title,
       String description,
@@ -52,6 +51,7 @@ class JobsCubit extends Cubit<JobsState> {
       String jobLevel,
       String employmentType,
       String jobType,
+      List<String> skills, // 👈 جديد
       ) async {
     emit(JobsLoading());
     try {
@@ -73,6 +73,7 @@ class JobsCubit extends Cubit<JobsState> {
         jobLevel,
         employmentType,
         jobType,
+        skills, // 👈 مهم
       );
 
       if (result["success"] == true) {
@@ -248,6 +249,45 @@ class JobsCubit extends Cubit<JobsState> {
       );
 
     } catch (e) {
+      emit(JobsFailure(e.toString()));
+    }
+  }
+  Future<void> loadSavedJobs(int userId) async {
+    emit(JobsLoading());
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        emit(JobsFailure("No token"));
+        return;
+      }
+
+      final jobs = await api.getSavedJobs(token, userId);
+      emit(SavedJobsLoaded(jobs));
+    } catch (e) {
+      emit(JobsFailure(e.toString()));
+    }
+  }
+
+  Future<void> saveJob(int userId, int jobId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      print("===== CUBIT SAVE DEBUG =====");
+      print("TOKEN => $token");
+      print("USER ID => $userId");
+      print("JOB ID => $jobId");
+      print("============================");
+
+      await api.addSavedJob(token, userId, jobId);
+
+      print("✅ SAVE COMPLETED");
+
+    } catch (e) {
+      print("❌ SAVE ERROR => $e");
       emit(JobsFailure(e.toString()));
     }
   }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graduation_project/screens/AdvancedFilterScreen.dart';
 import 'package:graduation_project/screens/EditJobScreen..dart';
 import 'package:graduation_project/screens/NotificationScreen.dart';
+import 'package:graduation_project/screens/SavedJobsScreen.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import 'core/api_service.dart';
@@ -155,6 +156,12 @@ class DevJobApp extends StatelessWidget {
                 builder: (_) => const MyApplicationsScreen(),
               );
 
+            case "/saved-jobs":
+              final userId = settings.arguments as int;
+              return MaterialPageRoute(
+                builder: (_) => SavedJobsScreen(userId: userId),
+              );
+
           // =====================
           // COMPANY
           // =====================
@@ -200,6 +207,8 @@ class DevJobApp extends StatelessWidget {
               return MaterialPageRoute(
                 builder: (_) => const NotificationScreen(),
               );
+
+
 
           // =====================
           // FALLBACK

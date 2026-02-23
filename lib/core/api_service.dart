@@ -99,6 +99,7 @@ class ApiService {
       String jobLevel,
       String employmentType,
       String jobType,
+      List<String> skills, // 👈 جديد
       ) async {
 
     final url = "http://devjob.runasp.net/api/jobs/add-job";
@@ -109,41 +110,29 @@ class ApiService {
       "location": location,
       "minimumExperience": minExp,
       "maximumExperience": maxExp,
-      "jobLevel": jobLevel,
-      "employmentType": employmentType,
-      "jobType": jobType,
+      "JobLevel": jobLevel,          // 👈 نفس الكابيتال زي الباك
+      "EmploymentType": employmentType,
+      "JobType": jobType,
+      "skills": skills,              // 👈 مهم جداً
     };
 
     print("========== ADD JOB DEBUG ==========");
-    print("ADD JOB URL => $url");
-    print("ADD JOB TOKEN => $token");
-    print("ADD JOB BODY => ${jsonEncode(body)}");
-    print("==================================");
+    print("BODY => ${jsonEncode(body)}");
 
     final r = await http.post(
       Uri.parse(url),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
-        "Accept": "application/json",
       },
       body: jsonEncode(body),
     );
 
-    print("ADD JOB STATUS => ${r.statusCode}");
-    print("ADD JOB RESPONSE BODY => ${r.body}");
+    print("STATUS => ${r.statusCode}");
+    print("RESPONSE => ${r.body}");
 
-    if (r.statusCode == 200 || r.statusCode == 201) {
-      return {"success": true};
-    } else {
-      return {
-        "success": false,
-        "statusCode": r.statusCode,
-        "error": r.body.isEmpty ? "Empty response body" : r.body,
-      };
-    }
+    return _handle(r, "Add Job Failed");
   }
-
 
 
 
@@ -326,6 +315,77 @@ class ApiService {
     }
 
     throw Exception("Failed to load company count");
+  }
+  Future<void> addSavedJob(
+      String token,
+      int userId,
+      int jobId,
+      ) async {
+
+    final url = "http://devjob.runasp.net/api/jobs/add-saved-job";
+
+    print("===== ADD SAVED JOB DEBUG =====");
+    print("URL => $url");
+    print("TOKEN => $token");
+    print("USER ID => $userId");
+    print("JOB ID => $jobId");
+    print("BODY => ${jsonEncode({
+      "userId": userId,
+      "jobId": jobId,
+    })}");
+
+    final r = await http.post(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "userId": userId,
+        "jobId": jobId,
+      }),
+    );
+
+    print("STATUS CODE => ${r.statusCode}");
+    print("RESPONSE BODY => ${r.body}");
+    print("================================");
+
+    if (r.statusCode != 200) {
+      throw Exception("Save Job Failed: ${r.body}");
+    }
+  }
+  Future<List> getSavedJobs(String token, int userId) async {
+
+    final url =
+        "http://devjob.runasp.net/api/jobs/display-saved-jobs?useId=$userId";
+
+    print("========= CALLING SAVED JOBS API =========");
+    print("URL => $url");
+    print("TOKEN => $token");
+
+    final r = await http.get(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    print("STATUS CODE => ${r.statusCode}");
+    print("BODY => ${r.body}");
+    print("==========================================");
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+
+      if (decoded["success"] == true &&
+          decoded["displaySavedJobDtos"] != null) {
+        return decoded["displaySavedJobDtos"];
+      }
+
+      return [];
+    }
+
+    throw Exception("Load Saved Jobs Failed: ${r.body}");
   }
 
 // ================================
@@ -604,7 +664,29 @@ class ApiService {
       headers: {"Authorization": "Bearer $token"},
     );
 
-    return _handle(r, "Get User Data Failed");
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+
+      dynamic rawUserId = decoded["userId"];
+
+      int? fixedUserId;
+
+      // لو بيرجع ليست ناخد أول عنصر
+      if (rawUserId is List && rawUserId.isNotEmpty) {
+        fixedUserId = rawUserId.first;
+      }
+      // لو رجع رقم عادي
+      else if (rawUserId is int) {
+        fixedUserId = rawUserId;
+      }
+
+      return {
+        "userId": fixedUserId,
+        "name": decoded["name"],
+      };
+    }
+
+    throw Exception("Get User Data Failed: ${r.body}");
   }
 
   // ================================

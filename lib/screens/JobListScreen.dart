@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../features/auth/AuthCubit.dart';
-import '../features/auth/AuthState.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
 import 'ApplyJobScreen.dart';
@@ -21,65 +20,76 @@ class JobListScreen extends StatefulWidget {
 }
 
 class _JobListScreenState extends State<JobListScreen> {
+  int? userId;
+
   @override
   void initState() {
     super.initState();
+    _loadUser();
 
     if (widget.loadType == JobLoadType.all) {
       context.read<JobsCubit>().loadJobs();
-
     } else {
       context.read<JobsCubit>().loadRecommendedJobs();
-
     }
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedUserId = prefs.getInt("userId");
+
+    print("🔎 LOADED USER ID => $storedUserId");
+
+    setState(() {
+      userId = storedUserId;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         title: const Text("Jobs"),
-    actions: [
-    IconButton(
-    icon: const Icon(Icons.filter_list),
-    onPressed: () {
-      Navigator.pushNamed(context, "/advanced-filter").then((_) {
-        context.read<JobsCubit>().loadRecommendedJobs();
-      });
-
-    },
-    ),
-    ],
-    ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () {
+              Navigator.pushNamed(context, "/advanced-filter")
+                  .then((_) {
+                context.read<JobsCubit>().loadRecommendedJobs();
+              });
+            },
+          ),
+        ],
+      ),
       body: BlocBuilder<JobsCubit, JobsState>(
-      builder: (context, state) {
-        if (state is JobsLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (state is JobsLoaded){
-
-          if (state.jobs.isEmpty) {
-            return const Center(child: Text("No jobs available"));
+        builder: (context, state) {
+          if (state is JobsLoading) {
+            return const Center(child: CircularProgressIndicator());
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: state.jobs.length,
-            itemBuilder: (context, index) {
-              final job = state.jobs[index];
-              return _jobCard(context, job);
-            },
-          );
-        }
+          if (state is JobsLoaded) {
+            if (state.jobs.isEmpty) {
+              return const Center(child: Text("No jobs available"));
+            }
 
-        if (state is JobsFailure) {
-          return Center(child: Text(state.message));
-        }
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: state.jobs.length,
+              itemBuilder: (context, index) {
+                final job = state.jobs[index];
+                return _jobCard(context, job);
+              },
+            );
+          }
 
-        return const SizedBox();
-      },
-    ),
+          if (state is JobsFailure) {
+            return Center(child: Text(state.message));
+          }
+
+          return const SizedBox();
+        },
+      ),
     );
   }
 
@@ -101,65 +111,114 @@ class _JobListScreenState extends State<JobListScreen> {
           BoxShadow(color: Colors.black12, blurRadius: 6),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Text(
-            job["title"] ?? "",
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
-          Text(
-            job["company_name"] ??
-                job["companyName"] ??
-                "Unknown Company",
-            style: const TextStyle(color: Colors.grey),
-          ),
-
-          const SizedBox(height: 10),
-
-          Text(
-            job["description"] ??
-                job["desctiption"] ??
-                "",
-
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          const SizedBox(height: 10),
-
-          Text("📍 Location: ${job["location"] ?? "N/A"}"),
-
-          const SizedBox(height: 14),
-
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: canApply ? Colors.green : Colors.grey,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+          // ❤️ Save Icon
+          Positioned(
+            right: 0,
+            top: 0,
+            child: IconButton(
+              icon: const Icon(
+                Icons.favorite_border,
+                color: Colors.green,
               ),
-              onPressed: canApply
-                  ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ApplyJobScreen(job: job),
+              onPressed: () {
+                print("❤️ ICON PRESSED");
+                print("USER ID => $userId");
+                print("JOB ID => $jobId");
+
+                if (userId == null) {
+                  print("❌ USER ID NULL");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("User not loaded"),
+                    ),
+                  );
+                  return;
+                }
+
+                if (jobId == null) {
+                  print("❌ JOB ID NULL");
+                  return;
+                }
+
+                context.read<JobsCubit>().saveJob(userId!, jobId);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Job Saved"),
                   ),
                 );
-              }
-                  : null,
-              child: Text(
-                canApply ? "Apply" : "External Job",
-                style: const TextStyle(color: Colors.white),
-              ),
+              },
             ),
+          ),
+
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+
+              Text(
+                job["title"] ?? "",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              Text(
+                job["company_name"] ??
+                    job["companyName"] ??
+                    "Unknown Company",
+                style: const TextStyle(color: Colors.grey),
+              ),
+
+              const SizedBox(height: 10),
+
+              Text(
+                job["description"] ??
+                    job["desctiption"] ??
+                    "",
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              const SizedBox(height: 10),
+
+              Text("📍 Location: ${job["location"] ?? "N/A"}"),
+
+              const SizedBox(height: 14),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                    canApply ? Colors.green : Colors.grey,
+                    padding:
+                    const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: canApply
+                      ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            ApplyJobScreen(job: job),
+                      ),
+                    );
+                  }
+                      : null,
+                  child: Text(
+                    canApply ? "Apply" : "External Job",
+                    style:
+                    const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

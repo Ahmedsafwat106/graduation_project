@@ -69,29 +69,37 @@ class ApplicationsCubit extends Cubit<ApplicationsState> {
     }
   }
 
-
   Future<void> updateStatus(
       int jobId,
       int userId,
       String status,
       ) async {
 
+    emit(ApplicationsLoading());
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
 
-      await api.updateApplicantStatus(
-          token,
-          jobId,
-          userId,
-          status);
+      if (token.isEmpty) {
+        throw Exception("No token found");
+      }
 
+      await api.updateApplicantStatus(
+        token,
+        jobId,
+        userId,
+        status,
+      );
+
+      // 🔥 أهم سطر
       await loadApplicantsScreen(jobId);
 
     } catch (e) {
       emit(ApplicationsFailure(e.toString()));
     }
   }
+  
   Future<void> loadApplicantHistoryScreen() async {
     emit(ApplicationsLoading());
 

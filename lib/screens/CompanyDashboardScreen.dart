@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../core/api_service.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
 
@@ -61,6 +63,26 @@ class _CompanyDashboardScreenState
                           MainAxisAlignment.spaceBetween,
                           children: [
 
+                            // 👤 Edit Company
+                            IconButton(
+                              icon: const Icon(Icons.business, color: Colors.white),
+                              onPressed: () async {
+
+                                final prefs = await SharedPreferences.getInstance();
+                                final token = prefs.getString("token") ?? "";
+
+                                if (token.isEmpty) return;
+
+                                final api = ApiService();
+                                final data = await api.getCompanyProfile(token);
+
+                                Navigator.pushNamed(
+                                  context,
+                                  "/edit-company",
+                                  arguments: data,
+                                );
+                              },
+                            ),
                             const Text(
                               "Welcome back 👋",
                               style: TextStyle(

@@ -66,3 +66,11 @@ class DeveloperDashboardLoaded extends JobsState {
   @override
   List<Object?> get props => [counts, jobs];
 }
+class SavedJobsLoaded extends JobsState {
+  final List jobs;
+
+  SavedJobsLoaded(this.jobs);
+
+  @override
+  List<Object?> get props => [jobs];
+}

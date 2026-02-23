@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../features/auth/AuthCubit.dart';
-import '../features/auth/AuthState.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
 
@@ -19,6 +17,10 @@ class _AddJobScreenState extends State<AddJobScreen> {
   final minExp = TextEditingController();
   final maxExp = TextEditingController();
 
+  // ✅ Skills
+  final skillController = TextEditingController();
+  List<String> skills = [];
+
   String jobLevel = "Senior";
   String employmentType = "Fulltime";
   String jobType = "Hybrid";
@@ -30,6 +32,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
     location.dispose();
     minExp.dispose();
     maxExp.dispose();
+    skillController.dispose();
     super.dispose();
   }
 
@@ -47,7 +50,6 @@ class _AddJobScreenState extends State<AddJobScreen> {
               const SnackBar(content: Text("Job Added Successfully ✅")),
             );
             context.read<JobsCubit>().loadCompanyJobs();
-
             Navigator.pushReplacementNamed(context, "/company-jobs");
           }
 
@@ -91,9 +93,71 @@ class _AddJobScreenState extends State<AddJobScreen> {
                       (v) => setState(() => jobType = v),
                 ),
 
+                const SizedBox(height: 15),
+
+                // ================= SKILLS =================
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    "Skills",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: skillController,
+                        decoration: InputDecoration(
+                          hintText: "Add skill",
+                          filled: true,
+                          fillColor: Colors.grey.shade100,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.add, color: Colors.green),
+                      onPressed: () {
+                        if (skillController.text.trim().isNotEmpty) {
+                          setState(() {
+                            skills.add(skillController.text.trim());
+                            skillController.clear();
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                Wrap(
+                  spacing: 8,
+                  children: skills
+                      .map(
+                        (e) => Chip(
+                      label: Text(e),
+                      onDeleted: () {
+                        setState(() {
+                          skills.remove(e);
+                        });
+                      },
+                    ),
+                  )
+                      .toList(),
+                ),
+
                 const SizedBox(height: 25),
 
-                state is AuthLoading
+                state is JobsLoading
                     ? const CircularProgressIndicator()
                     : SizedBox(
                   width: double.infinity,
@@ -107,11 +171,13 @@ class _AddJobScreenState extends State<AddJobScreen> {
                           description.text.isEmpty ||
                           location.text.isEmpty ||
                           minExp.text.isEmpty ||
-                          maxExp.text.isEmpty) {
+                          maxExp.text.isEmpty ||
+                          skills.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content:
-                              Text("Please fill all fields")),
+                            content:
+                            Text("Please fill all fields and add at least one skill"),
+                          ),
                         );
                         return;
                       }
@@ -122,15 +188,15 @@ class _AddJobScreenState extends State<AddJobScreen> {
                       if (min == null || max == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content:
-                              Text("Experience must be numbers")),
+                            content:
+                            Text("Experience must be numbers"),
+                          ),
                         );
                         return;
                       }
 
                       context.read<JobsCubit>().addJob(
-
-                      title.text.trim(),
+                        title.text.trim(),
                         description.text.trim(),
                         location.text.trim(),
                         min,
@@ -138,6 +204,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
                         jobLevel,
                         employmentType,
                         jobType,
+                        skills,
                       );
                     },
                     child: const Text(
