@@ -8,6 +8,7 @@ import 'AuthState.dart';
 class AuthCubit extends Cubit<AuthState> {
   final ApiService api;
   AuthCubit(this.api) : super(AuthInitial());
+
   Future<void> login(String email, String password, String role) async {
     emit(AuthLoading());
 
@@ -17,10 +18,11 @@ class AuthCubit extends Cubit<AuthState> {
       final token = result["token"] ??
           result["Token"] ??
           result["accessToken"] ??
+          result["jwt"] ??
           "";
 
       if (token.isEmpty) {
-        throw Exception("Login failed: No token returned");
+        throw Exception("Login failed: No token returned from API");
       }
 
       final prefs = await SharedPreferences.getInstance();
@@ -28,28 +30,45 @@ class AuthCubit extends Cubit<AuthState> {
       await prefs.setString("token", token);
       await prefs.setString("role", role);
 
-      // ✅ نجيب userId بس لو Developer
-      if (role.toLowerCase() == "developer") {
-        final userData = await api.getUserData(token);
-        final userId = userData["userId"];
+      print("🔐 TOKEN SAVED");
 
-        if (userId != null) {
-          await prefs.setInt("userId", userId);
-          print("✅ USER ID SAVED => $userId");
-        } else {
-          print("❌ USER ID STILL NULL");
-        }
+      // ================= GET USER DATA =================
+      final userData = await api.getUserData(token);
+
+      final int? fixedUserId = userData["id"];
+      final String? appUser = userData["appUser"];
+      final String? name = userData["name"];
+
+      // ================= STORAGE =================
+
+      if (name != null && name.isNotEmpty) {
+        await prefs.setString("userName", name);
       }
 
-      // ✅ يشتغل للطرفين
+      if (appUser != null && appUser.isNotEmpty) {
+        await prefs.setString("appUser", appUser);
+        print("✅ APP USER SAVED => $appUser");
+      }
+
+      if (fixedUserId != null) {
+        await prefs.setInt("userId", fixedUserId);
+        print("✅ USER ID SAVED => $fixedUserId");
+      } else {
+        print("⚠️ USER ID IS NULL");
+      }
+
+      // ================= SEND DEVICE ID =================
       await sendDeviceIdAfterLogin();
 
       emit(AuthSuccess("LOGIN_SUCCESS"));
 
     } catch (e) {
+      print("❌ LOGIN ERROR => $e");
       emit(AuthFailure(e.toString()));
     }
   }
+
+
 
 
   Future<void> registerDeveloper(

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../features/applications/applications_cubit.dart';
 import '../features/applications/applications_state..dart';
 import '../features/chat/ChatCubit.dart';
+import 'ChatDetailsScreen.dart';
 
 class CompanyApplicantsScreen extends StatefulWidget {
   final int jobId;
@@ -17,13 +19,28 @@ class _CompanyApplicantsScreenState
     extends State<CompanyApplicantsScreen> {
 
   String searchQuery = "";
+  int? companyId;
+  bool isCompanyLoaded = false;
+
+  int? _loadingUserId;
 
   @override
   void initState() {
     super.initState();
+    _loadCompanyIdFromPrefs();
+
     context
         .read<ApplicationsCubit>()
         .loadApplicantsScreen(widget.jobId);
+  }
+
+  Future<void> _loadCompanyIdFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    companyId = prefs.getInt("userId");
+
+    setState(() {
+      isCompanyLoaded = true;
+    });
   }
 
   Color _getStatusColor(String status) {
@@ -109,11 +126,10 @@ class _CompanyApplicantsScreenState
 
                   const SizedBox(height: 15),
 
-                  // COUNTS
+                  // COUNTS (زي الصورة)
                   BlocBuilder<ApplicationsCubit,
                       ApplicationsState>(
                     builder: (context, state) {
-
                       if (state is ApplicantsScreenLoaded) {
 
                         final c = state.counts;
@@ -125,12 +141,6 @@ class _CompanyApplicantsScreenState
                             color: Colors.white,
                             borderRadius:
                             BorderRadius.circular(20),
-                            boxShadow: const [
-                              BoxShadow(
-                                  color:
-                                  Colors.black12,
-                                  blurRadius: 5)
-                            ],
                           ),
                           child: Row(
                             mainAxisAlignment:
@@ -156,7 +166,6 @@ class _CompanyApplicantsScreenState
                           ),
                         );
                       }
-
                       return const SizedBox();
                     },
                   ),
@@ -172,8 +181,7 @@ class _CompanyApplicantsScreenState
 
                   if (state is ApplicationsLoading) {
                     return const Center(
-                        child:
-                        CircularProgressIndicator());
+                        child: CircularProgressIndicator());
                   }
 
                   if (state is ApplicantsScreenLoaded) {
@@ -192,14 +200,10 @@ class _CompanyApplicantsScreenState
                     }
 
                     return ListView.builder(
-                      padding:
-                      const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       itemCount: filtered.length,
-                      itemBuilder:
-                          (context, index) {
-
-                        final user = filtered[index];
-                        return _applicantCard(user);
+                      itemBuilder: (context, index) {
+                        return _applicantCard(filtered[index]);
                       },
                     );
                   }
@@ -218,11 +222,7 @@ class _CompanyApplicantsScreenState
     );
   }
 
-  Widget _countItem(
-      int number,
-      String label,
-      Color color,
-      ) {
+  Widget _countItem(int number, String label, Color color) {
     return Column(
       children: [
         Text(
@@ -241,27 +241,23 @@ class _CompanyApplicantsScreenState
 
     final status = user["status"] ?? "New";
     final statusColor = _getStatusColor(status);
+    final userId = user["userId"] ?? 0;
 
     return Container(
-      margin:
-      const EdgeInsets.only(bottom: 16),
-      padding:
-      const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-        BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: const [
-          BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6),
+          BoxShadow(color: Colors.black12, blurRadius: 6),
         ],
       ),
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
+          // NAME + MATCH
           Row(
             mainAxisAlignment:
             MainAxisAlignment.spaceBetween,
@@ -304,6 +300,7 @@ class _CompanyApplicantsScreenState
 
           const SizedBox(height: 10),
 
+          // SKILLS
           Wrap(
             spacing: 6,
             children:
@@ -320,13 +317,7 @@ class _CompanyApplicantsScreenState
 
           const SizedBox(height: 10),
 
-          Text(
-            "Applied: ${user["applyDate"] ?? ""}",
-            style: const TextStyle(color: Colors.grey),
-          ),
-
-          const SizedBox(height: 10),
-
+          // STATUS DROPDOWN
           Container(
             padding:
             const EdgeInsets.symmetric(horizontal: 12),
@@ -340,7 +331,6 @@ class _CompanyApplicantsScreenState
             DropdownButtonHideUnderline(
               child:
               DropdownButton<String>(
-
                 value: status,
                 iconEnabledColor:
                 statusColor,
@@ -357,9 +347,7 @@ class _CompanyApplicantsScreenState
                   DropdownMenuItem(
                       value: "Rejected",
                       child: Text("Rejected")),
-
                 ],
-
                 onChanged:
                     (value) {
                   if (value != null) {
@@ -373,51 +361,81 @@ class _CompanyApplicantsScreenState
                     );
                   }
                 },
-                style: TextStyle(
-                  color:
-                  statusColor,
-                  fontWeight:
-                  FontWeight.bold,
-                ),
-
               ),
             ),
-
           ),
+
           const SizedBox(height: 12),
 
+          // START CHAT BUTTON
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
               ),
-              onPressed: () async {
+              onPressed: _loadingUserId == userId
+                  ? null
+                  : () async {
 
-                await context.read<ChatCubit>().startConversation(
-                  user["userId"],
-                  widget.jobId,
-                  2,
-                );
+                setState(() => _loadingUserId = userId);
 
-                Navigator.pushNamed(
-                  context,
-                  "/chat-details",
-                  arguments: {
-                    "userId": user["userId"],
-                    "jobId": widget.jobId,
-                  },
-                );
+                final chatCubit =
+                context.read<ChatCubit>();
+                final prefs =
+                await SharedPreferences.getInstance();
+
+                if (!isCompanyLoaded ||
+                    companyId == null ||
+                    userId == 0) {
+                  setState(() => _loadingUserId = null);
+                  return;
+                }
+
+                final key =
+                    "conversation_${widget.jobId}_$userId";
+
+                int? convoId =
+                prefs.getInt(key);
+
+                if (convoId == null) {
+                  convoId =
+                  await chatCubit.startConversation(
+                    userId,
+                    widget.jobId,
+                    companyId!,
+                  );
+
+                  if (convoId != null) {
+                    await prefs.setInt(key, convoId);
+                  }
+                }
+
+                setState(() => _loadingUserId = null);
+
+                if (convoId != null && mounted) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          ChatDetailsScreen(
+                            conversationId: convoId!,
+                          ),
+                    ),
+                  );
+                }
               },
-              child: const Text(
-                "Start Chat",
-                style: TextStyle(color: Colors.white),
-              ),
+              child: _loadingUserId == userId
+                  ? const SizedBox(
+                height: 18,
+                width: 18,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+                  : const Text("Start Chat"),
             ),
-          ),
+          )
         ],
       ),
     );

@@ -1,25 +1,34 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:signalr_netcore/http_connection_options.dart';
+import 'package:signalr_netcore/hub_connection.dart';
+import 'package:signalr_netcore/hub_connection_builder.dart';
+import 'package:signalr_netcore/itransport.dart';
+
 import '../../core/api_service.dart';
 import 'ChatState.dart';
 
-
 class ChatCubit extends Cubit<ChatState> {
   final ApiService api;
+  HubConnection? _connection;
+  int? _currentConversationId;
 
   ChatCubit(this.api) : super(ChatInitial());
 
-  Future<void> startConversation(
+  // ================= START CONVERSATION (COMPANY ONLY) =================
+  Future<int?> startConversation(
       int userId,
       int jobId,
       int companyId,
       ) async {
-
-    emit(ChatLoading());
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        emit(ChatFailure("No token found"));
+        return null;
+      }
 
       final result = await api.startConversation(
         token,
@@ -28,22 +37,126 @@ class ChatCubit extends Cubit<ChatState> {
         companyId,
       );
 
-      emit(ChatSuccess(result["message"] ?? "Conversation Started"));
+      final convoId = result["conversationId"];
+
+      if (convoId == null) {
+        emit(ChatFailure("No conversationId returned"));
+        return null;
+      }
+
+      return convoId;
+
+    } catch (e) {
+      emit(ChatFailure(e.toString()));
+      return null;
+    }
+  }
+
+  // ================= LOAD CHAT =================
+  Future<void> loadChatMessages(int conversationId) async {
+    emit(ChatLoading());
+
+    try {
+      _currentConversationId = conversationId;
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      final messages =
+      await api.loadChatMessages(token, conversationId);
+
+      emit(ChatMessagesLoaded(messages));
+
+      await _startSignalR(token);
 
     } catch (e) {
       emit(ChatFailure(e.toString()));
     }
   }
 
-  Future<void> loadAllChats() async {
+  // ================= SEND MESSAGE =================
+  Future<void> sendMessage(
+      int conversationId,
+      String message,
+      ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
 
+      await api.sendMessage(token, conversationId, message);
+
+    } catch (e) {
+      emit(ChatFailure(e.toString()));
+    }
+  }
+
+  // ================= SIGNALR =================
+  Future<void> _startSignalR(String token) async {
+
+    if (_connection != null &&
+        _connection!.state == HubConnectionState.Connected) {
+      return;
+    }
+
+    _connection = HubConnectionBuilder()
+        .withUrl(
+      "http://devjob.runasp.net/messageHub",
+      options: HttpConnectionOptions(
+        accessTokenFactory: () async => token,
+        transport: HttpTransportType.WebSockets,
+      ),
+    )
+        .withAutomaticReconnect()
+        .build();
+
+    _connection!.on("ReceiveMessage", (arguments) {
+
+      if (arguments == null || arguments.isEmpty) return;
+
+      final data = arguments.first as Map<String, dynamic>;
+
+      if (_currentConversationId != data["ConversationId"]) return;
+
+      final currentState = state;
+
+      if (currentState is ChatMessagesLoaded) {
+
+        final newMessage = {
+          "message": data["Message"] ?? "",
+          "dateTime": data["SendAt"] ?? "",
+          "senderId": data["Sender"] ?? "",
+        };
+
+        final updated =
+        List<Map<String, dynamic>>.from(currentState.messages);
+
+        updated.add(newMessage);
+
+        emit(ChatMessagesLoaded(updated));
+      }
+    });
+
+    await _connection!.start();
+  }
+
+  @override
+  Future<void> close() async {
+    await _connection?.stop();
+    return super.close();
+  }
+  Future<void> loadDeveloperChats() async {
     emit(ChatLoading());
 
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
 
-      final chats = await api.getAllChats(token);
+      if (token.isEmpty) {
+        emit(ChatFailure("No token found"));
+        return;
+      }
+
+      final chats = await api.getAllDeveloperChats(token);
 
       emit(ChatLoaded(chats));
 

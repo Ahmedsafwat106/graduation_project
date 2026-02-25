@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/chat/ChatCubit.dart';
 import '../features/chat/ChatState.dart';
-
+import 'ChatDetailsScreen.dart';
 
 class DeveloperChatsScreen extends StatefulWidget {
   const DeveloperChatsScreen({super.key});
@@ -18,7 +18,7 @@ class _DeveloperChatsScreenState
   @override
   void initState() {
     super.initState();
-    context.read<ChatCubit>().loadAllChats();
+    context.read<ChatCubit>().loadDeveloperChats();
   }
 
   @override
@@ -32,38 +32,68 @@ class _DeveloperChatsScreenState
         builder: (context, state) {
 
           if (state is ChatLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
 
           if (state is ChatLoaded) {
 
-            if (state.chats.isEmpty) {
-              return const Center(child: Text("No chats yet"));
+            final chats = state.chats;
+
+            if (chats.isEmpty) {
+              return const Center(
+                child: Text("No chats yet"),
+              );
             }
 
             return ListView.builder(
-              itemCount: state.chats.length,
+              itemCount: chats.length,
               itemBuilder: (context, index) {
 
-                final chat = state.chats[index];
+                final chat = chats[index];
+                final conversationId = chat["conversationId"];
+
                 return ListTile(
-                  title: Text(chat["companyName"] ?? ""),
-                  subtitle: Text(chat["lastMessage"] ?? ""),
+                  onTap: () {
+                    if (conversationId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Invalid conversation"),
+                        ),
+                      );
+                      return;
+                    }
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChatDetailsScreen(
+                          conversationId: conversationId,
+                        ),
+                      ),
+                    );
+                  },
+                  title: Text(
+                    (chat["companyName"] ?? "Unknown Company").toString(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    (chat["lastMessage"] ?? "No messages yet").toString(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-
-                      Builder(
-                        builder: (_) {
-                          final dateTime = chat["dateTime"];
-                          return Text(
-                            dateTime != null && dateTime.toString().length >= 10
-                                ? dateTime.toString().substring(0, 10)
-                                : "",
-                          );
-                        },
-                      ),
-
+                      if (chat["dateTime"] != null)
+                        Text(
+                          chat["dateTime"]
+                              .toString()
+                              .substring(0, 10),
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       if ((chat["unReadMessage"] ?? 0) > 0)
                         Container(
                           margin: const EdgeInsets.only(top: 4),
@@ -88,7 +118,9 @@ class _DeveloperChatsScreenState
           }
 
           if (state is ChatFailure) {
-            return Center(child: Text(state.message));
+            return Center(
+              child: Text(state.message),
+            );
           }
 
           return const SizedBox();

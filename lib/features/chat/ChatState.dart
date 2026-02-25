@@ -35,3 +35,11 @@ class ChatFailure extends ChatState {
   @override
   List<Object?> get props => [message];
 }
+class ChatMessagesLoaded extends ChatState {
+  final List messages;
+
+  ChatMessagesLoaded(this.messages);
+
+  @override
+  List<Object?> get props => [messages];
+}

@@ -73,7 +73,7 @@ class _DeveloperDashboardScreenState
                               "Welcome back 👋",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize:10,
+                                fontSize:8,
                                 fontWeight:
                                 FontWeight.bold,
                               ),

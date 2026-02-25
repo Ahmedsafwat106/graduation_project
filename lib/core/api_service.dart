@@ -499,27 +499,44 @@ class ApiService {
       int companyId,
       ) async {
 
+    final url =
+        "http://devjob.runasp.net/api/chat/start-conversation";
+
+    final body = {
+      "userId": userId,
+      "jobId": jobId,
+      "companyId": companyId,
+    };
+
     final r = await http.post(
-      Uri.parse("http://devjob.runasp.net/api/chat/start-conversation"),
+      Uri.parse(url),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
+        "Accept": "application/json",
       },
-      body: jsonEncode({
-        "userId": userId,
-        "jobId": jobId,
-        "companyId": companyId,
-      }),
+      body: jsonEncode(body),
     );
 
-    return _handle(r, "Start Conversation Failed");
+    final decoded = jsonDecode(r.body);
+
+    print("START CONVERSATION RESPONSE => $decoded");
+
+    if (r.statusCode == 200 && decoded["conversationId"] != null) {
+      return decoded;
+    }
+
+    throw Exception("Start Conversation Failed: ${r.body}");
+
+    throw Exception("Start Conversation Failed: ${r.body}");
   }
 
   // ================= GET ALL CHATS (DEVELOPER) =================
-  Future<List> getAllChats(String token) async {
+  Future<List> getAllDeveloperChats(String token) async {
 
     final r = await http.get(
       Uri.parse("http://devjob.runasp.net/api/chat/all-chats"),
+
       headers: {
         "Authorization": "Bearer $token",
       },
@@ -537,6 +554,80 @@ class ApiService {
     }
 
     throw Exception("Load Chats Failed: ${r.body}");
+  }
+  // ================= LOAD CHAT MESSAGES =================
+  Future<List> loadChatMessages(String token, int conversationId) async {
+
+    final url =
+        "http://devjob.runasp.net/api/chat/load-chat?conversationId=$conversationId";
+
+    print("===== LOAD CHAT DEBUG =====");
+    print("URL => $url");
+    print("TOKEN => $token");
+
+    final r = await http.get(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      },
+    );
+
+    print("STATUS CODE => ${r.statusCode}");
+    print("RESPONSE BODY => ${r.body}");
+    print("===========================");
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+
+      if (decoded["success"] == true &&
+          decoded["chatContents"] != null) {
+        return decoded["chatContents"];
+      }
+
+      return [];
+    }
+
+    throw Exception("Load Chat Failed: ${r.body}");
+  }
+  // ================= SEND MESSAGE =================
+  Future<Map<String, dynamic>> sendMessage(
+      String token,
+      int conversationId,
+      String message,
+      ) async {
+
+    final url = "http://devjob.runasp.net/api/chat/send-message";
+
+    print("===== SEND MESSAGE DEBUG =====");
+    print("URL => $url");
+    print("CONVERSATION ID => $conversationId");
+    print("MESSAGE => $message");
+
+    final r = await http.post(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: jsonEncode({
+        "conversationId": conversationId,
+        "Message": message, // 👈 مهم نفس الكابيتال زي الباك
+      }),
+    );
+
+    print("STATUS CODE => ${r.statusCode}");
+    print("RESPONSE BODY => ${r.body}");
+    print("==============================");
+
+    final decoded = jsonDecode(r.body);
+
+    if (r.statusCode == 200 && decoded["success"] == true) {
+      return decoded;
+    }
+
+    throw Exception(decoded["message"] ?? "Send Message Failed");
   }
 
 // ================================
@@ -714,22 +805,17 @@ class ApiService {
     if (r.statusCode == 200) {
       final decoded = jsonDecode(r.body);
 
-      dynamic rawUserId = decoded["userId"];
+      int? fixedId;
 
-      int? fixedUserId;
-
-      // لو بيرجع ليست ناخد أول عنصر
-      if (rawUserId is List && rawUserId.isNotEmpty) {
-        fixedUserId = rawUserId.first;
-      }
-      // لو رجع رقم عادي
-      else if (rawUserId is int) {
-        fixedUserId = rawUserId;
+      if (decoded["userId"] is List &&
+          decoded["userId"].isNotEmpty) {
+        fixedId = decoded["userId"][0];
       }
 
       return {
-        "userId": fixedUserId,
+        "id": fixedId, // 🔥 ده هيبقى userId أو companyId
         "name": decoded["name"],
+        "appUser": decoded["appUser"],
       };
     }
 

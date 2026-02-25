@@ -80,7 +80,7 @@ class DevJobApp extends StatelessWidget {
       ],
       child: MaterialApp(
 
-      debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
         title: "DevJob",
         initialRoute: "/splash",
 
@@ -220,21 +220,33 @@ class DevJobApp extends StatelessWidget {
               );
 
             case "/chat-details":
-              final args = settings.arguments as Map;
+              final args = settings.arguments as Map?;
+              final conversationId = args?["conversationId"];
+
+              if (conversationId == null) {
+                return MaterialPageRoute(
+                  builder: (_) => const Scaffold(
+                    body: Center(child: Text("Invalid Conversation")),
+                  ),
+                );
+              }
+
+            case "/chat-details":
+              final args = settings.arguments as Map?;
+              final conversationId = args?["conversationId"];
+
+              if (conversationId == null) {
+                return MaterialPageRoute(
+                  builder: (_) => const Scaffold(
+                    body: Center(child: Text("Invalid Conversation")),
+                  ),
+                );
+              }
+
               return MaterialPageRoute(
                 builder: (_) => ChatDetailsScreen(
-                  userId: args["userId"],
-                  jobId: args["jobId"],
+                  conversationId: conversationId,
                 ),
-              );
-
-
-          // =====================
-          // FALLBACK
-          // =====================
-            default:
-              return MaterialPageRoute(
-                builder: (_) => const SplashScreen(),
               );
           }
         },
