@@ -40,10 +40,7 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Apply Job"),
-        backgroundColor: Colors.green,
-      ),
+      backgroundColor: const Color(0xFFF4F7F6),
       body: MultiBlocListener(
         listeners: [
           BlocListener<ApplicationsCubit, ApplicationsState>(
@@ -63,99 +60,248 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
             },
           ),
         ],
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: Column(
+          children: [
 
-              Text(
-                widget.job["title"] ?? "",
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+            /// ================= MODERN HEADER =================
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF1FA463),
+                    Color(0xFF159957),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(35),
+                  bottomRight: Radius.circular(35),
                 ),
               ),
-
-              const SizedBox(height: 10),
-
-              Text(
-                widget.job["description"] ??
-                    widget.job["desctiption"] ??
-                    "",
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.arrow_back, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Apply Job",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "Confirm your application",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
+            ),
 
-              const SizedBox(height: 20),
+            /// ================= BODY =================
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 25),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
-              const Text(
-                "Select CV",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                    /// ============ JOB CARD (Premium) ============
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.job["title"] ?? "",
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E1E1E),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            widget.job["description"] ??
+                                widget.job["desctiption"] ??
+                                "",
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
-              const SizedBox(height: 10),
+                    const SizedBox(height: 24),
 
-              BlocBuilder<CvCubit, CvState>(
-                builder: (context, state) {
+                    /// ============ SELECT CV TITLE ============
+                    const Text(
+                      "Select CV",
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E1E1E),
+                      ),
+                    ),
 
-                  if (state is CvLoading) {
-                    return const CircularProgressIndicator();
-                  }
+                    const SizedBox(height: 12),
 
-                  if (state is CvsLoaded) {
+                    /// ============ CV DROPDOWN CARD ============
+                    BlocBuilder<CvCubit, CvState>(
+                      builder: (context, state) {
 
-                    if (state.cvs.isEmpty) {
-                      return const Text("No CV uploaded");
-                    }
+                        if (state is CvLoading) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
 
-                    return DropdownButton<int>(
-                      value: selectedCvId,
-                      isExpanded: true,
-                      hint: const Text("Choose your CV"),
-                      items: state.cvs.map<DropdownMenuItem<int>>((cv) {
-                        return DropdownMenuItem<int>(
-                          value: cv["id"],
-                          child: Text(cv["cvName"]),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedCvId = value;
-                        });
+                        if (state is CvsLoaded) {
+
+                          if (state.cvs.isEmpty) {
+                            return Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: const Text("No CV uploaded"),
+                            );
+                          }
+
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: DropdownButton<int>(
+                              value: selectedCvId,
+                              isExpanded: true,
+                              underline: const SizedBox(),
+                              hint: const Text("Choose your CV"),
+                              items: state.cvs
+                                  .map<DropdownMenuItem<int>>((cv) {
+                                return DropdownMenuItem<int>(
+                                  value: cv["id"],
+                                  child: Text(
+                                    cv["cvName"],
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCvId = value;
+                                });
+                              },
+                            ),
+                          );
+                        }
+
+                        return const SizedBox();
                       },
-                    );
-                  }
+                    ),
 
-                  return const SizedBox();
-                },
-              ),
+                    const Spacer(),
 
-              const Spacer(),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  onPressed: selectedCvId == null
-                      ? null
-                      : () {
-                    context
-                        .read<ApplicationsCubit>()
-                        .applyJob(jobId, selectedCvId!);
-                  },
-                  child: const Text(
-                    "Confirm Apply",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                    /// ============ GRADIENT APPLY BUTTON ============
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFF1FA463),
+                              Color(0xFF159957),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.25),
+                              blurRadius: 14,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                              BorderRadius.circular(18),
+                            ),
+                          ),
+                          onPressed: selectedCvId == null
+                              ? null
+                              : () {
+                            context
+                                .read<ApplicationsCubit>()
+                                .applyJob(jobId, selectedCvId!);
+                          },
+                          child: const Text(
+                            "Confirm Apply",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

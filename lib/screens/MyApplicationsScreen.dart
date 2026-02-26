@@ -17,14 +17,15 @@ class _MyApplicationsScreenState
   @override
   void initState() {
     super.initState();
-    context.read<ApplicationsCubit>()
+    context
+        .read<ApplicationsCubit>()
         .loadApplicantHistoryScreen();
   }
 
   Color _getStatusColor(String status) {
     switch (status) {
       case "Interview":
-        return Colors.green;
+        return const Color(0xFF1FA463);
       case "Rejected":
         return Colors.red;
       case "Waiting":
@@ -56,14 +57,22 @@ class _MyApplicationsScreenState
               return Column(
                 children: [
 
-                  // ================= HEADER =================
+                  /// ================= MODERN GRADIENT HEADER =================
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding:
+                    const EdgeInsets.fromLTRB(20, 20, 20, 30),
                     decoration: const BoxDecoration(
-                      color: Colors.green,
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF1FA463),
+                          Color(0xFF159957),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(30),
-                        bottomRight: Radius.circular(30),
+                        bottomLeft: Radius.circular(35),
+                        bottomRight: Radius.circular(35),
                       ),
                     ),
                     child: Column(
@@ -71,21 +80,31 @@ class _MyApplicationsScreenState
                       CrossAxisAlignment.start,
                       children: [
 
+                        /// Top Bar
                         Row(
                           children: [
-                            IconButton(
-                              icon: const Icon(
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white
+                                    .withOpacity(0.2),
+                                borderRadius:
+                                BorderRadius.circular(12),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
                                   Icons.arrow_back,
-                                  color: Colors.white),
-                              onPressed: () =>
-                                  Navigator.pop(context),
+                                  color: Colors.white,
+                                ),
+                                onPressed: () =>
+                                    Navigator.pop(context),
+                              ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 12),
                             const Text(
                               "Application History",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 20,
+                                fontSize: 22,
                                 fontWeight:
                                 FontWeight.bold,
                               ),
@@ -95,19 +114,24 @@ class _MyApplicationsScreenState
 
                         const SizedBox(height: 20),
 
-                        // ================= COUNTS =================
+                        /// ================= COUNTS CARD (MODERN) =================
                         Container(
                           padding:
-                          const EdgeInsets.all(15),
+                          const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 10),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius:
-                            BorderRadius.circular(20),
-                            boxShadow: const [
+                            BorderRadius.circular(24),
+                            boxShadow: [
                               BoxShadow(
-                                  color:
-                                  Colors.black12,
-                                  blurRadius: 5)
+                                color: Colors.black
+                                    .withOpacity(0.05),
+                                blurRadius: 14,
+                                offset:
+                                const Offset(0, 6),
+                              ),
                             ],
                           ),
                           child: Row(
@@ -116,17 +140,20 @@ class _MyApplicationsScreenState
                                 .spaceAround,
                             children: [
                               _countItem(
-                                  counts["totalApplied"] ?? 0,
-                                  "Total Applied",
-                                  Colors.black),
+                                counts["totalApplied"] ?? 0,
+                                "Total Applied",
+                                Colors.black,
+                              ),
                               _countItem(
-                                  counts["interview"] ?? 0,
-                                  "Interview",
-                                  Colors.green),
+                                counts["interview"] ?? 0,
+                                "Interview",
+                                const Color(0xFF1FA463),
+                              ),
                               _countItem(
-                                  counts["waiting"] ?? 0,
-                                  "Waiting",
-                                  Colors.orange),
+                                counts["waiting"] ?? 0,
+                                "Waiting",
+                                Colors.orange,
+                              ),
                             ],
                           ),
                         ),
@@ -134,23 +161,28 @@ class _MyApplicationsScreenState
                     ),
                   ),
 
-                  // ================= LIST =================
+                  const SizedBox(height: 12),
+
+                  /// ================= APPLICATION LIST =================
                   Expanded(
                     child: history.isEmpty
                         ? const Center(
-                        child: Text(
-                            "No applications yet"))
+                      child: Text(
+                        "No applications yet",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
                         : ListView.builder(
                       padding:
-                      const EdgeInsets.all(16),
+                      const EdgeInsets.fromLTRB(
+                          16, 4, 16, 20),
                       itemCount: history.length,
-                      itemBuilder:
-                          (context, index) {
-
-                        final app =
-                        history[index];
-
-                        return _applicationCard(app);
+                      itemBuilder: (context, index) {
+                        final app = history[index];
+                        return _modernApplicationCard(app);
                       },
                     ),
                   ),
@@ -170,7 +202,7 @@ class _MyApplicationsScreenState
     );
   }
 
-  // ================= COUNT ITEM =================
+  /// ================= COUNT ITEM (MODERN) =================
   Widget _countItem(
       int number,
       String label,
@@ -181,22 +213,28 @@ class _MyApplicationsScreenState
         Text(
           number.toString(),
           style: TextStyle(
-              fontSize: 18,
-              fontWeight:
-              FontWeight.bold,
-              color: color),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
-        Text(label),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.grey,
+            fontSize: 12,
+          ),
+        ),
       ],
     );
   }
 
-  // ================= APPLICATION CARD =================
-  Widget _applicationCard(Map app) {
-
+  /// ================= MODERN APPLICATION CARD =================
+  Widget _modernApplicationCard(Map app) {
     final rawStatus = app["jobStatus"] ?? "New";
 
-    // 👇 نحول New إلى Waiting
+    /// نفس اللوجيك القديم بدون تغيير
     final status =
     rawStatus == "New" ? "Waiting" : rawStatus;
 
@@ -204,19 +242,17 @@ class _MyApplicationsScreenState
     _getStatusColor(status);
 
     return Container(
-      margin:
-      const EdgeInsets.only(bottom: 18),
-      padding:
-      const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-        BorderRadius.circular(18),
-        boxShadow: const [
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, 4),
+            color:
+            Colors.black.withOpacity(0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -225,35 +261,40 @@ class _MyApplicationsScreenState
         CrossAxisAlignment.start,
         children: [
 
+          /// JOB TITLE + STATUS BADGE
           Row(
             crossAxisAlignment:
             CrossAxisAlignment.start,
             children: [
 
               Container(
-                width: 45,
-                height: 45,
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
-                  color:
-                  Colors.green.withOpacity(0.1),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF1FA463),
+                      Color(0xFF159957),
+                    ],
+                  ),
                   borderRadius:
-                  BorderRadius.circular(12),
+                  BorderRadius.circular(16),
                 ),
                 child: const Icon(
                   Icons.work_outline,
-                  color: Colors.green,
+                  color: Colors.white,
                 ),
               ),
 
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
 
               Expanded(
                 child: Text(
                   app["jobName"] ?? "",
                   style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight:
-                    FontWeight.bold,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E1E1E),
                   ),
                 ),
               ),
@@ -261,11 +302,11 @@ class _MyApplicationsScreenState
               Container(
                 padding:
                 const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5),
+                    horizontal: 12,
+                    vertical: 6),
                 decoration: BoxDecoration(
-                  color: statusColor
-                      .withOpacity(0.12),
+                  color:
+                  statusColor.withOpacity(0.12),
                   borderRadius:
                   BorderRadius.circular(20),
                 ),
@@ -282,22 +323,24 @@ class _MyApplicationsScreenState
             ],
           ),
 
+          const SizedBox(height: 16),
+          const Divider(height: 1),
           const SizedBox(height: 14),
-          const Divider(),
-          const SizedBox(height: 12),
 
+          /// APPLY DATE ROW
           Row(
             children: [
               const Icon(
-                  Icons.calendar_today,
-                  size: 14,
-                  color: Colors.grey),
-              const SizedBox(width: 6),
+                Icons.calendar_today_outlined,
+                size: 16,
+                color: Colors.grey,
+              ),
+              const SizedBox(width: 8),
               Text(
                 "Applied on ${app["applyDate"] ?? ""}",
                 style: const TextStyle(
                   color: Colors.grey,
-                  fontSize: 12,
+                  fontSize: 13,
                 ),
               ),
             ],

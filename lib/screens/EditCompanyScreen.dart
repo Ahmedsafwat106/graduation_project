@@ -32,70 +32,184 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4FFFA),
-      appBar: AppBar(
-        title: const Text("Edit Company"),
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
-
+      backgroundColor: const Color(0xFFF4F7F6),
       body: BlocConsumer<ProfileCubit, ProfileState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text("Company Updated ✓")));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Company Updated ✓")),
+            );
             Navigator.pop(context);
           }
         },
-
         builder: (context, state) {
-          return Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                _field("Company Name", company),
-                _field("Phone", phone),
-                _field("City", city),
-                _field("Field", field),
+          return Column(
+            children: [
 
-                const SizedBox(height: 25),
-
-                state is AuthLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    minimumSize: const Size(double.infinity, 52),
+              /// ================= MODERN GRADIENT HEADER =================
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF1FA463),
+                      Color(0xFF159957),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  onPressed: () {
-                    context.read<ProfileCubit>().updateCompany(
-                      company.text,
-                      phone.text,
-                      city.text,
-                      field.text,
-                    );
-                  },
-                  child: const Text("Save Changes"),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(35),
+                    bottomRight: Radius.circular(35),
+                  ),
                 ),
-              ],
-            ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.arrow_back, color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Edit Company",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          "Update your company profile",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              /// ================= FORM =================
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+                  child: Column(
+                    children: [
+
+                      _modernField(
+                        "Company Name",
+                        company,
+                        Icons.business_outlined,
+                      ),
+                      _modernField(
+                        "Phone",
+                        phone,
+                        Icons.phone_outlined,
+                      ),
+                      _modernField(
+                        "City",
+                        city,
+                        Icons.location_city_outlined,
+                      ),
+                      _modernField(
+                        "Field",
+                        field,
+                        Icons.work_outline,
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      /// ================= SAVE BUTTON (BRAND GRADIENT) =================
+                      state is AuthLoading
+                          ? const CircularProgressIndicator()
+                          : SizedBox(
+                        width: double.infinity,
+                        height: 55,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF1FA463),
+                                Color(0xFF159957),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.25),
+                                blurRadius: 14,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                            ),
+                            onPressed: () {
+                              context.read<ProfileCubit>().updateCompany(
+                                company.text,
+                                phone.text,
+                                city.text,
+                                field.text,
+                              );
+                            },
+                            child: const Text(
+                              "Save Changes",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _field(String label, TextEditingController controller) {
+  /// ================= MODERN INPUT FIELD =================
+  Widget _modernField(
+      String label, TextEditingController controller, IconData icon) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
+      margin: const EdgeInsets.only(bottom: 16),
       child: TextField(
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
+          prefixIcon: Icon(icon, color: const Color(0xFF1FA463)),
           filled: true,
           fillColor: Colors.white,
+          contentPadding:
+          const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(18),
             borderSide: BorderSide.none,
           ),
         ),

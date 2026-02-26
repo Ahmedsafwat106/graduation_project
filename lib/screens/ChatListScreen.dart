@@ -29,26 +29,34 @@ class _ChatListScreenState
         child: Column(
           children: [
 
-            /// ================= HEADER =================
+            /// ================= MODERN GRADIENT HEADER =================
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               decoration: const BoxDecoration(
-                color: Colors.green,
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF1FA463),
+                    Color(0xFF159957),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
+                  bottomLeft: Radius.circular(35),
+                  bottomRight: Radius.circular(35),
                 ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
+                  /// Top Bar
                   Row(
                     children: [
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: IconButton(
                           icon: const Icon(Icons.arrow_back,
@@ -56,7 +64,7 @@ class _ChatListScreenState
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
-                      const SizedBox(width: 15),
+                      const SizedBox(width: 16),
                       const Text(
                         "Messages",
                         style: TextStyle(
@@ -70,16 +78,25 @@ class _ChatListScreenState
 
                   const SizedBox(height: 20),
 
-                  /// Search Bar
+                  /// Modern Search Bar
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: const TextField(
                       decoration: InputDecoration(
-                        icon: Icon(Icons.search),
+                        icon: Icon(Icons.search,
+                            color: Color(0xFF1FA463)),
                         hintText: "Search conversations...",
                         border: InputBorder.none,
                       ),
@@ -89,9 +106,9 @@ class _ChatListScreenState
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            /// ================= LIST =================
+            /// ================= CHAT LIST =================
             Expanded(
               child: BlocBuilder<ChatCubit, ChatState>(
                 builder: (context, state) {
@@ -103,24 +120,33 @@ class _ChatListScreenState
                   }
 
                   if (state is ChatLoaded) {
-
                     final chats = state.chats;
 
                     if (chats.isEmpty) {
                       return const Center(
-                        child: Text("No chats yet"),
+                        child: Text(
+                          "No chats yet",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
                       );
                     }
 
                     return ListView.builder(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.fromLTRB(
+                          16, 4, 16, 20),
                       itemCount: chats.length,
                       itemBuilder: (context, index) {
 
                         final chat = chats[index];
-                        final conversationId = chat["conversationId"];
+                        final conversationId =
+                        chat["conversationId"];
 
                         return InkWell(
+                          borderRadius:
+                          BorderRadius.circular(22),
                           onTap: () {
                             if (conversationId == null) return;
 
@@ -128,47 +154,65 @@ class _ChatListScreenState
                               context,
                               MaterialPageRoute(
                                 builder: (_) => ChatDetailsScreen(
-                                  conversationId: conversationId,
+                                  conversationId:
+                                  conversationId,
                                 ),
                               ),
                             );
                           },
                           child: Container(
-                            margin:
-                            const EdgeInsets.only(bottom: 16),
-                            padding: const EdgeInsets.all(16),
+                            margin: const EdgeInsets.only(
+                                bottom: 14),
+                            padding:
+                            const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius:
-                              BorderRadius.circular(20),
-                              boxShadow: const [
+                              BorderRadius.circular(22),
+                              boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 6,
-                                )
+                                  color: Colors.black
+                                      .withOpacity(0.05),
+                                  blurRadius: 14,
+                                  offset:
+                                  const Offset(0, 6),
+                                ),
                               ],
                             ),
                             child: Row(
                               children: [
 
-                                /// Avatar
-                                CircleAvatar(
-                                  radius: 28,
-                                  backgroundColor:
-                                  Colors.green.shade100,
+                                /// Modern Avatar
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    gradient:
+                                    const LinearGradient(
+                                      colors: [
+                                        Color(0xFF1FA463),
+                                        Color(0xFF159957),
+                                      ],
+                                    ),
+                                    borderRadius:
+                                    BorderRadius.circular(
+                                        18),
+                                  ),
                                   child: const Icon(
-                                    Icons.rocket_launch,
-                                    color: Colors.green,
+                                    Icons.chat_bubble_outline,
+                                    color: Colors.white,
+                                    size: 26,
                                   ),
                                 ),
 
-                                const SizedBox(width: 15),
+                                const SizedBox(width: 14),
 
-                                /// Name + Message
+                                /// Name + Last Message
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                    CrossAxisAlignment
+                                        .start,
                                     children: [
 
                                       Row(
@@ -186,6 +230,8 @@ class _ChatListScreenState
                                                 fontWeight:
                                                 FontWeight
                                                     .bold,
+                                                color: Color(
+                                                    0xFF1E1E1E),
                                               ),
                                               overflow:
                                               TextOverflow
@@ -222,6 +268,7 @@ class _ChatListScreenState
                                         const TextStyle(
                                           color:
                                           Colors.grey,
+                                          height: 1.4,
                                         ),
                                       ),
                                     ],
@@ -237,7 +284,11 @@ class _ChatListScreenState
 
                   if (state is ChatFailure) {
                     return Center(
-                      child: Text(state.message),
+                      child: Text(
+                        state.message,
+                        style: const TextStyle(
+                            color: Colors.red),
+                      ),
                     );
                   }
 

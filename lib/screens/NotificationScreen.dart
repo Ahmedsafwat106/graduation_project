@@ -4,7 +4,6 @@ import '../features/notification/NotificationState.dart';
 import '../features/notification/notification_cubit.dart';
 import '../models/NotificationCard.dart';
 
-
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
@@ -30,29 +29,45 @@ class _NotificationScreenState
         child: Column(
           children: [
 
-            /// HEADER
+            /// ================= MODERN GRADIENT HEADER =================
             Container(
-              padding: const EdgeInsets.all(20),
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               decoration: const BoxDecoration(
-                color: Colors.green,
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF1FA463),
+                    Color(0xFF159957),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
+                  bottomLeft: Radius.circular(35),
+                  bottomRight: Radius.circular(35),
                 ),
               ),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back,
-                        color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   const Text(
                     "Notifications",
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -60,9 +75,9 @@ class _NotificationScreenState
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
 
-            /// LIST
+            /// ================= NOTIFICATION LIST =================
             Expanded(
               child: BlocBuilder<
                   NotificationCubit,
@@ -76,39 +91,71 @@ class _NotificationScreenState
                   }
 
                   if (state is NotificationLoaded) {
-
                     final notifications =
                         state.notifications;
 
                     if (notifications.isEmpty) {
-                      return const Center(
-                        child:
-                        Text("No notifications yet"),
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment:
+                          MainAxisAlignment.center,
+                          children: const [
+                            Icon(
+                              Icons.notifications_none_outlined,
+                              size: 60,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              "No notifications yet",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
                       );
                     }
 
                     return ListView.builder(
-                      padding:
-                      const EdgeInsets.symmetric(
-                          horizontal: 16),
-                      itemCount:
-                      notifications.length,
-                      itemBuilder:
-                          (context, index) {
+                      padding: const EdgeInsets.fromLTRB(
+                          16, 6, 16, 20),
+                      itemCount: notifications.length,
+                      itemBuilder: (context, index) {
 
-                        final item =
-                        notifications[index];
+                        final item = notifications[index];
 
-                        return NotificationCard(
-                          title:
-                          item["title"] ?? "",
-                          message:
-                          item["message"] ?? "",
-                          time: item["createdDate"] != null
-                              ? item["createdDate"].toString().substring(0, 16)
-                              : "",
-                          isRead:
-                          item["isRead"] ?? false,
+                        /// Wrapper Card (UI فقط بدون لمس NotificationCard)
+                        return Container(
+                          margin:
+                          const EdgeInsets.only(bottom: 14),
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                            BorderRadius.circular(22),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black
+                                    .withOpacity(0.05),
+                                blurRadius: 14,
+                                offset:
+                                const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: NotificationCard(
+                            title: item["title"] ?? "",
+                            message: item["message"] ?? "",
+                            time: item["createdDate"] != null
+                                ? item["createdDate"]
+                                .toString()
+                                .substring(0, 16)
+                                : "",
+                            isRead:
+                            item["isRead"] ?? false,
+                          ),
                         );
                       },
                     );
@@ -116,7 +163,12 @@ class _NotificationScreenState
 
                   if (state is NotificationFailure) {
                     return Center(
-                      child: Text(state.message),
+                      child: Text(
+                        state.message,
+                        style: const TextStyle(
+                          color: Colors.red,
+                        ),
+                      ),
                     );
                   }
 

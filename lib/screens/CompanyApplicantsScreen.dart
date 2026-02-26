@@ -21,14 +21,12 @@ class _CompanyApplicantsScreenState
   String searchQuery = "";
   int? companyId;
   bool isCompanyLoaded = false;
-
   int? _loadingUserId;
 
   @override
   void initState() {
     super.initState();
     _loadCompanyIdFromPrefs();
-
     context
         .read<ApplicationsCubit>()
         .loadApplicantsScreen(widget.jobId);
@@ -50,7 +48,7 @@ class _CompanyApplicantsScreenState
       case "Reviewed":
         return Colors.orange;
       case "Interview":
-        return Colors.green;
+        return const Color(0xFF1FA463);
       case "Rejected":
         return Colors.red;
       default:
@@ -66,49 +64,69 @@ class _CompanyApplicantsScreenState
         child: Column(
           children: [
 
-            // ================= HEADER =================
+            /// ================= MODERN GRADIENT HEADER =================
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               decoration: const BoxDecoration(
-                color: Colors.green,
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF1FA463),
+                    Color(0xFF159957),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
+                  bottomLeft: Radius.circular(35),
+                  bottomRight: Radius.circular(35),
                 ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
+                  /// Top Bar
                   Row(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back,
-                            color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back,
+                              color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       const Text(
                         "Applicants",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 20),
 
-                  // SEARCH
+                  /// Modern Search Bar
                   Container(
                     padding:
-                    const EdgeInsets.symmetric(horizontal: 15),
+                    const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius:
-                      BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: TextField(
                       onChanged: (value) {
@@ -117,30 +135,39 @@ class _CompanyApplicantsScreenState
                         });
                       },
                       decoration: const InputDecoration(
-                        icon: Icon(Icons.search),
+                        icon: Icon(Icons.search,
+                            color: Color(0xFF1FA463)),
                         hintText: "Search applicants...",
                         border: InputBorder.none,
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 18),
 
-                  // COUNTS (زي الصورة)
+                  /// COUNTS CARD (زي الداشبورد ستايل)
                   BlocBuilder<ApplicationsCubit,
                       ApplicationsState>(
                     builder: (context, state) {
                       if (state is ApplicantsScreenLoaded) {
-
                         final c = state.counts;
 
                         return Container(
-                          padding:
-                          const EdgeInsets.all(15),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 10),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius:
-                            BorderRadius.circular(20),
+                            BorderRadius.circular(22),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black
+                                    .withOpacity(0.05),
+                                blurRadius: 12,
+                                offset:
+                                const Offset(0, 6),
+                              ),
+                            ],
                           ),
                           child: Row(
                             mainAxisAlignment:
@@ -157,7 +184,7 @@ class _CompanyApplicantsScreenState
                               _countItem(
                                   c["totalInterview"] ?? 0,
                                   "Interview",
-                                  Colors.green),
+                                  const Color(0xFF1FA463)),
                               _countItem(
                                   c["totalReviewed"] ?? 0,
                                   "Reviewed",
@@ -173,7 +200,9 @@ class _CompanyApplicantsScreenState
               ),
             ),
 
-            // ================= LIST =================
+            const SizedBox(height: 12),
+
+            /// ================= APPLICANTS LIST =================
             Expanded(
               child: BlocBuilder<ApplicationsCubit,
                   ApplicationsState>(
@@ -200,10 +229,12 @@ class _CompanyApplicantsScreenState
                     }
 
                     return ListView.builder(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.fromLTRB(
+                          16, 4, 16, 20),
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
-                        return _applicantCard(filtered[index]);
+                        return _modernApplicantCard(
+                            filtered[index]);
                       },
                     );
                   }
@@ -228,16 +259,20 @@ class _CompanyApplicantsScreenState
         Text(
           number.toString(),
           style: TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: color),
         ),
-        Text(label),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.grey),
+        ),
       ],
     );
   }
 
-  Widget _applicantCard(Map user) {
+  Widget _modernApplicantCard(Map user) {
 
     final status = user["status"] ?? "New";
     final statusColor = _getStatusColor(status);
@@ -245,45 +280,51 @@ class _CompanyApplicantsScreenState
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 6),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          // NAME + MATCH
+          /// NAME + MATCH SCORE
           Row(
             mainAxisAlignment:
             MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                user["name"] ?? "No Name",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  user["name"] ?? "No Name",
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E1E1E),
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               Container(
-                padding:
-                const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4),
-                decoration:
-                BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color:
+                  const Color(0xFF1FA463).withOpacity(0.1),
                   borderRadius:
-                  BorderRadius.circular(12),
+                  BorderRadius.circular(16),
                 ),
                 child: Text(
                   "${user["matchScore"] ?? 0}%",
                   style: const TextStyle(
-                    color: Colors.green,
+                    color: Color(0xFF1FA463),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -291,49 +332,52 @@ class _CompanyApplicantsScreenState
             ],
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
 
           Text(
             "${user["yearOfex"] ?? 0} years experience",
-            style: const TextStyle(color: Colors.grey),
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 13,
+            ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
 
-          // SKILLS
+          /// SKILLS CHIPS (Modern)
           Wrap(
-            spacing: 6,
-            children:
-            (user["skillName"] as List?)
-                ?.map((skill) =>
-                Chip(
-                  label: Text(skill),
-                  backgroundColor:
-                  Colors.grey.shade100,
-                ))
+            spacing: 8,
+            runSpacing: 8,
+            children: (user["skillName"] as List?)
+                ?.map(
+                  (skill) => Chip(
+                label: Text(skill),
+                backgroundColor:
+                const Color(0xFFF4F7F6),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                  BorderRadius.circular(16),
+                ),
+              ),
+            )
                 .toList() ??
                 [],
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
 
-          // STATUS DROPDOWN
+          /// STATUS DROPDOWN (Styled)
           Container(
             padding:
-            const EdgeInsets.symmetric(horizontal: 12),
-            decoration:
-            BoxDecoration(
+            const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
               color: statusColor.withOpacity(0.1),
-              borderRadius:
-              BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20),
             ),
-            child:
-            DropdownButtonHideUnderline(
-              child:
-              DropdownButton<String>(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
                 value: status,
-                iconEnabledColor:
-                statusColor,
+                iconEnabledColor: statusColor,
                 items: const [
                   DropdownMenuItem(
                       value: "New",
@@ -348,12 +392,10 @@ class _CompanyApplicantsScreenState
                       value: "Rejected",
                       child: Text("Rejected")),
                 ],
-                onChanged:
-                    (value) {
+                onChanged: (value) {
                   if (value != null) {
                     context
-                        .read<
-                        ApplicationsCubit>()
+                        .read<ApplicationsCubit>()
                         .updateStatus(
                       widget.jobId,
                       user["userId"],
@@ -365,77 +407,113 @@ class _CompanyApplicantsScreenState
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
-          // START CHAT BUTTON
+          /// START CHAT BUTTON (Brand Gradient)
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-              ),
-              onPressed: _loadingUserId == userId
-                  ? null
-                  : () async {
-
-                setState(() => _loadingUserId = userId);
-
-                final chatCubit =
-                context.read<ChatCubit>();
-                final prefs =
-                await SharedPreferences.getInstance();
-
-                if (!isCompanyLoaded ||
-                    companyId == null ||
-                    userId == 0) {
-                  setState(() => _loadingUserId = null);
-                  return;
-                }
-
-                final key =
-                    "conversation_${widget.jobId}_$userId";
-
-                int? convoId =
-                prefs.getInt(key);
-
-                if (convoId == null) {
-                  convoId =
-                  await chatCubit.startConversation(
-                    userId,
-                    widget.jobId,
-                    companyId!,
-                  );
-
-                  if (convoId != null) {
-                    await prefs.setInt(key, convoId);
-                  }
-                }
-
-                setState(() => _loadingUserId = null);
-
-                if (convoId != null && mounted) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          ChatDetailsScreen(
-                            conversationId: convoId!,
-                          ),
-                    ),
-                  );
-                }
-              },
-              child: _loadingUserId == userId
-                  ? const SizedBox(
-                height: 18,
-                width: 18,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
+            height: 48,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF1FA463),
+                    Color(0xFF159957),
+                  ],
                 ),
-              )
-                  : const Text("Start Chat"),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.circular(16),
+                  ),
+                ),
+                onPressed: _loadingUserId == userId
+                    ? null
+                    : () async {
+
+                  setState(
+                          () => _loadingUserId = userId);
+
+                  final chatCubit =
+                  context.read<ChatCubit>();
+                  final prefs =
+                  await SharedPreferences
+                      .getInstance();
+
+                  if (!isCompanyLoaded ||
+                      companyId == null ||
+                      userId == 0) {
+                    setState(
+                            () => _loadingUserId = null);
+                    return;
+                  }
+
+                  final key =
+                      "conversation_${widget.jobId}_$userId";
+
+                  int? convoId =
+                  prefs.getInt(key);
+
+                  if (convoId == null) {
+                    convoId =
+                    await chatCubit.startConversation(
+                      userId,
+                      widget.jobId,
+                      companyId!,
+                    );
+
+                    if (convoId != null) {
+                      await prefs.setInt(
+                          key, convoId);
+                    }
+                  }
+
+                  setState(
+                          () => _loadingUserId = null);
+
+                  if (convoId != null && mounted) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            ChatDetailsScreen(
+                              conversationId:
+                              convoId!,
+                            ),
+                      ),
+                    );
+                  }
+                },
+                child: _loadingUserId == userId
+                    ? const SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                    : const Text(
+                  "Start Chat",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
-          )
+          ),
         ],
       ),
     );

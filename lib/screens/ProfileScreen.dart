@@ -55,106 +55,255 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4FFFA),
-      appBar: AppBar(
-        title: const Text("Profile"),
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: BlocBuilder<ProfileCubit, ProfileState>(
-        builder: (context, state) {
+      backgroundColor: const Color(0xFFF4F7F6),
+      body: SafeArea(
+        child: BlocBuilder<ProfileCubit, ProfileState>(
+          builder: (context, state) {
 
-          // ✅ Loading
-          if (state is ProfileLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+            /// ================= LOADING =================
+            if (state is ProfileLoading) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
 
-          // ✅ Failure (يعرضلك الخطأ الحقيقي)
-          if (state is ProfileFailure) {
-            return Center(
-              child: Text(state.message),
-            );
-          }
+            /// ================= FAILURE =================
+            if (state is ProfileFailure) {
+              return Center(child: Text(state.message));
+            }
 
-          // ✅ Success Load
-          if (state is ProfileLoaded) {
-            final data = state.user;
+            /// ================= SUCCESS =================
+            if (state is ProfileLoaded) {
+              final data = state.user;
 
-            return Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
+              return Column(
                 children: [
-                  const CircleAvatar(
-                    radius: 45,
-                    backgroundColor: Color(0xFF4CAF50),
-                    child: Icon(Icons.person,
-                        size: 55, color: Colors.white),
-                  ),
 
-                  const SizedBox(height: 20),
-
-                  if (role == "company") ...[
-                    _info("Company", data["companyName"] ?? ""),
-                    _info("Email", data["email"] ?? ""),
-                    _info("Phone", data["phone"] ?? "Not set"),
-                    _info("City", data["city"] ?? "Not set"),
-                    _info("Field", data["field"] ?? "Not set"),
-
-                    const SizedBox(height: 30),
-
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        minimumSize:
-                        const Size(double.infinity, 50),
+                  /// ================= GRADIENT HEADER =================
+                  Container(
+                    width: double.infinity,
+                    padding:
+                    const EdgeInsets.fromLTRB(20, 30, 20, 35),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF1FA463),
+                          Color(0xFF159957),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      onPressed: () => _openApplicants(context),
-                      child: const Text(
-                        "View Applicants",
-                        style:
-                        TextStyle(color: Colors.white),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(35),
+                        bottomRight: Radius.circular(35),
                       ),
                     ),
-                  ],
+                    child: Column(
+                      children: [
+                        const CircleAvatar(
+                          radius: 48,
+                          backgroundColor: Colors.white,
+                          child: Icon(
+                            Icons.person,
+                            size: 55,
+                            color: Color(0xFF1FA463),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
 
-                  if (role == "developer") ...[
-                    _info("Name",
-                        "${data['firstName'] ?? ""} ${data['lastName'] ?? ""}"),
-                    _info("Email", data["email"] ?? ""),
-                    _info("Phone", data["phone"] ?? "Not set"),
-                    _info("City", data["city"] ?? "Not set"),
-                  ],
+                        /// NAME / COMPANY TITLE
+                        Text(
+                          role == "company"
+                              ? (data["companyName"] ?? "Company")
+                              : "${data['firstName'] ?? ""} ${data['lastName'] ?? ""}",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        Text(
+                          data["email"] ?? "",
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  /// ================= BODY =================
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        children: [
+
+                          /// COMPANY INFO
+                          if (role == "company") ...[
+                            _modernInfoCard(
+                                Icons.business,
+                                "Company",
+                                data["companyName"] ?? ""),
+                            _modernInfoCard(Icons.email,
+                                "Email", data["email"] ?? ""),
+                            _modernInfoCard(Icons.phone,
+                                "Phone",
+                                data["phone"] ?? "Not set"),
+                            _modernInfoCard(Icons.location_city,
+                                "City",
+                                data["city"] ?? "Not set"),
+                            _modernInfoCard(Icons.work_outline,
+                                "Field",
+                                data["field"] ?? "Not set"),
+
+                            const SizedBox(height: 25),
+
+                            /// VIEW APPLICANTS BUTTON (GRADIENT)
+                            SizedBox(
+                              width: double.infinity,
+                              height: 55,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF1FA463),
+                                      Color(0xFF159957),
+                                    ],
+                                  ),
+                                  borderRadius:
+                                  BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.green
+                                          .withOpacity(0.3),
+                                      blurRadius: 18,
+                                      offset:
+                                      const Offset(0, 8),
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  style:
+                                  ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                    Colors.transparent,
+                                    shadowColor:
+                                    Colors.transparent,
+                                  ),
+                                  onPressed: () =>
+                                      _openApplicants(context),
+                                  child: const Text(
+                                    "View Applicants",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight:
+                                      FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+
+                          /// DEVELOPER INFO
+                          if (role == "developer") ...[
+                            _modernInfoCard(
+                                Icons.person,
+                                "Name",
+                                "${data['firstName'] ?? ""} ${data['lastName'] ?? ""}"),
+                            _modernInfoCard(Icons.email,
+                                "Email", data["email"] ?? ""),
+                            _modernInfoCard(Icons.phone,
+                                "Phone",
+                                data["phone"] ?? "Not set"),
+                            _modernInfoCard(Icons.location_city,
+                                "City",
+                                data["city"] ?? "Not set"),
+                          ],
+
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
-              ),
-            );
-          }
+              );
+            }
 
-          return const SizedBox();
-        },
+            return const SizedBox();
+          },
+        ),
       ),
     );
   }
 
-  Widget _info(String title, String value) {
+  /// ================= MODERN INFO CARD (UI ONLY) =================
+  Widget _modernInfoCard(
+      IconData icon, String title, String value) {
     return Container(
-      padding: const EdgeInsets.all(15),
-      margin: const EdgeInsets.only(bottom: 15),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 5),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
       child: Row(
-        mainAxisAlignment:
-        MainAxisAlignment.spaceBetween,
         children: [
-          Text(title,
-              style: const TextStyle(color: Colors.grey)),
-          Text(value,
-              style:
-              const TextStyle(fontWeight: FontWeight.bold)),
+          Container(
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              color:
+              const Color(0xFF1FA463).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              icon,
+              color: const Color(0xFF1FA463),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Color(0xFF1E1E1E),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

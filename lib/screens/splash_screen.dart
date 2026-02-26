@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen>
         CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
     _scaleAnimation =
-        Tween<double>(begin: 0.85, end: 1.05).animate(_fadeAnimation);
+        Tween<double>(begin: 0.9, end: 1.08).animate(_fadeAnimation);
 
     _controller.forward();
 
@@ -36,7 +35,6 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigateNext() async {
-
     await Future.delayed(const Duration(seconds: 4));
 
     if (!mounted) return;
@@ -53,8 +51,19 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF1FA463),
+              Color(0xFF159957),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: ScaleTransition(
@@ -62,46 +71,82 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
+                /// ===== GLOW CIRCLE BACKGROUND =====
                 Container(
-                  width: 120,
-                  height: 120,
+                  width: 170,
+                  height: 170,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.25),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.25),
+                        Colors.white.withOpacity(0.05),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.workspace_premium,
-                    color: Colors.white,
-                    size: 60,
+                  child: Center(
+                    /// ===== LOGO CARD =====
+                    child: Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 30,
+                            offset: const Offset(0, 15),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.workspace_premium_rounded,
+                        color: Color(0xFF1FA463),
+                        size: 55,
+                      ),
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 40),
 
+                /// ===== APP NAME =====
                 const Text(
                   "DevJob",
                   style: TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF4CAF50),
+                    fontSize: 42,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 1,
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
+                /// ===== TAGLINE =====
                 const Text(
-                  "Find.  Match.  Grow.",
+                  "Find • Match • Grow",
                   style: TextStyle(
-                    fontSize: 16,
-                    letterSpacing: 0.5,
-                    color: Colors.grey,
+                    fontSize: 17,
+                    color: Colors.white70,
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+
+                const SizedBox(height: 50),
+
+                /// ===== LOADING INDICATOR (PREMIUM TOUCH) =====
+                SizedBox(
+                  width: 26,
+                  height: 26,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor:
+                    AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 ),
               ],

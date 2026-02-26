@@ -5,6 +5,7 @@ import '../core/api_service.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
 
+
 class CompanyDashboardScreen extends StatefulWidget {
   const CompanyDashboardScreen({super.key});
 
@@ -31,134 +32,157 @@ class _CompanyDashboardScreenState
           builder: (context, state) {
 
             if (state is JobsLoading) {
-              return const Center(
-                  child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
 
             if (state is CompanyDashboardLoaded) {
-
               final counts = state.counts;
               final jobs = state.jobs;
 
               return Column(
                 children: [
 
-                  // ================= HEADER =================
+                  /// ================= MODERN HEADER (زي الصورة) =================
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 80),
                     decoration: const BoxDecoration(
-                      color: Colors.green,
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF1FA463), // نفس أخضر مشروعك
+                          Color(0xFF159957),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(30),
-                        bottomRight: Radius.circular(30),
+                        bottomLeft: Radius.circular(35),
+                        bottomRight: Radius.circular(35),
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
 
-                        Row(
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                        /// Company Icon (زي الصورة)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.business, color: Colors.white),
+                            onPressed: () async {
+                              final prefs = await SharedPreferences.getInstance();
+                              final token = prefs.getString("token") ?? "";
+                              if (token.isEmpty) return;
+
+                              final api = ApiService();
+                              final data = await api.getCompanyProfile(token);
+
+                              Navigator.pushNamed(
+                                context,
+                                "/edit-company",
+                                arguments: data,
+                              );
+                            },
+                          ),
+                        ),
+
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-
-                            // 👤 Edit Company
-                            IconButton(
-                              icon: const Icon(Icons.business, color: Colors.white),
-                              onPressed: () async {
-
-                                final prefs = await SharedPreferences.getInstance();
-                                final token = prefs.getString("token") ?? "";
-
-                                if (token.isEmpty) return;
-
-                                final api = ApiService();
-                                final data = await api.getCompanyProfile(token);
-
-                                Navigator.pushNamed(
-                                  context,
-                                  "/edit-company",
-                                  arguments: data,
-                                );
-                              },
-                            ),
-                            const Text(
+                            Text(
                               "Welcome back 👋",
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight:
-                                FontWeight.bold,
+                                color: Colors.white70,
+                                fontSize: 13,
                               ),
                             ),
-
-                            // 🔔 Notification Icon
-                            Stack(
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    Navigator.pushNamed(
-                                        context,
-                                        "/notifications");
-                                  },
-                                  icon: const Icon(
-                                    Icons.notifications,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                Positioned(
-                                  right: 8,
-                                  top: 8,
-                                  child: Container(
-                                    width: 10,
-                                    height: 10,
-                                    decoration:
-                                    const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            SizedBox(height: 4),
+                            Text(
+                              "TechCorp",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
 
-                        const SizedBox(height: 20),
-
-                        // ================= COUNTS =================
-                        Row(
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceAround,
+                        /// Notification (نفس البادج)
+                        Stack(
                           children: [
-
-                            _countCard(
-                                counts["activeJob"] ?? 0,
-                                "Active Jobs"),
-
-                            _countCard(
-                                counts["applicants"] ?? 0,
-                                "Applicants"),
-
-                            _countCard(
-                                counts["hires"] ?? 0,
-                                "Hires"),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: IconButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                      context,
+                                      "/notifications");
+                                },
+                                icon: const Icon(
+                                  Icons.notifications_none,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              right: 6,
+                              top: 6,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  // أضف تحت counts مباشرة
 
-                  const SizedBox(height: 20),
+                  /// ================= FLOATING STATS CARDS =================
+                  Transform.translate(
+                    offset: const Offset(0, -50),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _modernStatCard(
+                            counts["activeJob"] ?? 0,
+                            "Active Jobs",
+                            Icons.work_outline,
+                          ),
+                          _modernStatCard(
+                            counts["applicants"] ?? 0,
+                            "Applicants",
+                            Icons.people_outline,
+                          ),
+                          _modernStatCard(
+                            counts["hires"] ?? 0,
+                            "Hires",
+                            Icons.person_add_alt_1_outlined,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
+                  /// زر Post New Job (زي التصميم بالظبط)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: SizedBox(
                       width: double.infinity,
-                      height: 50,
-                      child: DecoratedBox(
+                      height: 55,
+                      child: Container(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [
@@ -166,12 +190,22 @@ class _CompanyDashboardScreenState
                               Color(0xFF22C55E),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.25),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
                           ),
                           onPressed: () {
                             Navigator.pushNamed(context, "/add-job");
@@ -180,7 +214,8 @@ class _CompanyDashboardScreenState
                             "+ Post New Job",
                             style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -190,41 +225,48 @@ class _CompanyDashboardScreenState
 
                   const SizedBox(height: 20),
 
-                  // ================= RECENT JOBS =================
+                  /// ================= RECENT JOBS (Soft Cards) =================
                   Expanded(
                     child: ListView.builder(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: jobs.length,
                       itemBuilder: (context, index) {
-
                         final job = jobs[index];
 
                         return Container(
                           margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius:
-                            BorderRadius.circular(16),
-                            boxShadow: const [
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
                               BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 6),
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              ),
                             ],
                           ),
                           child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
 
-                              Text(
-                                job["title"] ?? "",
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight:
-                                  FontWeight.bold,
-                                ),
+                              /// Job Title + menu
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      job["title"] ?? "",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1E1E1E),
+                                      ),
+                                    ),
+                                  ),
+                                  const Icon(Icons.more_vert, color: Colors.grey),
+                                ],
                               ),
 
                               const SizedBox(height: 6),
@@ -237,11 +279,10 @@ class _CompanyDashboardScreenState
                                 ),
                               ),
 
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 10),
 
                               Align(
-                                alignment:
-                                Alignment.centerRight,
+                                alignment: Alignment.centerRight,
                                 child: GestureDetector(
                                   onTap: () {
                                     Navigator.pushNamed(
@@ -253,9 +294,8 @@ class _CompanyDashboardScreenState
                                   child: const Text(
                                     "View Applicants",
                                     style: TextStyle(
-                                      color: Colors.green,
-                                      fontWeight:
-                                      FontWeight.w600,
+                                      color: Color(0xFF1FA463),
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ),
@@ -281,29 +321,41 @@ class _CompanyDashboardScreenState
     );
   }
 
-  Widget _countCard(int number, String label) {
+  /// كارت الإحصائيات الحديث (زي الصورة بالظبط)
+  Widget _modernStatCard(int number, String label, IconData icon) {
     return Container(
-      width: 90,
-      padding: const EdgeInsets.all(14),
+      width: 105,
+      padding: const EdgeInsets.symmetric(vertical: 18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 6),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
       child: Column(
         children: [
+          Icon(icon, color: Color(0xFF1FA463), size: 22),
+          const SizedBox(height: 8),
           Text(
             number.toString(),
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
+              color: Color(0xFF1E1E1E),
             ),
           ),
+          const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(fontSize: 12),
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
           ),
         ],
       ),

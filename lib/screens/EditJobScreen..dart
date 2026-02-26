@@ -18,7 +18,6 @@ class _EditJobScreenState extends State<EditJobScreen> {
   late TextEditingController description;
   late TextEditingController location;
 
-  // القيم اللي مش بتتعدل في الشاشة
   late String jobType;
   late String jobLevel;
   late String employmentType;
@@ -32,7 +31,6 @@ class _EditJobScreenState extends State<EditJobScreen> {
         TextEditingController(text: widget.job["description"] ?? "");
     location = TextEditingController(text: widget.job["location"] ?? "");
 
-    // ناخد القيم القديمة زي ما هي
     jobType = widget.job["jobType"] ?? "Onsite";
     jobLevel = widget.job["jobLevel"] ?? "Mid";
     employmentType = widget.job["employmentType"] ?? "Parttime";
@@ -51,80 +49,195 @@ class _EditJobScreenState extends State<EditJobScreen> {
     final int jobId = widget.job["id"];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit Job"),
-        backgroundColor: Colors.green,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: BlocConsumer<JobsCubit, JobsState>(
-          listener: (context, state) {
-            if (state is JobActionSuccess && state.message == "JOB_UPDATED") {
-              Navigator.pop(context); // رجوع My Jobs
-            }
+      backgroundColor: const Color(0xFFF4F7F6),
+      body: BlocConsumer<JobsCubit, JobsState>(
+        listener: (context, state) {
+          if (state is JobActionSuccess && state.message == "JOB_UPDATED") {
+            Navigator.pop(context);
+          }
 
-            if (state is JobsFailure)
-            {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
-            }
-          },
-          builder: (context, state) {
-            return ListView(
-              children: [
-                _field("Job Title", title),
-                _field("Description", description, max: 4),
-                _field("Location", location),
+          if (state is JobsFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        builder: (context, state) {
+          return Column(
+            children: [
 
-                const SizedBox(height: 20),
-
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+              /// ================= MODERN GRADIENT HEADER =================
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF1FA463),
+                      Color(0xFF159957),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  onPressed: state is AuthLoading
-                      ? null
-                      : () {
-                    context.read<JobsCubit>().updateJob(
-                      jobId,
-                      title.text.trim(),
-                      description.text.trim(),
-                      location.text.trim(),
-                      jobType,
-                      jobLevel,
-                      employmentType,
-                    );
-
-                  },
-                  child: state is AuthLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                    "Save Changes",
-                    style: TextStyle(color: Colors.white),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(35),
+                    bottomRight: Radius.circular(35),
                   ),
                 ),
-              ],
-            );
-          },
-        ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.arrow_back,
+                            color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Edit Job",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          "Update your job details",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              /// ================= FORM BODY =================
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+                  child: Column(
+                    children: [
+                      _modernField(
+                        "Job Title",
+                        title,
+                        Icons.work_outline,
+                      ),
+                      _modernField(
+                        "Description",
+                        description,
+                        Icons.description_outlined,
+                        max: 4,
+                      ),
+                      _modernField(
+                        "Location",
+                        location,
+                        Icons.location_on_outlined,
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      /// ================= SAVE BUTTON (BRAND GRADIENT) =================
+                      state is AuthLoading
+                          ? const CircularProgressIndicator()
+                          : SizedBox(
+                        width: double.infinity,
+                        height: 55,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF1FA463),
+                                Color(0xFF159957),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.25),
+                                blurRadius: 14,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.circular(18),
+                              ),
+                            ),
+                            onPressed: state is AuthLoading
+                                ? null
+                                : () {
+                              context.read<JobsCubit>().updateJob(
+                                jobId,
+                                title.text.trim(),
+                                description.text.trim(),
+                                location.text.trim(),
+                                jobType,
+                                jobLevel,
+                                employmentType,
+                              );
+                            },
+                            child: state is AuthLoading
+                                ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                                : const Text(
+                              "Save Changes",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _field(String label, TextEditingController c, {int max = 1}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+  /// ================= MODERN INPUT FIELD =================
+  Widget _modernField(String label, TextEditingController c,
+      IconData icon,
+      {int max = 1}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
       child: TextField(
         controller: c,
         maxLines: max,
         decoration: InputDecoration(
           labelText: label,
+          prefixIcon: Icon(icon, color: const Color(0xFF1FA463)),
           filled: true,
-          fillColor: Colors.grey.shade100,
+          fillColor: Colors.white,
+          contentPadding:
+          const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(18),
             borderSide: BorderSide.none,
           ),
         ),
