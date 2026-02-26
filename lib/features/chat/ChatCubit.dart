@@ -144,7 +144,7 @@ class ChatCubit extends Cubit<ChatState> {
     await _connection?.stop();
     return super.close();
   }
-  Future<void> loadDeveloperChats() async {
+  Future<void> loadAllChats() async {
     emit(ChatLoading());
 
     try {

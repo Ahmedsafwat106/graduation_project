@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graduation_project/screens/AdvancedFilterScreen.dart';
 import 'package:graduation_project/screens/ChatDetailsScreen.dart';
-import 'package:graduation_project/screens/DeveloperChatsScreen..dart';
+import 'package:graduation_project/screens/ChatListScreen.dart';
 import 'package:graduation_project/screens/EditJobScreen..dart';
 import 'package:graduation_project/screens/NotificationScreen.dart';
 import 'package:graduation_project/screens/SavedJobsScreen.dart';
@@ -16,6 +16,7 @@ import 'features/auth/AuthCubit.dart';
 import 'features/chat/ChatCubit.dart';
 import 'features/cv/cv_cubit.dart';
 import 'features/jobs/jobs_cubit.dart';
+import 'features/notification/notification_cubit.dart';
 import 'features/profile/profile_cubit.dart';
 import 'screens/splash_screen.dart';
 import 'screens/onboarding_screen.dart';
@@ -76,6 +77,9 @@ class DevJobApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => ChatCubit(ApiService()),
+        ),
+        BlocProvider(
+          create: (_) => NotificationCubit(ApiService()),
         ),
       ],
       child: MaterialApp(
@@ -214,22 +218,12 @@ class DevJobApp extends StatelessWidget {
                 builder: (_) => const NotificationScreen(),
               );
 
-            case "/developer-chats":
+            case "/chats":
               return MaterialPageRoute(
-                builder: (_) => const DeveloperChatsScreen(),
+                builder: (_) => const ChatListScreen(),
               );
 
-            case "/chat-details":
-              final args = settings.arguments as Map?;
-              final conversationId = args?["conversationId"];
 
-              if (conversationId == null) {
-                return MaterialPageRoute(
-                  builder: (_) => const Scaffold(
-                    body: Center(child: Text("Invalid Conversation")),
-                  ),
-                );
-              }
 
             case "/chat-details":
               final args = settings.arguments as Map?;

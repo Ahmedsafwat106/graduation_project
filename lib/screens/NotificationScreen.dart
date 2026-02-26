@@ -1,7 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../features/notification/NotificationState.dart';
+import '../features/notification/notification_cubit.dart';
+import '../models/NotificationCard.dart';
 
-class NotificationScreen extends StatelessWidget {
+
+class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
+
+  @override
+  State<NotificationScreen> createState() =>
+      _NotificationScreenState();
+}
+
+class _NotificationScreenState
+    extends State<NotificationScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<NotificationCubit>().loadNotifications();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +30,7 @@ class NotificationScreen extends StatelessWidget {
         child: Column(
           children: [
 
-            // ================= HEADER =================
+            /// HEADER
             Container(
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
@@ -43,153 +62,70 @@ class NotificationScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // ================= LIST =================
+            /// LIST
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: const [
+              child: BlocBuilder<
+                  NotificationCubit,
+                  NotificationState>(
+                builder: (context, state) {
 
-                  NotificationCard(
-                    title: "Application Viewed",
-                    message:
-                    "TechCorp viewed your application for Senior React Developer",
-                    time: "2 hours ago",
-                    icon: Icons.work_outline,
-                  ),
+                  if (state is NotificationLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-                  NotificationCard(
-                    title: "New Message",
-                    message: "Sarah Johnson sent you a message",
-                    time: "3 hours ago",
-                    icon: Icons.chat_bubble_outline,
-                  ),
+                  if (state is NotificationLoaded) {
 
-                  NotificationCard(
-                    title: "Interview Scheduled",
-                    message:
-                    "You have an interview tomorrow at 2 PM with StartupHub",
-                    time: "5 hours ago",
-                    icon: Icons.check_circle_outline,
-                  ),
+                    final notifications =
+                        state.notifications;
 
-                  NotificationCard(
-                    title: "New Job Match",
-                    message:
-                    "We found 3 new jobs matching your profile",
-                    time: "1 day ago",
-                    icon: Icons.person_add_alt,
-                  ),
+                    if (notifications.isEmpty) {
+                      return const Center(
+                        child:
+                        Text("No notifications yet"),
+                      );
+                    }
 
-                  NotificationCard(
-                    title: "Application Status",
-                    message:
-                    "Your application for Frontend Developer has been shortlisted",
-                    time: "2 days ago",
-                    icon: Icons.assignment_turned_in,
-                  ),
-                ],
+                    return ListView.builder(
+                      padding:
+                      const EdgeInsets.symmetric(
+                          horizontal: 16),
+                      itemCount:
+                      notifications.length,
+                      itemBuilder:
+                          (context, index) {
+
+                        final item =
+                        notifications[index];
+
+                        return NotificationCard(
+                          title:
+                          item["title"] ?? "",
+                          message:
+                          item["message"] ?? "",
+                          time: item["createdDate"] != null
+                              ? item["createdDate"].toString().substring(0, 16)
+                              : "",
+                          isRead:
+                          item["isRead"] ?? false,
+                        );
+                      },
+                    );
+                  }
+
+                  if (state is NotificationFailure) {
+                    return Center(
+                      child: Text(state.message),
+                    );
+                  }
+
+                  return const SizedBox();
+                },
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class NotificationCard extends StatelessWidget {
-  final String title;
-  final String message;
-  final String time;
-  final IconData icon;
-
-  const NotificationCard({
-    super.key,
-    required this.title,
-    required this.message,
-    required this.time,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          Container(
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: Colors.green),
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-
-                Text(
-                  message,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 13,
-                  ),
-                ),
-
-                const SizedBox(height: 6),
-
-                Text(
-                  time,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 6),
-
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: Colors.green,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../features/chat/ChatCubit.dart';
 import '../features/chat/ChatState.dart';
 
@@ -9,6 +10,7 @@ class ChatDetailsScreen extends StatefulWidget {
   const ChatDetailsScreen({
     super.key,
     required this.conversationId,
+
   });
 
   @override
@@ -16,14 +18,22 @@ class ChatDetailsScreen extends StatefulWidget {
 }
 
 class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
-
+  int? myId;
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _loadMyId();
     context.read<ChatCubit>().loadChatMessages(widget.conversationId);
+  }
+
+  Future<void> _loadMyId() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      myId = prefs.getInt("userId");
+    });
   }
 
   void _sendMessage() async {
@@ -53,77 +63,101 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
   Widget _buildMessageItem(Map msg) {
     final text = msg["message"] ?? "";
     final date = msg["dateTime"] ?? "";
-    final senderId = msg["senderId"] ?? "";
+    final senderId = msg["senderId"];
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.green.shade100),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            text.toString(),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+    final isMe = senderId == myId;
+
+    return Align(
+      alignment:
+      isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 10,
+        ),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
+        decoration: BoxDecoration(
+          color: isMe
+              ? const Color(0xFFDCF8C6) // رسالتي أخضر
+              : Colors.white,          // رسالة الطرف التاني أبيض
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft:
+            isMe ? const Radius.circular(16) : const Radius.circular(0),
+            bottomRight:
+            isMe ? const Radius.circular(0) : const Radius.circular(16),
           ),
-          const SizedBox(height: 6),
-          Text(
-            date.toString(),
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 3,
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              text.toString(),
+              style: const TextStyle(
+                fontSize: 15,
+              ),
             ),
-          ),
-          Text(
-            "Sender: $senderId",
-            style: const TextStyle(
-              fontSize: 10,
-              color: Colors.grey,
+            const SizedBox(height: 4),
+            Text(
+              date.toString().length >= 16
+                  ? date.toString().substring(11, 16)
+                  : "",
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.grey,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildInputField() {
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-          )
-        ],
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 8,
       ),
+      color: Colors.white,
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: const InputDecoration(
-                hintText: "Type a message...",
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F0F0),
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: TextField(
+                controller: _messageController,
+                decoration: const InputDecoration(
+                  hintText: "Type a message",
+                  border: InputBorder.none,
+                ),
               ),
             ),
           ),
           const SizedBox(width: 8),
-          IconButton(
-            onPressed: _sendMessage,
-            icon: const Icon(
-              Icons.send,
-              color: Colors.green,
-              size: 28,
+          CircleAvatar(
+            backgroundColor: Colors.green,
+            child: IconButton(
+              onPressed: _sendMessage,
+              icon: const Icon(
+                Icons.send,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
         ],

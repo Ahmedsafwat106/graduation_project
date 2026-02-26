@@ -533,10 +533,8 @@ class ApiService {
 
   // ================= GET ALL CHATS (DEVELOPER) =================
   Future<List> getAllDeveloperChats(String token) async {
-
     final r = await http.get(
       Uri.parse("http://devjob.runasp.net/api/chat/all-chats"),
-
       headers: {
         "Authorization": "Bearer $token",
       },
@@ -647,6 +645,33 @@ class ApiService {
     }
 
     throw Exception("Failed to load job applicants");
+  }
+  Future<List<dynamic>> getAllNotifications(String token) async {
+    final url = Uri.parse(
+      "http://devjob.runasp.net/api/Notification/all-notifications",
+    );
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data["success"] == true) {
+        return data["displayNotificationDtos"] ?? [];
+      } else {
+        throw Exception(data["message"] ?? "Unknown error");
+      }
+    } else {
+      throw Exception(
+        "Server Error: ${response.statusCode}",
+      );
+    }
   }
 
   // ================= COMPANY JOBS =================
