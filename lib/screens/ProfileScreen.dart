@@ -57,29 +57,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F6),
       body: SafeArea(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
         child: BlocBuilder<ProfileCubit, ProfileState>(
           builder: (context, state) {
 
-            /// ================= LOADING =================
             if (state is ProfileLoading) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
             }
-
-            /// ================= FAILURE =================
             if (state is ProfileFailure) {
               return Center(child: Text(state.message));
             }
 
-            /// ================= SUCCESS =================
             if (state is ProfileLoaded) {
               final data = state.user;
 
               return Column(
                 children: [
-
-                  /// ================= GRADIENT HEADER =================
                   Container(
                     width: double.infinity,
                     padding:
@@ -100,18 +97,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: Column(
                       children: [
-                        const CircleAvatar(
-                          radius: 48,
-                          backgroundColor: Colors.white,
-                          child: Icon(
-                            Icons.person,
-                            size: 55,
-                            color: Color(0xFF1FA463),
-                          ),
-                        ),
+
+                            Stack(
+                              alignment: Alignment.bottomRight,
+                              children: [
+
+                                const CircleAvatar(
+                                  radius: 48,
+                                  backgroundColor: Colors.white,
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 55,
+                                    color: Color(0xFF1FA463),
+                                  ),
+                                ),
+
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(6),
+                                    child: Icon(
+                                      Icons.edit,
+                                      size: 18,
+                                      color: Color(0xFF1FA463),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+
                         const SizedBox(height: 15),
 
-                        /// NAME / COMPANY TITLE
                         Text(
                           role == "company"
                               ? (data["companyName"] ?? "Company")
@@ -139,7 +158,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   const SizedBox(height: 25),
 
-                  /// ================= BODY =================
                   Expanded(
                     child: SingleChildScrollView(
                       padding:
@@ -147,7 +165,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         children: [
 
-                          /// COMPANY INFO
                           if (role == "company") ...[
                             _modernInfoCard(
                                 Icons.business,
@@ -215,7 +232,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ],
 
-                          /// DEVELOPER INFO
                           if (role == "developer") ...[
                             _modernInfoCard(
                                 Icons.person,
@@ -244,10 +260,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         ),
       ),
+    ),
     );
   }
 
-  /// ================= MODERN INFO CARD (UI ONLY) =================
   Widget _modernInfoCard(
       IconData icon, String title, String value) {
     return Container(
@@ -258,9 +274,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 25,
+            spreadRadius: 2,
+            offset: const Offset(0, 10),
           ),
         ],
       ),

@@ -37,6 +37,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   Future<void> _finishOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool("onboarding_done", true);
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -51,67 +52,79 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         child: Column(
           children: [
 
-            /// ================= TOP BRAND HEADER =================
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 25),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF1FA463),
-                    Color(0xFF159957),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 30),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF1FA463),
+                        Color(0xFF159957),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(35),
+                      bottomRight: Radius.circular(35),
+                    ),
+                  ),
+                  child: const Text(
+                    "DevJob",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(35),
-                  bottomRight: Radius.circular(35),
+
+                /// SKIP BUTTON
+                Positioned(
+                  right: 15,
+                  top: 5,
+                  child: TextButton(
+                    onPressed: _finishOnboarding,
+                    child: const Text(
+                      "Skip",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              child: const Text(
-                "DevJob",
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  letterSpacing: 1,
-                ),
-              ),
+              ],
             ),
 
-            /// ================= PAGES =================
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: pages.length,
-                onPageChanged: (i) =>
-                    setState(() => _currentIndex = i),
+                onPageChanged: (i) => setState(() => _currentIndex = i),
                 itemBuilder: (context, i) {
                   return Padding(
-                    padding:
-                    const EdgeInsets.fromLTRB(22, 30, 22, 10),
+                    padding: const EdgeInsets.fromLTRB(22, 30, 22, 10),
                     child: Column(
                       children: [
 
-                        /// IMAGE CARD (MODERN SHADOW)
                         Container(
                           width: double.infinity,
-                          height: 300,
+                          height: 320,
                           decoration: BoxDecoration(
-                            borderRadius:
-                            BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(30),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black
-                                    .withOpacity(0.08),
-                                blurRadius: 30,
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 40,
                                 offset: const Offset(0, 15),
                               )
                             ],
                             image: DecorationImage(
-                              image: AssetImage(
-                                  pages[i]["image"]!),
+                              image: AssetImage(pages[i]["image"]!),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -119,7 +132,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
                         const SizedBox(height: 35),
 
-                        /// TITLE
                         Text(
                           pages[i]["title"]!,
                           textAlign: TextAlign.center,
@@ -132,11 +144,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
                         const SizedBox(height: 16),
 
-                        /// SUBTITLE
                         Padding(
-                          padding:
-                          const EdgeInsets.symmetric(
-                              horizontal: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(
                             pages[i]["subtitle"]!,
                             textAlign: TextAlign.center,
@@ -154,21 +163,18 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               ),
             ),
 
-            /// ================= MODERN DOT INDICATOR =================
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 pages.length,
                     (i) => AnimatedContainer(
-                  duration:
-                  const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 5, vertical: 12),
+                  duration: const Duration(milliseconds: 300),
+                  margin:
+                  const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
                   width: _currentIndex == i ? 26 : 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    borderRadius:
-                    BorderRadius.circular(40),
+                    borderRadius: BorderRadius.circular(40),
                     color: _currentIndex == i
                         ? const Color(0xFF1FA463)
                         : Colors.grey.shade300,
@@ -177,10 +183,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               ),
             ),
 
-            /// ================= NEXT / GET STARTED BUTTON =================
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  22, 0, 22, 28),
+              padding: const EdgeInsets.fromLTRB(22, 0, 22, 28),
               child: SizedBox(
                 width: double.infinity,
                 height: 58,
@@ -192,12 +196,10 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                         Color(0xFF159957),
                       ],
                     ),
-                    borderRadius:
-                    BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green
-                            .withOpacity(0.3),
+                        color: Colors.green.withOpacity(0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -206,31 +208,26 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      borderRadius:
-                      BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20),
                       onTap: () {
-                        if (_currentIndex ==
-                            pages.length - 1) {
+                        if (_currentIndex == pages.length - 1) {
                           _finishOnboarding();
                         } else {
                           _pageController.nextPage(
-                            duration: const Duration(
-                                milliseconds: 500),
+                            duration: const Duration(milliseconds: 500),
                             curve: Curves.easeInOut,
                           );
                         }
                       },
                       child: Center(
                         child: Text(
-                          _currentIndex ==
-                              pages.length - 1
+                          _currentIndex == pages.length - 1
                               ? "Get Started"
                               : "Next",
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
-                            fontWeight:
-                            FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),

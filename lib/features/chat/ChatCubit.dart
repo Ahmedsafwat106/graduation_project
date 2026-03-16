@@ -82,9 +82,22 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
+      final myId = prefs.getString("appUser") ?? "";
 
       await api.sendMessage(token, conversationId, message);
 
+      final currentState = state;
+      if (currentState is ChatMessagesLoaded) {
+        final newMsg = {
+          "message": message,
+          "dateTime": DateTime.now().toIso8601String(),
+          "senderId": myId,
+          "messageId": 0,
+        };
+        final updated = List<Map<String, dynamic>>.from(currentState.messages);
+        updated.add(newMsg);
+        emit(ChatMessagesLoaded(updated));
+      }
     } catch (e) {
       emit(ChatFailure(e.toString()));
     }
@@ -92,7 +105,6 @@ class ChatCubit extends Cubit<ChatState> {
 
   // ================= SIGNALR =================
   Future<void> _startSignalR(String token) async {
-
     if (_connection != null &&
         _connection!.state == HubConnectionState.Connected) {
       return;
@@ -109,33 +121,82 @@ class ChatCubit extends Cubit<ChatState> {
         .withAutomaticReconnect()
         .build();
 
-    _connection!.on("ReceiveMessage", (arguments) {
 
+    _connection!.on("ReceiveMessage", (arguments) {
       if (arguments == null || arguments.isEmpty) return;
 
       final data = arguments.first as Map<String, dynamic>;
-
       if (_currentConversationId != data["ConversationId"]) return;
 
       final currentState = state;
-
       if (currentState is ChatMessagesLoaded) {
-
         final newMessage = {
           "message": data["Message"] ?? "",
           "dateTime": data["SendAt"] ?? "",
           "senderId": data["Sender"] ?? "",
+          "messageId": data["MessageId"] ?? 0,
         };
 
-        final updated =
-        List<Map<String, dynamic>>.from(currentState.messages);
-
+        final updated = List<Map<String, dynamic>>.from(currentState.messages);
         updated.add(newMessage);
-
         emit(ChatMessagesLoaded(updated));
       }
     });
 
+
+    _connection!.on("DeleteMessage", (arguments) {
+      if (arguments == null || arguments.isEmpty) return;
+
+      final data = arguments.first as Map<String, dynamic>;
+      final messageId = data["MessageId"] ?? data["messageId"];
+
+      if (messageId == null) return;
+
+      final currentState = state;
+      if (currentState is ChatMessagesLoaded) {
+        final updated = currentState.messages
+            .where((msg) => msg["messageId"] != messageId)
+            .toList();
+        emit(ChatMessagesLoaded(updated));
+      }
+    });
+    _connection!.on("UpdateMessage", (arguments) {
+      if (arguments == null || arguments.isEmpty) return;
+
+      final data = arguments.first as Map<String, dynamic>;
+      final messageId = data["messageId"] ?? data["MessageId"];
+      final newMessage = data["newMessage"] ?? data["NewMessage"] ?? "";
+
+      if (messageId == null) return;
+
+      final currentState = state;
+      if (currentState is ChatMessagesLoaded) {
+        final updated = currentState.messages.map((msg) {
+          final id = msg["messageId"] ?? msg["id"];
+          if (id == messageId) {
+            return {
+              ...Map<String, dynamic>.from(msg),
+              "message": newMessage,
+              "isEdited": true,
+            };
+          }
+          return msg;
+        }).toList();
+        emit(ChatMessagesLoaded(updated));
+      }
+    });
+    _connection!.on("updateMessageNumber", (arguments) {
+      if (arguments == null || arguments.isEmpty) return;
+      final data = arguments.first as Map<String, dynamic>;
+      final userId = data["user"];
+      final newCount = data["newMessage"];
+      if (userId != null && newCount != null) {
+        emit(MessageCountUpdated(
+          userId: userId is int ? userId : int.tryParse(userId.toString()) ?? 0,
+          newCount: newCount is int ? newCount : int.tryParse(newCount.toString()) ?? 0,
+        ));
+      }
+    });
     await _connection!.start();
   }
 
@@ -164,4 +225,69 @@ class ChatCubit extends Cubit<ChatState> {
       emit(ChatFailure(e.toString()));
     }
   }
+
+  Future<void> deleteMessage(int messageId, int conversationId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        emit(ChatFailure("No token found"));
+        return;
+      }
+
+      await api.deleteMessage(token, messageId, conversationId);
+
+
+      final currentState = state;
+      if (currentState is ChatMessagesLoaded) {
+        final updated = currentState.messages
+            .where((msg) => msg["messageId"] != messageId)
+            .toList();
+        emit(ChatMessagesLoaded(updated));
+      }
+
+    } catch (e) {
+      emit(ChatFailure(e.toString()));
+    }
+  }
+
+  // ================= UPDATE MESSAGE =================
+  Future<void> updateMessage(
+      int messageId,
+      int conversationId,
+      String newMessage,
+      ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      if (token.isEmpty) {
+        emit(ChatFailure("No token found"));
+        return;
+      }
+
+      await api.updateMessage(token, messageId, conversationId, newMessage);
+
+
+      final currentState = state;
+      if (currentState is ChatMessagesLoaded) {
+        final updated = currentState.messages.map((msg) {
+          final id = msg["messageId"] ?? msg["id"];
+          if (id == messageId) {
+            return {
+              ...Map<String, dynamic>.from(msg),
+              "message": newMessage,
+              "isEdited": true,
+            };
+          }
+          return msg;
+        }).toList();
+        emit(ChatMessagesLoaded(updated));
+      }
+    } catch (e) {
+      emit(ChatFailure(e.toString()));
+    }
+  }
+
 }

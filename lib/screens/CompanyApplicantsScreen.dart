@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../features/applications/applications_cubit.dart';
 import '../features/applications/applications_state..dart';
 import '../features/chat/ChatCubit.dart';
+import '../features/jobs/jobs_cubit.dart';
+import '../features/jobs/jobs_state..dart';
 import 'ChatDetailsScreen.dart';
 
 class CompanyApplicantsScreen extends StatefulWidget {
@@ -15,30 +17,31 @@ class CompanyApplicantsScreen extends StatefulWidget {
       _CompanyApplicantsScreenState();
 }
 
-class _CompanyApplicantsScreenState
-    extends State<CompanyApplicantsScreen> {
+class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
 
   String searchQuery = "";
   int? companyId;
   bool isCompanyLoaded = false;
   int? _loadingUserId;
 
+  // real-time counts — بيتحدث من JobsCubit
+  int? _rtNew;
+  int? _rtInterview;
+  int? _rtAccepted;
+  int? _rtRejected;
+
   @override
   void initState() {
     super.initState();
     _loadCompanyIdFromPrefs();
-    context
-        .read<ApplicationsCubit>()
-        .loadApplicantsScreen(widget.jobId);
+    context.read<ApplicationsCubit>().loadApplicantsScreen(widget.jobId);
+    context.read<JobsCubit>().connectJobHub();
   }
 
   Future<void> _loadCompanyIdFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     companyId = prefs.getInt("userId");
-
-    setState(() {
-      isCompanyLoaded = true;
-    });
+    setState(() => isCompanyLoaded = true);
   }
 
   Color _getStatusColor(String status) {
@@ -61,193 +64,206 @@ class _CompanyApplicantsScreenState
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F6),
       body: SafeArea(
-        child: Column(
-          children: [
+        child: BlocListener<JobsCubit, JobsState>(
+          listener: (context, state) {
+            if (state is StatusUpdatedForCompany) {
+              setState(() {
+                _rtNew = state.countNew;
+                _rtInterview = state.countInterview;
+                _rtAccepted = state.countAccepted;
+                _rtRejected = state.countRejected;
+              });
+            }
+          },
+          child: Column(
+            children: [
 
-            /// ================= MODERN GRADIENT HEADER =================
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF1FA463),
-                    Color(0xFF159957),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(35),
-                  bottomRight: Radius.circular(35),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  /// Top Bar
-                  Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back,
-                              color: Colors.white),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        "Applicants",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(35),
+                    bottomRight: Radius.circular(35),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
-                  const SizedBox(height: 20),
-
-                  /// Modern Search Bar
-                  Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                    Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back, color: Colors.white),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          "Applicants",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
-                    child: TextField(
-                      onChanged: (value) {
-                        setState(() {
-                          searchQuery = value.toLowerCase();
-                        });
-                      },
-                      decoration: const InputDecoration(
-                        icon: Icon(Icons.search,
-                            color: Color(0xFF1FA463)),
-                        hintText: "Search applicants...",
-                        border: InputBorder.none,
+
+                    const SizedBox(height: 20),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        onChanged: (value) {
+                          setState(() => searchQuery = value.toLowerCase());
+                        },
+                        decoration: const InputDecoration(
+                          icon: Icon(Icons.search, color: Color(0xFF1FA463)),
+                          hintText: "Search applicants...",
+                          border: InputBorder.none,
+                        ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 18),
+                    const SizedBox(height: 18),
 
-                  /// COUNTS CARD (زي الداشبورد ستايل)
-                  BlocBuilder<ApplicationsCubit,
-                      ApplicationsState>(
-                    builder: (context, state) {
-                      if (state is ApplicantsScreenLoaded) {
-                        final c = state.counts;
-
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius:
-                            BorderRadius.circular(22),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black
-                                    .withOpacity(0.05),
-                                blurRadius: 12,
-                                offset:
-                                const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment:
-                            MainAxisAlignment.spaceAround,
-                            children: [
-                              _countItem(
+                    BlocBuilder<ApplicationsCubit, ApplicationsState>(
+                      builder: (context, state) {
+                        if (state is ApplicantsScreenLoaded) {
+                          final c = state.counts;
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(22),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _countItem(
                                   c["totalApplicant"] ?? 0,
                                   "Total",
-                                  Colors.black),
-                              _countItem(
-                                  c["totalNew"] ?? 0,
+                                  Colors.black,
+                                ),
+                                _countItem(
+                                  _rtNew ?? c["totalNew"] ?? 0,
                                   "New",
-                                  Colors.blue),
-                              _countItem(
-                                  c["totalInterview"] ?? 0,
+                                  Colors.blue,
+                                ),
+                                _countItem(
+                                  _rtInterview ?? c["totalInterview"] ?? 0,
                                   "Interview",
-                                  const Color(0xFF1FA463)),
-                              _countItem(
-                                  c["totalReviewed"] ?? 0,
+                                  const Color(0xFF1FA463),
+                                ),
+                                _countItem(
+                                  _rtAccepted ?? c["totalReviewed"] ?? 0,
                                   "Reviewed",
-                                  Colors.orange),
+                                  Colors.orange,
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return const SizedBox();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Expanded(
+                child: BlocBuilder<ApplicationsCubit, ApplicationsState>(
+                  builder: (context, state) {
+
+                    if (state is ApplicationsLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (state is ApplicantsScreenLoaded) {
+                      final filtered = state.applicants
+                          .where((user) => (user["name"] ?? "")
+                          .toString()
+                          .toLowerCase()
+                          .contains(searchQuery))
+                          .toList();
+
+                      if (filtered.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.people_outline,
+                                  size: 60, color: Colors.grey),
+                              SizedBox(height: 12),
+                              Text(
+                                "No applicants yet",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E1E1E),
+                                ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "No one has applied for this job yet",
+                                style: TextStyle(
+                                    color: Colors.grey, fontSize: 14),
+                              ),
                             ],
                           ),
                         );
                       }
-                      return const SizedBox();
-                    },
-                  ),
-                ],
-              ),
-            ),
 
-            const SizedBox(height: 12),
-
-            /// ================= APPLICANTS LIST =================
-            Expanded(
-              child: BlocBuilder<ApplicationsCubit,
-                  ApplicationsState>(
-                builder: (context, state) {
-
-                  if (state is ApplicationsLoading) {
-                    return const Center(
-                        child: CircularProgressIndicator());
-                  }
-
-                  if (state is ApplicantsScreenLoaded) {
-
-                    final filtered = state.applicants
-                        .where((user) =>
-                        (user["name"] ?? "")
-                            .toString()
-                            .toLowerCase()
-                            .contains(searchQuery))
-                        .toList();
-
-                    if (filtered.isEmpty) {
-                      return const Center(
-                          child: Text("No applicants found"));
+                      return ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          return _modernApplicantCard(filtered[index]);
+                        },
+                      );
                     }
 
-                    return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(
-                          16, 4, 16, 20),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        return _modernApplicantCard(
-                            filtered[index]);
-                      },
-                    );
-                  }
+                    if (state is ApplicationsFailure) {
+                      return Center(child: Text(state.message));
+                    }
 
-                  if (state is ApplicationsFailure) {
-                    return Center(child: Text(state.message));
-                  }
-
-                  return const SizedBox();
-                },
+                    return const SizedBox();
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -259,21 +275,15 @@ class _CompanyApplicantsScreenState
         Text(
           number.toString(),
           style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: color),
+              fontSize: 20, fontWeight: FontWeight.bold, color: color),
         ),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(color: Colors.grey)),
       ],
     );
   }
 
   Widget _modernApplicantCard(Map user) {
-
     final status = user["status"] ?? "New";
     final statusColor = _getStatusColor(status);
     final userId = user["userId"] ?? 0;
@@ -296,10 +306,8 @@ class _CompanyApplicantsScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          /// NAME + MATCH SCORE
           Row(
-            mainAxisAlignment:
-            MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Text(
@@ -316,10 +324,8 @@ class _CompanyApplicantsScreenState
                 padding: const EdgeInsets.symmetric(
                     horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color:
-                  const Color(0xFF1FA463).withOpacity(0.1),
-                  borderRadius:
-                  BorderRadius.circular(16),
+                  color: const Color(0xFF1FA463).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   "${user["matchScore"] ?? 0}%",
@@ -336,15 +342,11 @@ class _CompanyApplicantsScreenState
 
           Text(
             "${user["yearOfex"] ?? 0} years experience",
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 13,
-            ),
+            style: const TextStyle(color: Colors.grey, fontSize: 13),
           ),
 
           const SizedBox(height: 12),
 
-          /// SKILLS CHIPS (Modern)
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -352,11 +354,9 @@ class _CompanyApplicantsScreenState
                 ?.map(
                   (skill) => Chip(
                 label: Text(skill),
-                backgroundColor:
-                const Color(0xFFF4F7F6),
+                backgroundColor: const Color(0xFFF4F7F6),
                 shape: RoundedRectangleBorder(
-                  borderRadius:
-                  BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
             )
@@ -366,10 +366,8 @@ class _CompanyApplicantsScreenState
 
           const SizedBox(height: 14),
 
-          /// STATUS DROPDOWN (Styled)
           Container(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
               color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
@@ -379,24 +377,14 @@ class _CompanyApplicantsScreenState
                 value: status,
                 iconEnabledColor: statusColor,
                 items: const [
-                  DropdownMenuItem(
-                      value: "New",
-                      child: Text("New")),
-                  DropdownMenuItem(
-                      value: "Reviewed",
-                      child: Text("Reviewed")),
-                  DropdownMenuItem(
-                      value: "Interview",
-                      child: Text("Interview")),
-                  DropdownMenuItem(
-                      value: "Rejected",
-                      child: Text("Rejected")),
+                  DropdownMenuItem(value: "New", child: Text("New")),
+                  DropdownMenuItem(value: "Reviewed", child: Text("Reviewed")),
+                  DropdownMenuItem(value: "Interview", child: Text("Interview")),
+                  DropdownMenuItem(value: "Rejected", child: Text("Rejected")),
                 ],
                 onChanged: (value) {
                   if (value != null) {
-                    context
-                        .read<ApplicationsCubit>()
-                        .updateStatus(
+                    context.read<ApplicationsCubit>().updateStatus(
                       widget.jobId,
                       user["userId"],
                       value,
@@ -409,17 +397,13 @@ class _CompanyApplicantsScreenState
 
           const SizedBox(height: 16),
 
-          /// START CHAT BUTTON (Brand Gradient)
           SizedBox(
             width: double.infinity,
             height: 48,
             child: Container(
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF1FA463),
-                    Color(0xFF159957),
-                  ],
+                  colors: [Color(0xFF1FA463), Color(0xFF159957)],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
@@ -435,62 +419,57 @@ class _CompanyApplicantsScreenState
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 onPressed: _loadingUserId == userId
                     ? null
                     : () async {
+                  setState(() => _loadingUserId = userId);
 
-                  setState(
-                          () => _loadingUserId = userId);
+                  final chatCubit = context.read<ChatCubit>();
+                  final prefs = await SharedPreferences.getInstance();
 
-                  final chatCubit =
-                  context.read<ChatCubit>();
-                  final prefs =
-                  await SharedPreferences
-                      .getInstance();
-
-                  if (!isCompanyLoaded ||
-                      companyId == null ||
-                      userId == 0) {
-                    setState(
-                            () => _loadingUserId = null);
+                  if (!isCompanyLoaded || companyId == null || userId == 0) {
+                    setState(() => _loadingUserId = null);
                     return;
                   }
 
-                  final key =
-                      "conversation_${widget.jobId}_$userId";
-
-                  int? convoId =
-                  prefs.getInt(key);
+                  final key = "conversation_${widget.jobId}_$userId";
+                  int? convoId = prefs.getInt(key);
 
                   if (convoId == null) {
-                    convoId =
-                    await chatCubit.startConversation(
+                    convoId = await chatCubit.startConversation(
                       userId,
                       widget.jobId,
                       companyId!,
                     );
-
                     if (convoId != null) {
-                      await prefs.setInt(
-                          key, convoId);
+                      await prefs.setInt(key, convoId);
                     }
                   }
 
-                  setState(
-                          () => _loadingUserId = null);
+                  setState(() => _loadingUserId = null);
+
+                  if (convoId == null && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Cannot start chat: applicant has not applied for this job or conversation failed to create.",
+                        ),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 4),
+                      ),
+                    );
+                    return;
+                  }
 
                   if (convoId != null && mounted) {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) =>
-                            ChatDetailsScreen(
-                              conversationId:
-                              convoId!,
-                            ),
+                        builder: (_) => ChatDetailsScreen(
+                          conversationId: convoId!,
+                        ),
                       ),
                     );
                   }

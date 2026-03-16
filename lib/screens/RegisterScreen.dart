@@ -16,6 +16,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  bool _obscure = true;
   late String role;
 
   final devName = TextEditingController();
@@ -42,12 +43,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: const Color(0xFFF4F7F6),
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
+          if (state is AuthSuccess && state.message == "LOGIN_SUCCESS") {
             if (role == "developer") {
               Navigator.pushReplacementNamed(context, "/upload-cv");
             } else {
-              Navigator.pushReplacementNamed(
-                  context, "/company-dashboard");
+              Navigator.pushReplacementNamed(context, "/company-dashboard");
             }
           }
 
@@ -62,7 +62,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               children: [
 
-                /// ================= GRADIENT HEADER =================
                 Container(
                   width: double.infinity,
                   padding:
@@ -106,10 +105,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: 30),
 
-                /// ================= REGISTER CARD =================
                 Padding(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Container(
                     padding: const EdgeInsets.all(26),
                     decoration: BoxDecoration(
@@ -117,16 +114,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color:
-                          Colors.black.withOpacity(0.06),
+                          color: Colors.black.withOpacity(0.06),
                           blurRadius: 30,
                           offset: const Offset(0, 15),
                         )
                       ],
                     ),
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
 
                         const Center(
@@ -142,154 +137,95 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                         const SizedBox(height: 25),
 
-                        /// ROLE SWITCH (MODERN)
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF1F3F5),
-                            borderRadius:
-                            BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
                             children: [
-                              Expanded(
-                                  child:
-                                  _roleButton("developer")),
-                              Expanded(
-                                  child:
-                                  _roleButton("company")),
+                              Expanded(child: _roleButton("developer")),
+                              Expanded(child: _roleButton("company")),
                             ],
                           ),
                         ),
 
                         const SizedBox(height: 24),
 
-                        /// ================= FIELDS =================
                         if (role == "developer") ...[
-                          _modernField(
-                              "Full Name",
-                              devName,
-                              Icons.person_outline),
-                          _modernField("Email",
-                              devEmail, Icons.email_outlined),
-                          _modernField("Password",
-                              devPass, Icons.lock_outline,
-                              isPass: true),
-                          _modernField(
-                              "Confirm Password",
-                              devConfirm,
-                              Icons.lock_outline,
-                              isPass: true),
+                          _modernField("Full Name", devName, Icons.person_outline),
+                          _modernField("Email", devEmail, Icons.email_outlined),
+                          _modernField("Password", devPass, Icons.lock_outline, isPass: true),
+                          _modernField("Confirm Password", devConfirm, Icons.lock_outline, isPass: true),
                         ] else ...[
-                          _modernField(
-                              "Company Name",
-                              comName,
-                              Icons.business_outlined),
-                          _modernField("Email",
-                              comEmail, Icons.email_outlined),
-                          _modernField(
-                              "Serial Number",
-                              comSerial,
-                              Icons.confirmation_number_outlined),
-                          _modernField(
-                              "Phone Number",
-                              comPhone,
-                              Icons.phone_outlined),
-                          _modernField("Password",
-                              comPass, Icons.lock_outline,
-                              isPass: true),
-                          _modernField(
-                              "Confirm Password",
-                              comConfirm,
-                              Icons.lock_outline,
-                              isPass: true),
+                          _modernField("Company Name", comName, Icons.business_outlined),
+                          _modernField("Email", comEmail, Icons.email_outlined),
+                          _modernField("Serial Number", comSerial, Icons.confirmation_number_outlined),
+                          _modernField("Phone Number", comPhone, Icons.phone_outlined),
+                          _modernField("Password", comPass, Icons.lock_outline, isPass: true),
+                          _modernField("Confirm Password", comConfirm, Icons.lock_outline, isPass: true),
                         ],
 
                         const SizedBox(height: 25),
 
-                        /// ================= SIGN UP BUTTON =================
                         state is AuthLoading
                             ? const Center(
-                            child:
-                            CircularProgressIndicator())
+                          child: CircularProgressIndicator(),
+                        )
                             : SizedBox(
                           width: double.infinity,
                           height: 58,
                           child: Container(
                             decoration: BoxDecoration(
-                              gradient:
-                              const LinearGradient(
+                              gradient: const LinearGradient(
                                 colors: [
                                   Color(0xFF1FA463),
                                   Color(0xFF159957),
                                 ],
                               ),
-                              borderRadius:
-                              BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.green
-                                      .withOpacity(0.3),
+                                  color: Colors.green.withOpacity(0.3),
                                   blurRadius: 20,
-                                  offset:
-                                  const Offset(0, 10),
+                                  offset: const Offset(0, 10),
                                 ),
                               ],
                             ),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                borderRadius:
-                                BorderRadius.circular(
-                                    20),
+                                borderRadius: BorderRadius.circular(20),
                                 onTap: () {
-                                  if (role ==
-                                      "developer") {
-                                    if (devName
-                                        .text
-                                        .isEmpty ||
-                                        devEmail
-                                            .text
-                                            .isEmpty ||
-                                        devPass
-                                            .text
-                                            .isEmpty) {
-                                      _error(
-                                          "Fill all developer fields");
+
+                                  if (role == "developer") {
+
+                                    if (devName.text.isEmpty ||
+                                        devEmail.text.isEmpty ||
+                                        devPass.text.isEmpty) {
+                                      _error("Fill all developer fields");
                                       return;
                                     }
 
-                                    context
-                                        .read<AuthCubit>()
-                                        .registerDeveloper(
+                                    context.read<AuthCubit>().registerDeveloper(
                                       devName.text,
                                       devEmail.text,
                                       devPass.text,
                                     );
+
                                   } else {
-                                    if (comName
-                                        .text
-                                        .isEmpty ||
-                                        comEmail
-                                            .text
-                                            .isEmpty ||
-                                        comSerial
-                                            .text
-                                            .isEmpty ||
-                                        comPhone
-                                            .text
-                                            .isEmpty ||
-                                        comPass
-                                            .text
-                                            .isEmpty) {
-                                      _error(
-                                          "Fill all company fields");
+
+                                    if (comName.text.isEmpty ||
+                                        comEmail.text.isEmpty ||
+                                        comSerial.text.isEmpty ||
+                                        comPhone.text.isEmpty ||
+                                        comPass.text.isEmpty) {
+                                      _error("Fill all company fields");
                                       return;
                                     }
 
-                                    context
-                                        .read<AuthCubit>()
-                                        .registerCompany(
+                                    context.read<AuthCubit>().registerCompany(
                                       comName.text,
                                       comSerial.text,
                                       comPhone.text,
@@ -297,6 +233,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       comPass.text,
                                     );
                                   }
+
                                 },
                                 child: const Center(
                                   child: Text(
@@ -304,8 +241,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
-                                      fontWeight:
-                                      FontWeight.bold,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
@@ -315,6 +251,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ],
                     ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                const Text(
+                  "By signing up you agree to our Terms & Conditions",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
                   ),
                 ),
 
@@ -392,14 +339,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       child: TextField(
         controller: c,
-        obscureText: isPass,
+        obscureText: isPass ? _obscure : false,
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon:
-          Icon(icon, color: const Color(0xFF1FA463)),
+          prefixIcon: Icon(icon, color: const Color(0xFF1FA463)),
           border: InputBorder.none,
-          contentPadding:
-          const EdgeInsets.symmetric(vertical: 18),
+          contentPadding: const EdgeInsets.symmetric(vertical: 18),
+
+          suffixIcon: isPass
+              ? IconButton(
+            icon: Icon(
+              _obscure
+                  ? Icons.visibility
+                  : Icons.visibility_off,
+              color: Colors.grey,
+            ),
+            onPressed: () {
+              setState(() {
+                _obscure = !_obscure;
+              });
+            },
+          )
+              : null,
         ),
       ),
     );

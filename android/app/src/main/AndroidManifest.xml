@@ -1,17 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
-    <!-- 🔴 REQUIRED FOR url_launcher (https links) -->
     <queries>
-        <!-- For opening web links -->
         <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="https" />
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
         </intent>
-
-        <!-- Existing (PROCESS_TEXT) -->
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
@@ -32,7 +30,8 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:enableOnBackInvokedCallback="true">
 
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
@@ -42,11 +41,25 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
 
         <meta-data
             android:name="flutterEmbedding"
             android:value="2"/>
+
+        <meta-data
+            android:name="com.onesignal.NotificationIcon"
+            android:resource="@mipmap/ic_launcher"/>
+
+        <meta-data
+            android:name="com.onesignal.NotificationChannel.DEFAULT_IMPORTANCE"
+            android:value="HIGH"/>
+
+        <meta-data
+            android:name="com.onesignal.NotificationChannel.DEFAULT"
+            android:value="chat_messages"/>
+
     </application>
 
 </manifest>

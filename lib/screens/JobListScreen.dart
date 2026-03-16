@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
 import 'ApplyJobScreen.dart';
@@ -21,17 +22,11 @@ class JobListScreen extends StatefulWidget {
 
 class _JobListScreenState extends State<JobListScreen> {
   int? userId;
-
   @override
   void initState() {
     super.initState();
     _loadUser();
-
-    if (widget.loadType == JobLoadType.all) {
-      context.read<JobsCubit>().loadJobs();
-    } else {
-      context.read<JobsCubit>().loadRecommendedJobs();
-    }
+    context.read<JobsCubit>().loadJobs();
   }
 
   Future<void> _loadUser() async {
@@ -50,50 +45,59 @@ class _JobListScreenState extends State<JobListScreen> {
       body: Column(
         children: [
 
-          /// ================= MODERN HEADER =================
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
+          padding: const EdgeInsets.fromLTRB(20, 15, 20, 10),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF1FA463),
-                  Color(0xFF159957),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(35),
-                bottomRight: Radius.circular(35),
-              ),
+              color: Color(0xFFF4F7F6),
             ),
             child: Row(
               children: [
-                const Expanded(
-                  child: Text(
+
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 18, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: const Text(
                     "Jobs",
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
+                      color: Color(0xFF1E1E1E),
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+
+                const Spacer(),
+
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                      )
+                    ],
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.filter_list,
-                        color: Colors.white),
+                        color: Color(0xFF1FA463)),
                     onPressed: () {
                       Navigator.pushNamed(context, "/advanced-filter")
                           .then((_) {
-                        context
-                            .read<JobsCubit>()
-                            .loadRecommendedJobs();
+                        context.read<JobsCubit>().loadRecommendedJobs();
                       });
                     },
                   ),
@@ -102,7 +106,6 @@ class _JobListScreenState extends State<JobListScreen> {
             ),
           ),
 
-          /// ================= JOB LIST =================
           Expanded(
             child: BlocBuilder<JobsCubit, JobsState>(
               builder: (context, state) {
@@ -112,6 +115,9 @@ class _JobListScreenState extends State<JobListScreen> {
                 }
 
                 if (state is JobsLoaded) {
+                  print("===== JOBS RESPONSE =====");
+                  print(state.jobs);
+                  print("=========================");
                   if (state.jobs.isEmpty) {
                     return const Center(
                       child: Text(
@@ -147,181 +153,184 @@ class _JobListScreenState extends State<JobListScreen> {
       ),
     );
   }
-
-  /// ================= MODERN JOB CARD (UI ONLY) =================
   Widget _modernJobCard(BuildContext context, Map job) {
-    final int? jobId =
-        job["id"] ?? job["jobId"] ?? job["job_id"];
 
-    final bool canApply = jobId != null;
+
+    int? jobId;
+    final rawId = job["job_id"] ?? job["id"] ?? job["jobId"];
+    if (rawId is int) {
+      jobId = rawId;
+    } else if (rawId is String) {
+      jobId = int.tryParse(rawId);
+    }
+
+    final String title = job["title"] ?? "";
+    final String company = job["companyName"] ?? job["company_name"] ?? "";
+
+
+    final String? externalUrl = job["apply_Link"];
+
+    final bool canApplyInsideApp = jobId != null &&
+        (externalUrl == null || externalUrl.isEmpty);
+    final bool hasExternalLink = externalUrl != null && externalUrl.isNotEmpty;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          /// ❤️ Save Button (Modern Floating Style)
-          Positioned(
-            right: -6,
-            top: -6,
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1FA463).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.favorite_border,
-                  color: Color(0xFF1FA463),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E1E1E),
+                  ),
                 ),
-                onPressed: () {
-                  if (userId == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("User not loaded"),
-                      ),
-                    );
-                    return;
-                  }
-
-                  if (jobId == null) return;
-
-                  context.read<JobsCubit>().saveJob(userId!, jobId);
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Job Saved"),
-                    ),
-                  );
-                },
               ),
-            ),
+
+              if (canApplyInsideApp)
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1FA463).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.favorite_border,
+                        color: Color(0xFF1FA463)),
+                    onPressed: () {
+                      if (userId == null || jobId == null) return;
+                      context.read<JobsCubit>().saveJob(userId!, jobId!);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Job Saved ✅")),
+                      );
+                    },
+                  ),
+                ),
+            ],
           ),
 
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 6),
+
+          Text(
+            company.isEmpty ? "Unknown Company" : company,
+            style: const TextStyle(color: Colors.grey, fontSize: 14),
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            job["desctiption"] ?? job["description"] ?? "",
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(height: 1.5, color: Colors.black87),
+          ),
+
+          const SizedBox(height: 14),
+
+          Row(
             children: [
-
-              /// JOB TITLE
+              const Icon(Icons.location_on_outlined,
+                  size: 18, color: Colors.grey),
+              const SizedBox(width: 6),
               Text(
-                job["title"] ?? "",
-                style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E1E1E),
+                job["location"] ?? "N/A",
+                style: const TextStyle(color: Colors.grey, fontSize: 13),
+              ),
+              const Spacer(),
+
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1FA463).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ),
-
-              const SizedBox(height: 6),
-
-              /// COMPANY NAME
-              Text(
-                job["company_name"] ??
-                    job["companyName"] ??
-                    "Unknown Company",
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              /// DESCRIPTION
-              Text(
-                job["description"] ??
-                    job["desctiption"] ??
-                    "",
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  height: 1.4,
-                  color: Colors.black87,
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              /// LOCATION ROW (MODERN)
-              Row(
-                children: [
-                  const Icon(
-                    Icons.location_on_outlined,
-                    size: 18,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    job["location"] ?? "N/A",
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 18),
-
-              /// APPLY BUTTON (GRADIENT BRAND)
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: canApply
-                          ? const [
-                        Color(0xFF1FA463),
-                        Color(0xFF159957),
-                      ]
-                          : [
-                        Colors.grey.shade400,
-                        Colors.grey.shade500,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                    ),
-                    onPressed: canApply
-                        ? () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              ApplyJobScreen(job: job),
-                        ),
-                      );
-                    }
-                        : null,
-                    child: Text(
-                      canApply ? "Apply Now" : "External Job",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
+                child: Text(
+                  job["jobType"] ?? "",
+                  style: const TextStyle(
+                    color: Color(0xFF1FA463),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
+          ),
+
+          const SizedBox(height: 18),
+
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1FA463),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              onPressed: () async {
+                if (canApplyInsideApp) {
+                  // ✅ Internal → ApplyJobScreen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ApplyJobScreen(job: job),
+                    ),
+                  );
+                } else if (hasExternalLink) {
+
+                  final uri = Uri.parse(externalUrl!);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(
+                      uri,
+                      mode: LaunchMode.externalApplication,
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Can't open link"),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (hasExternalLink) ...[
+                    const Icon(Icons.open_in_new,
+                        color: Colors.white, size: 18),
+                    const SizedBox(width: 6),
+                  ],
+                  Text(
+                    canApplyInsideApp ? "Apply Now" : "Apply External",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

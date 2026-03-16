@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/api_service.dart';
+import '../../core/signalr_service.dart';
 import 'jobs_state..dart';
 
 
@@ -11,14 +12,7 @@ class JobsCubit extends Cubit<JobsState> {
   Future<void> loadJobs() async {
     emit(JobsLoading());
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("token") ?? "";
-
-      if (token.isEmpty) {
-        throw Exception("User not logged in");
-      }
-
-      final jobs = await api.getJobs(token);
+      final jobs = await api.getAllJobs();
       emit(JobsLoaded(jobs));
     } catch (e) {
       emit(JobsFailure(e.toString()));
@@ -51,7 +45,7 @@ class JobsCubit extends Cubit<JobsState> {
       String jobLevel,
       String employmentType,
       String jobType,
-      List<String> skills, // 👈 جديد
+      List<String> skills,
       ) async {
     emit(JobsLoading());
     try {
@@ -73,7 +67,7 @@ class JobsCubit extends Cubit<JobsState> {
         jobLevel,
         employmentType,
         jobType,
-        skills, // 👈 مهم
+        skills,
       );
 
       if (result["success"] == true) {
@@ -183,7 +177,6 @@ class JobsCubit extends Cubit<JobsState> {
         minimumSalary,
       );
 
-      // 👇 المهم
       final jobs = await api.getRecommendedJobs(token);
       emit(JobsLoaded(jobs));
 
@@ -213,15 +206,16 @@ class JobsCubit extends Cubit<JobsState> {
         throw Exception("No token found");
       }
 
-      final counts = await api.getCompanyCount(token);
+      final countsRaw = await api.getCompanyCount(token);
       final jobs = await api.getAllCompanyJobs(token);
 
-      emit(
-        CompanyDashboardLoaded(
-          counts: counts,
-          jobs: jobs,
-        ),
-      );
+      final counts = {
+        "activeJob": countsRaw["activeJob"] ?? 0,
+        "applicants": countsRaw["applicants"] ?? 0,
+        "hires": countsRaw["hires"] ?? 0,
+      };
+
+      emit(CompanyDashboardLoaded(counts: counts, jobs: jobs));
 
     } catch (e) {
       emit(JobsFailure(e.toString()));
@@ -229,25 +223,16 @@ class JobsCubit extends Cubit<JobsState> {
   }
   Future<void> loadDeveloperDashboard() async {
     emit(JobsLoading());
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
 
-      if (token.isEmpty) {
-        throw Exception("No token found");
-      }
+      if (token.isEmpty) throw Exception("No token found");
 
       final counts = await api.getUserCount(token);
-      final jobs = await api.getJobs(token);
+      final jobs = await api.getAllJobs();
 
-      emit(
-        DeveloperDashboardLoaded(
-          counts: counts,
-          jobs: jobs,
-        ),
-      );
-
+      emit(DeveloperDashboardLoaded(counts: counts, jobs: jobs));
     } catch (e) {
       emit(JobsFailure(e.toString()));
     }
@@ -291,5 +276,75 @@ class JobsCubit extends Cubit<JobsState> {
       emit(JobsFailure(e.toString()));
     }
   }
+  Future<void> connectJobHub() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token") ?? "";
+    final myAppUser = prefs.getString("appUser") ?? "";
+    final myUserId = prefs.getInt("userId") ?? 0;
 
+    if (token.isEmpty) return;
+
+    await SignalRService().connectJobHub(
+      token: token,
+
+      onApplyCountForDeveloper: (userId, applyCount) {
+        if (userId == myAppUser) {
+          emit(DeveloperApplyCountUpdated(
+            userId: userId,
+            applyCount: applyCount,
+          ));
+        }
+      },
+
+      onApplyCountForCompany: (applyCount, newCount) {
+        emit(CompanyApplyCountUpdated(
+          applyCount: applyCount,
+          newCount: newCount,
+        ));
+      },
+
+      onActiveJobsUpdated: (active, companyId) {
+        emit(ActiveJobsUpdated(
+          active: active,
+          companyId: companyId,
+        ));
+      },
+
+      onStatusUpdatedForCompany: (data) {
+        emit(StatusUpdatedForCompany(
+          newStatus: _str(data, ["newStatus", "NewStatus"]),
+          countInterview: _int(data, ["countInterviewForCompany", "CountInterviewForCompany"]),
+          countAccepted: _int(data, ["countAcceptedForCompany", "CountAcceptedForCompany"]),
+          countRejected: _int(data, ["countRejectedForCompany", "CountRejectedForCompany"]),
+          countNew: _int(data, ["countNewForCompany", "CountNewForCompany"]),
+        ));
+      },
+
+      onStatusUpdatedForDeveloper: (data) {
+        emit(StatusUpdatedForDeveloper(
+          newStatus: _str(data, ["newStatus", "NewStatus"]),
+          countAccepted: _int(data, ["countAcceptedForDeveloper", "CountAcceptedForDeveloper"]),
+          countRejected: _int(data, ["countRejectedForDeveloper", "CountRejectedForDeveloper"]),
+          countNew: _int(data, ["countNewForDeveloper", "CountNewForDeveloper"]),
+          countInterview: _int(data, ["countInterviewForDeveloper", "CountInterviewForDeveloper"]),
+        ));
+      },
+    );
+  }
+
+  int _int(Map<String, dynamic> data, List<String> keys) {
+    for (final k in keys) {
+      final v = data[k];
+      if (v != null) return v is int ? v : int.tryParse(v.toString()) ?? 0;
+    }
+    return 0;
+  }
+
+  String _str(Map<String, dynamic> data, List<String> keys) {
+    for (final k in keys) {
+      final v = data[k];
+      if (v != null) return v.toString();
+    }
+    return "";
+  }
 }

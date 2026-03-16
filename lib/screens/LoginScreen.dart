@@ -12,6 +12,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool _obscure = true;
   String role = "developer";
 
   final devEmail = TextEditingController();
@@ -36,8 +37,6 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-
-            /// ================= GRADIENT HEADER (BRAND) =================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(24, 80, 24, 50),
@@ -81,7 +80,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
             const SizedBox(height: 30),
 
-            /// ================= LOGIN CARD =================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Container(
@@ -148,7 +146,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         const SizedBox(height: 28),
 
-                        /// ================= ROLE SWITCH (MODERN TOGGLE) =================
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
@@ -165,7 +162,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         const SizedBox(height: 24),
 
-                        /// ================= FIELDS =================
                         if (role == "developer") ...[
                           _modernField(
                               "Email Address",
@@ -190,7 +186,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         const SizedBox(height: 6),
 
-                        /// FORGOT PASSWORD
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -213,7 +208,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         const SizedBox(height: 20),
 
-                        /// ================= LOGIN BUTTON (GRADIENT) =================
                         state is AuthLoading
                             ? const Center(
                             child: CircularProgressIndicator())
@@ -240,44 +234,59 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ],
                             ),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                Colors.transparent,
-                                shadowColor:
-                                Colors.transparent,
-                                shape:
-                                RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.circular(20),
+
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 58,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF1FA463),
+                                      Color(0xFF159957),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.green.withOpacity(0.3),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              onPressed: () {
-                                final email = role ==
-                                    "developer"
-                                    ? devEmail.text
-                                    : cmpEmail.text;
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(20),
 
-                                final pass = role ==
-                                    "developer"
-                                    ? devPass.text
-                                    : cmpPass.text;
+                                    onTap: () {
+                                      final email = role == "developer"
+                                          ? devEmail.text
+                                          : cmpEmail.text;
 
-                                context
-                                    .read<AuthCubit>()
-                                    .login(
-                                  email,
-                                  pass,
-                                  role,
-                                );
-                              },
-                              child: const Text(
-                                "Login",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight:
-                                  FontWeight.bold,
+                                      final pass = role == "developer"
+                                          ? devPass.text
+                                          : cmpPass.text;
+
+                                      context.read<AuthCubit>().login(
+                                        email,
+                                        pass,
+                                        role,
+                                      );
+                                    },
+
+                                    child: const Center(
+                                      child: Text(
+                                        "Login",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -290,9 +299,31 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
+
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+
+                Expanded(
+                  child: Divider(color: Colors.grey.shade300),
+                ),
+
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                    "or",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+
+                Expanded(
+                  child: Divider(color: Colors.grey.shade300),
+                ),
+              ],
+            ),
             const SizedBox(height: 28),
 
-            /// CREATE ACCOUNT
             GestureDetector(
               onTap: () =>
                   Navigator.pushNamed(context, "/register"),
@@ -313,7 +344,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// ================= ROLE BUTTON (UI ONLY) =================
   Widget _roleButton(String r) {
     final isSelected = role == r;
 
@@ -348,7 +378,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// ================= MODERN FIELD =================
   Widget _modernField(
       String hint,
       TextEditingController c,
@@ -363,15 +392,32 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       child: TextField(
         controller: c,
-        obscureText: isPass,
+        obscureText: isPass ? _obscure : false,
         decoration: InputDecoration(
           hintText: hint,
           prefixIcon: Icon(icon, color: const Color(0xFF1FA463)),
           border: InputBorder.none,
           contentPadding:
           const EdgeInsets.symmetric(vertical: 18),
+
+          suffixIcon: isPass
+              ? IconButton(
+            icon: Icon(
+              _obscure
+                  ? Icons.visibility
+                  : Icons.visibility_off,
+              color: Colors.grey,
+            ),
+            onPressed: () {
+              setState(() {
+                _obscure = !_obscure;
+              });
+            },
+          )
+              : null,
         ),
       ),
     );
+
   }
 }

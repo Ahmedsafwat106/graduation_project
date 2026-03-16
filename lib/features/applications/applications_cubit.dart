@@ -92,7 +92,6 @@ class ApplicationsCubit extends Cubit<ApplicationsState> {
         status,
       );
 
-      // 🔥 أهم سطر
       await loadApplicantsScreen(jobId);
 
     } catch (e) {

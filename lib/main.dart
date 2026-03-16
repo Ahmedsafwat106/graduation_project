@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:graduation_project/screens/AdvancedFilterScreen.dart';
-import 'package:graduation_project/screens/ChatDetailsScreen.dart';
-import 'package:graduation_project/screens/ChatListScreen.dart';
-import 'package:graduation_project/screens/EditJobScreen..dart';
-import 'package:graduation_project/screens/NotificationScreen.dart';
-import 'package:graduation_project/screens/SavedJobsScreen.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/api_service.dart';
 import 'features/applications/applications_cubit.dart';
 import 'features/auth/AuthCubit.dart';
-
-// Screens
 import 'features/chat/ChatCubit.dart';
 import 'features/cv/cv_cubit.dart';
 import 'features/jobs/jobs_cubit.dart';
@@ -35,23 +28,62 @@ import 'screens/DeveloperDashboardScreen.dart';
 import 'screens/MyApplicationsScreen.dart';
 import 'screens/CompanyApplicantsScreen.dart';
 import 'screens/CompanyJobsScreen.dart';
+import 'screens/AdvancedFilterScreen.dart';
+import 'screens/NotificationScreen.dart';
+import 'screens/ChatListScreen.dart';
+import 'screens/ChatDetailsScreen.dart';
+import 'screens/SavedJobsScreen.dart';
+import 'screens/SearchJobsScreen.dart';
+import 'screens/EditJobScreen..dart';
 
+Future<void> main() async {
 
-void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ حط هنا App ID الحقيقي من OneSignal
-  OneSignal.initialize("98f24ac5-68c3-4427-bcf4-4bf2bd2140d6");
+  OneSignal.initialize("c909710b-0f3f-4b4e-90ad-7248a038d596");
 
   await OneSignal.Notifications.requestPermission(true);
 
-  // 🔥 ده اللي هيطلعلك Player ID الحقيقي
-  OneSignal.User.pushSubscription.addObserver((state) {
-    print("🔥 GLOBAL PLAYER ID => ${state.current.id}");
+  OneSignal.User.pushSubscription.addObserver((state) async {
+    final playerId = state.current.id;
+
+    print("🔥 PLAYER ID GENERATED => $playerId");
+
+    if (playerId == null || playerId.isEmpty) return;
+
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token") ?? "";
+
+    if (token.isEmpty) return;
+
+    try {
+      await ApiService().sendDeviceId(token, playerId);
+      print("✅ DEVICE ID AUTO-SENT => $playerId");
+    } catch (e) {
+      print("❌ AUTO SEND DEVICE ID ERROR => $e");
+    }
   });
+
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'chat_messages',
+    'Chat Messages',
+    importance: Importance.high,
+    playSound: true,
+    sound: RawResourceAndroidNotificationSound('notification_sound'),
+  );
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+      AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
 
   runApp(const DevJobApp());
 }
+
 
 class DevJobApp extends StatelessWidget {
   const DevJobApp({super.key});
@@ -60,40 +92,55 @@ class DevJobApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+
         BlocProvider<AuthCubit>(
           create: (_) => AuthCubit(ApiService()),
         ),
+
         BlocProvider<JobsCubit>(
           create: (_) => JobsCubit(ApiService()),
         ),
+
         BlocProvider<CvCubit>(
           create: (_) => CvCubit(ApiService()),
         ),
+
         BlocProvider<ProfileCubit>(
           create: (_) => ProfileCubit(ApiService()),
         ),
+
         BlocProvider<ApplicationsCubit>(
           create: (_) => ApplicationsCubit(ApiService()),
         ),
+
         BlocProvider(
           create: (_) => ChatCubit(ApiService()),
         ),
+
         BlocProvider(
           create: (_) => NotificationCubit(ApiService()),
         ),
       ],
       child: MaterialApp(
-
         debugShowCheckedModeBanner: false,
+
+        theme: ThemeData(
+          fontFamily: "Poppins",
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: {
+              TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+            },
+          ),
+        ),
+
         title: "DevJob",
+
         initialRoute: "/splash",
 
         onGenerateRoute: (settings) {
           switch (settings.name) {
 
-          // =====================
-          // BASIC FLOW
-          // =====================
             case "/splash":
               return MaterialPageRoute(
                 builder: (_) => const SplashScreen(),
@@ -129,15 +176,16 @@ class DevJobApp extends StatelessWidget {
                 ),
               );
 
-          // =====================
-          // DEVELOPER
-          // =====================
             case "/developer-dashboard":
               return MaterialPageRoute(
                 builder: (_) => const DeveloperDashboardScreen(),
               );
 
-          /// 🔹 لو محتاج تفتح JobList مباشرة
+            case "/company-dashboard":
+              return MaterialPageRoute(
+                builder: (_) => const CompanyDashboardScreen(),
+              );
+
             case "/jobs":
               return MaterialPageRoute(
                 builder: (_) => const JobListScreen(
@@ -161,6 +209,28 @@ class DevJobApp extends StatelessWidget {
                 builder: (_) => EditProfileScreen(data: data),
               );
 
+            case "/edit-company":
+              final data = settings.arguments as Map<String, dynamic>;
+              return MaterialPageRoute(
+                builder: (_) => EditCompanyScreen(data: data),
+              );
+
+            case "/add-job":
+              return MaterialPageRoute(
+                builder: (_) => const AddJobScreen(),
+              );
+
+            case "/company-jobs":
+              return MaterialPageRoute(
+                builder: (_) => const CompanyJobsScreen(),
+              );
+
+            case "/company-applicants":
+              final jobId = settings.arguments as int;
+              return MaterialPageRoute(
+                builder: (_) => CompanyApplicantsScreen(jobId: jobId),
+              );
+
             case "/my-applications":
               return MaterialPageRoute(
                 builder: (_) => const MyApplicationsScreen(),
@@ -170,42 +240,6 @@ class DevJobApp extends StatelessWidget {
               final userId = settings.arguments as int;
               return MaterialPageRoute(
                 builder: (_) => SavedJobsScreen(userId: userId),
-              );
-
-          // =====================
-          // COMPANY
-          // =====================
-            case "/company-dashboard":
-              return MaterialPageRoute(
-                builder: (_) => const CompanyDashboardScreen(),
-              );
-
-            case "/add-job":
-              return MaterialPageRoute(
-                builder: (_) => const AddJobScreen(),
-              );
-
-            case "/edit-company":
-              final data = settings.arguments as Map<String, dynamic>;
-              return MaterialPageRoute(
-                builder: (_) => EditCompanyScreen(data: data),
-              );
-
-            case "/company-applicants":
-              final jobId = settings.arguments as int;
-              return MaterialPageRoute(
-                builder: (_) => CompanyApplicantsScreen(jobId: jobId),
-              );
-
-            case "/company-jobs":
-              return MaterialPageRoute(
-                builder: (_) => const CompanyJobsScreen(),
-              );
-
-            case "/edit-job":
-              final job = settings.arguments as Map;
-              return MaterialPageRoute(
-                builder: (_) => EditJobScreen(job: job),
               );
 
             case "/advanced-filter":
@@ -223,7 +257,10 @@ class DevJobApp extends StatelessWidget {
                 builder: (_) => const ChatListScreen(),
               );
 
-
+            case "/SearchJobsScreen":
+              return MaterialPageRoute(
+                builder: (_) => const SearchJobsScreen(jobs: []),
+              );
 
             case "/chat-details":
               final args = settings.arguments as Map?;
@@ -242,7 +279,20 @@ class DevJobApp extends StatelessWidget {
                   conversationId: conversationId,
                 ),
               );
+
+            case "/edit-job":
+              final job = settings.arguments as Map;
+              return MaterialPageRoute(
+                builder: (_) => EditJobScreen(job: job),
+              );
+            case "/SearchJobsScreen":
+              final jobs = settings.arguments as List? ?? [];
+              return MaterialPageRoute(
+                builder: (_) => SearchJobsScreen(jobs: jobs),
+              );
           }
+
+          return null;
         },
       ),
     );

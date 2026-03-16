@@ -35,11 +35,23 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigateNext() async {
-    await Future.delayed(const Duration(seconds: 4));
+    await Future.delayed(const Duration(seconds: 3));
 
     if (!mounted) return;
 
-    Navigator.pushReplacementNamed(context, '/onboarding');
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token") ?? "";
+    final role = prefs.getString("role") ?? "";
+
+    if (token.isNotEmpty) {
+      if (role == "company") {
+        Navigator.pushReplacementNamed(context, "/company-dashboard");
+      } else {
+        Navigator.pushReplacementNamed(context, "/developer-dashboard");
+      }
+    } else {
+      Navigator.pushReplacementNamed(context, "/onboarding");
+    }
   }
 
   @override
@@ -72,7 +84,6 @@ class _SplashScreenState extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
-                /// ===== GLOW CIRCLE BACKGROUND =====
                 Container(
                   width: 170,
                   height: 170,
@@ -113,7 +124,6 @@ class _SplashScreenState extends State<SplashScreen>
 
                 const SizedBox(height: 40),
 
-                /// ===== APP NAME =====
                 const Text(
                   "DevJob",
                   style: TextStyle(
@@ -126,7 +136,6 @@ class _SplashScreenState extends State<SplashScreen>
 
                 const SizedBox(height: 12),
 
-                /// ===== TAGLINE =====
                 const Text(
                   "Find • Match • Grow",
                   style: TextStyle(
@@ -139,7 +148,6 @@ class _SplashScreenState extends State<SplashScreen>
 
                 const SizedBox(height: 50),
 
-                /// ===== LOADING INDICATOR (PREMIUM TOUCH) =====
                 SizedBox(
                   width: 26,
                   height: 26,
@@ -147,6 +155,15 @@ class _SplashScreenState extends State<SplashScreen>
                     strokeWidth: 3,
                     valueColor:
                     AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                const Text(
+                  "Version 1.0",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
                   ),
                 ),
               ],

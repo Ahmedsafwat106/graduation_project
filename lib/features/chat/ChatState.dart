@@ -43,3 +43,18 @@ class ChatMessagesLoaded extends ChatState {
   @override
   List<Object?> get props => [messages];
 }
+class ChatMessageDeleted extends ChatState {
+  final int messageId;
+  ChatMessageDeleted(this.messageId);
+
+  @override
+  List<Object?> get props => [messageId];
+}
+class MessageCountUpdated extends ChatState {
+  final int userId;
+  final int newCount;
+  MessageCountUpdated({required this.userId, required this.newCount});
+
+  @override
+  List<Object?> get props => [userId, newCount];
+}

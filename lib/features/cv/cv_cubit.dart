@@ -15,7 +15,7 @@ class CvCubit extends Cubit<CvState> {
 
       await api.uploadCv(filePath, token);
 
-      // 👇 من غير CvSuccess
+
       await loadCvs();
 
     } catch (e) {
@@ -32,7 +32,6 @@ class CvCubit extends Cubit<CvState> {
 
       final cvs = await api.getAllCvs(token);
 
-      // 👇 هنا تحط الـ print
       print("CV BODY RAW => $cvs");
 
       emit(CvsLoaded(cvs));
@@ -51,7 +50,6 @@ class CvCubit extends Cubit<CvState> {
 
       await api.deleteCv(token, cvId);
 
-      // 👇 reload بس
       await loadCvs();
 
     } catch (e) {

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/notification/NotificationState.dart';
@@ -29,7 +30,6 @@ class _NotificationScreenState
         child: Column(
           children: [
 
-            /// ================= MODERN GRADIENT HEADER =================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
@@ -48,36 +48,48 @@ class _NotificationScreenState
                 ),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
+
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+
+                      const SizedBox(width: 12),
+
+                      const Text(
+                        "Notifications",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    "Notifications",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      "Mark all",
+                      style: TextStyle(color: Colors.white),
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
 
             const SizedBox(height: 14),
 
-            /// ================= NOTIFICATION LIST =================
             Expanded(
               child: BlocBuilder<
                   NotificationCubit,
@@ -126,7 +138,6 @@ class _NotificationScreenState
 
                         final item = notifications[index];
 
-                        /// Wrapper Card (UI فقط بدون لمس NotificationCard)
                         return Container(
                           margin:
                           const EdgeInsets.only(bottom: 14),

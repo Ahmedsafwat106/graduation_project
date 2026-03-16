@@ -41,7 +41,7 @@ class _EditProfileScreenState
       backgroundColor: const Color(0xFFF4F7F6),
       body: BlocConsumer<ProfileCubit, ProfileState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
+          if (state is ProfileSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text("Profile Updated ✓"),
@@ -54,7 +54,6 @@ class _EditProfileScreenState
           return Column(
             children: [
 
-              /// ================= MODERN GRADIENT HEADER =================
               Container(
                 width: double.infinity,
                 padding:
@@ -119,7 +118,6 @@ class _EditProfileScreenState
                 ),
               ),
 
-              /// ================= FORM =================
               Expanded(
                 child: SingleChildScrollView(
                   padding:
@@ -149,8 +147,6 @@ class _EditProfileScreenState
                       ),
 
                       const SizedBox(height: 30),
-
-                      /// ================= SAVE BUTTON (BRAND GRADIENT) =================
                       state is AuthLoading
                           ? const CircularProgressIndicator()
                           : SizedBox(
@@ -225,7 +221,6 @@ class _EditProfileScreenState
     );
   }
 
-  /// ================= MODERN INPUT FIELD =================
   Widget _modernField(
       String label,
       TextEditingController c,

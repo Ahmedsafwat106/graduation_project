@@ -43,7 +43,6 @@ class _AdvancedFilterScreenState
           return Column(
             children: [
 
-              /// ================= MODERN HEADER (نفس كل الشاشات) =================
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
@@ -100,7 +99,6 @@ class _AdvancedFilterScreenState
                 ),
               ),
 
-              /// ================= BODY =================
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
@@ -108,7 +106,6 @@ class _AdvancedFilterScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
 
-                      /// ============ JOB TYPE CARD ============
                       _sectionCard(
                         title: "Job Type",
                         child: Column(
@@ -121,7 +118,6 @@ class _AdvancedFilterScreenState
 
                       const SizedBox(height: 16),
 
-                      /// ============ EXPERIENCE LEVEL ============
                       _sectionCard(
                         title: "Experience Level",
                         child: Container(
@@ -156,7 +152,6 @@ class _AdvancedFilterScreenState
 
                       const SizedBox(height: 16),
 
-                      /// ============ SKILLS ============
                       _sectionCard(
                         title: "Skills",
                         child: Wrap(
@@ -199,7 +194,6 @@ class _AdvancedFilterScreenState
 
                       const SizedBox(height: 16),
 
-                      /// ============ SALARY ============
                       _sectionCard(
                         title: "Minimum Salary",
                         child: Column(
@@ -243,7 +237,6 @@ class _AdvancedFilterScreenState
 
                       const SizedBox(height: 30),
 
-                      /// ============ APPLY BUTTON (GRADIENT) ============
                       SizedBox(
                         width: double.infinity,
                         height: 55,
@@ -273,13 +266,22 @@ class _AdvancedFilterScreenState
                                 BorderRadius.circular(18),
                               ),
                             ),
-                            onPressed: () {
-                              context.read<JobsCubit>().savePreferences(
+                            onPressed: () async {
+
+                              if (selectedJobTypes.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Please select at least one job type")),
+                                );
+                                return;
+                              }
+
+                              await context.read<JobsCubit>().savePreferences(
                                 selectedJobTypes,
                                 selectedLevel,
                                 selectedSkills,
                                 minimumSalary.toInt(),
                               );
+
                               Navigator.pop(context);
                             },
                             child: const Text(
@@ -304,7 +306,6 @@ class _AdvancedFilterScreenState
     );
   }
 
-  /// كارد سيكشن مودرن
   Widget _sectionCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
@@ -338,7 +339,6 @@ class _AdvancedFilterScreenState
     );
   }
 
-  /// Checkbox مودرن متناسق مع البراند
   Widget _modernCheckbox(String value) {
     final isSelected = selectedJobTypes.contains(value);
 

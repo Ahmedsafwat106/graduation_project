@@ -40,16 +40,13 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
             );
           }
 
-          /// ==========================================
-          /// ✅ لو عنده CV بالفعل
-          /// ==========================================
           if (state is CvsLoaded && state.cvs.isNotEmpty) {
             final cv = state.cvs.first;
 
             return Column(
               children: [
 
-                /// ===== GRADIENT HEADER =====
+                /// HEADER
                 Container(
                   width: double.infinity,
                   padding:
@@ -60,8 +57,6 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                         Color(0xFF1FA463),
                         Color(0xFF159957),
                       ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(35),
@@ -126,13 +121,12 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                               style: TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E1E1E),
                               ),
                             ),
 
                             const SizedBox(height: 30),
 
-                            /// Go To Dashboard (Gradient Button)
+
                             SizedBox(
                               width: double.infinity,
                               height: 55,
@@ -171,15 +165,15 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
 
                             const SizedBox(height: 14),
 
-                            /// Delete CV (Soft Danger Button)
                             SizedBox(
                               width: double.infinity,
                               height: 55,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red.shade500,
+                                  backgroundColor: Colors.red,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
+                                    borderRadius:
+                                    BorderRadius.circular(18),
                                   ),
                                 ),
                                 onPressed: () {
@@ -191,7 +185,6 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                                   "Delete CV",
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
@@ -206,13 +199,9 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
             );
           }
 
-          /// ==========================================
-          /// ✅ لو مفيش CV → شاشة الرفع
-          /// ==========================================
           return Column(
             children: [
 
-              /// ===== GRADIENT HEADER =====
               Container(
                 width: double.infinity,
                 padding:
@@ -223,8 +212,6 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                       Color(0xFF1FA463),
                       Color(0xFF159957),
                     ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(35),
@@ -243,11 +230,11 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
 
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 24, 22, 30),
+                  padding:
+                  const EdgeInsets.fromLTRB(22, 24, 22, 30),
                   child: Column(
                     children: [
 
-                      /// Upload Card (Modern)
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(28),
@@ -256,7 +243,8 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color:
+                              Colors.black.withOpacity(0.05),
                               blurRadius: 18,
                               offset: const Offset(0, 8),
                             ),
@@ -264,13 +252,15 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                         ),
                         child: Column(
                           children: [
+
                             Container(
                               width: 80,
                               height: 80,
                               decoration: BoxDecoration(
                                 color: const Color(0xFF1FA463)
                                     .withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(22),
+                                borderRadius:
+                                BorderRadius.circular(22),
                               ),
                               child: const Icon(
                                 Icons.upload_file_rounded,
@@ -278,7 +268,9 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                                 color: Color(0xFF1FA463),
                               ),
                             ),
+
                             const SizedBox(height: 18),
+
                             Text(
                               selectedFile ?? "No file selected",
                               textAlign: TextAlign.center,
@@ -289,9 +281,9 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                                     : Colors.black87,
                               ),
                             ),
+
                             const SizedBox(height: 20),
 
-                            /// Choose PDF Button (Soft)
                             ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
@@ -299,8 +291,10 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                                 foregroundColor:
                                 const Color(0xFF1FA463),
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 14),
+                                padding:
+                                const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 14),
                                 shape: RoundedRectangleBorder(
                                   borderRadius:
                                   BorderRadius.circular(18),
@@ -310,13 +304,15 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                               label: const Text("Choose PDF"),
                               onPressed: () async {
                                 final result =
-                                await FilePicker.platform.pickFiles(
+                                await FilePicker.platform
+                                    .pickFiles(
                                   type: FileType.custom,
                                   allowedExtensions: ['pdf'],
                                 );
 
                                 if (result != null &&
-                                    result.files.single.path != null) {
+                                    result.files.single.path !=
+                                        null) {
                                   setState(() {
                                     selectedFile =
                                     result.files.single.path!;
@@ -330,7 +326,6 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
 
                       const Spacer(),
 
-                      /// Upload Button (Brand Gradient)
                       SizedBox(
                         width: double.infinity,
                         height: 60,
@@ -342,11 +337,12 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                                 Color(0xFF159957),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius:
+                            BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color:
-                                Colors.green.withOpacity(0.25),
+                                color: Colors.green
+                                    .withOpacity(0.25),
                                 blurRadius: 16,
                                 offset: const Offset(0, 8),
                               ),
@@ -354,8 +350,10 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                           ),
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
+                              backgroundColor:
+                              Colors.transparent,
+                              shadowColor:
+                              Colors.transparent,
                             ),
                             onPressed: () {
                               if (selectedFile == null) {
@@ -378,7 +376,8 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                FontWeight.bold,
                               ),
                             ),
                           ),

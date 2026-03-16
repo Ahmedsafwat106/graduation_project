@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import '../core/api_service.dart';
 import 'LoginScreen.dart';
@@ -25,7 +26,7 @@ class ResetPasswordScreen extends StatelessWidget {
           child: Column(
             children: [
 
-              /// ================= GRADIENT HEADER =================
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(24, 70, 24, 45),
@@ -68,7 +69,6 @@ class ResetPasswordScreen extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              /// ================= RESET CARD =================
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Container(
@@ -134,7 +134,6 @@ class ResetPasswordScreen extends StatelessWidget {
 
                       const SizedBox(height: 28),
 
-                      /// ================= RESET BUTTON (GRADIENT BRAND) =================
                       SizedBox(
                         width: double.infinity,
                         height: 58,
@@ -216,7 +215,6 @@ class ResetPasswordScreen extends StatelessWidget {
 
                       const SizedBox(height: 18),
 
-                      /// BACK TO LOGIN (UX)
                       TextButton(
                         onPressed: () {
                           Navigator.pushReplacement(
@@ -247,7 +245,6 @@ class ResetPasswordScreen extends StatelessWidget {
     );
   }
 
-  /// ================= MODERN FIELD (UI ONLY) =================
   Widget _modernField(
       String hint,
       TextEditingController controller,

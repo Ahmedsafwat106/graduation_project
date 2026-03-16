@@ -17,7 +17,8 @@ class ChatDetailsScreen extends StatefulWidget {
 }
 
 class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
-  int? myId;
+
+  String? myId;
 
   final TextEditingController _messageController =
   TextEditingController();
@@ -33,10 +34,12 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
         .loadChatMessages(widget.conversationId);
   }
 
+
+
   Future<void> _loadMyId() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      myId = prefs.getInt("userId");
+      myId = prefs.getString("appUser");
     });
   }
 
@@ -62,91 +65,179 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
       );
     }
   }
-
-  /// ================= MODERN MESSAGE BUBBLE =================
   Widget _buildMessageItem(Map msg) {
     final text = msg["message"] ?? "";
     final date = msg["dateTime"] ?? "";
     final senderId = msg["senderId"];
-    final isMe = senderId == myId;
+    final messageId = msg["messageId"];
+    final isMe = senderId != null && senderId.toString() == myId;
 
     return Align(
-      alignment:
-      isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin:
-        const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(
-            horizontal: 16, vertical: 12),
-        constraints: BoxConstraints(
-          maxWidth:
-          MediaQuery.of(context).size.width * 0.75,
-        ),
-        decoration: BoxDecoration(
-          gradient: isMe
-              ? const LinearGradient(
-            colors: [
-              Color(0xFF1FA463),
-              Color(0xFF159957),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          )
-              : null,
-          color: isMe ? null : Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(20),
-            topRight: const Radius.circular(20),
-            bottomLeft: isMe
-                ? const Radius.circular(20)
-                : const Radius.circular(4),
-            bottomRight: isMe
-                ? const Radius.circular(4)
-                : const Radius.circular(20),
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: GestureDetector(
+
+        onLongPress: isMe
+            ? () {
+          showModalBottomSheet(
+            context: context,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
+            ),
+            builder: (_) => Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(
+                      Icons.edit_outlined,
+                      color: Color(0xFF1FA463),
+                    ),
+                    title: const Text("Edit Message"),
+                    onTap: () {
+                      Navigator.pop(context);
+                      final editController = TextEditingController(
+                        text: text.toString(),
+                      );
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text("Edit Message"),
+                          content: TextField(
+                            controller: editController,
+                            autofocus: true,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                if (messageId != null &&
+                                    editController.text.trim().isNotEmpty) {
+                                  context.read<ChatCubit>().updateMessage(
+                                    messageId,
+                                    widget.conversationId,
+                                    editController.text.trim(),
+                                  );
+                                }
+                              },
+                              child: const Text(
+                                "Save",
+                                style: TextStyle(
+                                  color: Color(0xFF1FA463),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+
+                  // ✅ Delete
+                  ListTile(
+                    leading: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.red,
+                    ),
+                    title: const Text(
+                      "Delete Message",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      if (messageId != null) {
+                        context.read<ChatCubit>().deleteMessage(
+                          messageId,
+                          widget.conversationId,
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+            : null,
+
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(
+              horizontal: 16, vertical: 12),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.75,
           ),
-          boxShadow: [
-            BoxShadow(
-              color:
-              Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+          decoration: BoxDecoration(
+            gradient: isMe
+                ? const LinearGradient(
+              colors: [
+                Color(0xFF1FA463),
+                Color(0xFF159957),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
+                : null,
+            color: isMe ? null : Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(20),
+              topRight: const Radius.circular(20),
+              bottomLeft: isMe
+                  ? const Radius.circular(20)
+                  : const Radius.circular(4),
+              bottomRight: isMe
+                  ? const Radius.circular(4)
+                  : const Radius.circular(20),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: isMe
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
-          children: [
-            Text(
-              text.toString(),
-              style: TextStyle(
-                fontSize: 15,
-                height: 1.4,
-                color:
-                isMe ? Colors.white : Colors.black87,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              date.toString().length >= 16
-                  ? date.toString()
-                  .substring(11, 16)
-                  : "",
-              style: TextStyle(
-                fontSize: 11,
-                color: isMe
-                    ? Colors.white.withOpacity(0.8)
-                    : Colors.grey,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: isMe
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            children: [
+              Text(
+                text.toString(),
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.4,
+                  color: isMe ? Colors.white : Colors.black87,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 6),
+              Text(
+                date.toString().length >= 16
+                    ? date.toString().substring(11, 16)
+                    : "",
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isMe
+                      ? Colors.white.withOpacity(0.8)
+                      : Colors.grey,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// ================= MODERN INPUT BAR =================
   Widget _buildInputField() {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 16),
@@ -206,14 +297,25 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
     );
   }
 
-  /// ================= CHAT BODY =================
   Widget _buildBody() {
-    return BlocBuilder<ChatCubit, ChatState>(
+    return BlocConsumer<ChatCubit, ChatState>(
+      listener: (context, state) {
+        // ✅ scroll لأسفل أوتوماتيك لما تيجي رسالة جديدة
+        if (state is ChatMessagesLoaded) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (_scrollController.hasClients) {
+              _scrollController.animateTo(
+                _scrollController.position.maxScrollExtent,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              );
+            }
+          });
+        }
+      },
       builder: (context, state) {
-
         if (state is ChatLoading) {
-          return const Center(
-              child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (state is ChatMessagesLoaded) {
@@ -223,22 +325,17 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
             return const Center(
               child: Text(
                 "No messages yet",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
             );
           }
 
           return ListView.builder(
             controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(
-                16, 12, 16, 10),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
             itemCount: messages.length,
             itemBuilder: (context, index) {
-              final msg = messages[index];
-              return _buildMessageItem(msg);
+              return _buildMessageItem(messages[index]);
             },
           );
         }
@@ -247,8 +344,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
           return Center(
             child: Text(
               state.message,
-              style:
-              const TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
             ),
           );
         }
@@ -258,7 +354,6 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
     );
   }
 
-  /// ================= MAIN BUILD (MODERN HEADER) =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -266,7 +361,6 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
       body: Column(
         children: [
 
-          /// Gradient Chat Header (موحد مع المشروع)
           Container(
             width: double.infinity,
             padding:

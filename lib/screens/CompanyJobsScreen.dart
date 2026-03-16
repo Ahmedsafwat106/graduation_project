@@ -24,7 +24,6 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
       body: Column(
         children: [
 
-          /// ================= MODERN GRADIENT HEADER =================
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
@@ -84,7 +83,6 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
 
           const SizedBox(height: 10),
 
-          /// ================= JOBS LIST =================
           Expanded(
             child: BlocBuilder<JobsCubit, JobsState>(
               builder: (context, state) {
@@ -139,7 +137,6 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
                           CrossAxisAlignment.start,
                           children: [
 
-                            /// TITLE + APPLICANTS BADGE
                             Row(
                               mainAxisAlignment:
                               MainAxisAlignment
@@ -190,7 +187,6 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
 
                             const SizedBox(height: 8),
 
-                            /// LOCATION
                             Row(
                               children: [
                                 const Icon(
@@ -216,11 +212,9 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
 
                             const SizedBox(height: 16),
 
-                            /// ACTION BUTTONS (Modern)
                             Row(
                               children: [
 
-                                /// Applicants
                                 _actionButton(
                                   icon: Icons.people_outline,
                                   color: Colors.blue,
@@ -252,7 +246,6 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
 
                                 const SizedBox(width: 10),
 
-                                /// Delete
                                 _actionButton(
                                   icon: Icons.delete_outline,
                                   color: Colors.red,
@@ -285,7 +278,6 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
     );
   }
 
-  /// Modern Action Button (UI Only)
   Widget _actionButton({
     required IconData icon,
     required Color color,

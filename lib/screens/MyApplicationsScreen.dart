@@ -57,7 +57,6 @@ class _MyApplicationsScreenState
               return Column(
                 children: [
 
-                  /// ================= MODERN GRADIENT HEADER =================
                   Container(
                     padding:
                     const EdgeInsets.fromLTRB(20, 20, 20, 30),
@@ -80,42 +79,53 @@ class _MyApplicationsScreenState
                       CrossAxisAlignment.start,
                       children: [
 
-                        /// Top Bar
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white
-                                    .withOpacity(0.2),
-                                borderRadius:
-                                BorderRadius.circular(12),
-                              ),
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.arrow_back,
-                                  color: Colors.white,
+
+                            Row(
+                              children: [
+
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
                                 ),
-                                onPressed: () =>
-                                    Navigator.pop(context),
-                              ),
+
+                                const SizedBox(width: 10),
+
+                                const Text(
+                                  "Application History",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              "Application History",
-                              style: TextStyle(
+
+                            IconButton(
+                              icon: const Icon(
+                                Icons.filter_list,
                                 color: Colors.white,
-                                fontSize: 22,
-                                fontWeight:
-                                FontWeight.bold,
                               ),
+                              onPressed: () {},
                             ),
                           ],
                         ),
 
                         const SizedBox(height: 20),
 
-                        /// ================= COUNTS CARD (MODERN) =================
-                        Container(
+            InkWell(
+            borderRadius: BorderRadius.circular(24),
+            onTap: () {},
+            child: Container(
                           padding:
                           const EdgeInsets.symmetric(
                               vertical: 16,
@@ -157,13 +167,13 @@ class _MyApplicationsScreenState
                             ],
                           ),
                         ),
+            )
                       ],
                     ),
                   ),
 
                   const SizedBox(height: 12),
 
-                  /// ================= APPLICATION LIST =================
                   Expanded(
                     child: history.isEmpty
                         ? const Center(
@@ -202,7 +212,6 @@ class _MyApplicationsScreenState
     );
   }
 
-  /// ================= COUNT ITEM (MODERN) =================
   Widget _countItem(
       int number,
       String label,
@@ -230,11 +239,9 @@ class _MyApplicationsScreenState
     );
   }
 
-  /// ================= MODERN APPLICATION CARD =================
   Widget _modernApplicationCard(Map app) {
     final rawStatus = app["jobStatus"] ?? "New";
 
-    /// نفس اللوجيك القديم بدون تغيير
     final status =
     rawStatus == "New" ? "Waiting" : rawStatus;
 
@@ -249,10 +256,10 @@ class _MyApplicationsScreenState
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color:
-            Colors.black.withOpacity(0.05),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 25,
+            spreadRadius: 2,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -261,7 +268,6 @@ class _MyApplicationsScreenState
         CrossAxisAlignment.start,
         children: [
 
-          /// JOB TITLE + STATUS BADGE
           Row(
             crossAxisAlignment:
             CrossAxisAlignment.start,
@@ -327,7 +333,6 @@ class _MyApplicationsScreenState
           const Divider(height: 1),
           const SizedBox(height: 14),
 
-          /// APPLY DATE ROW
           Row(
             children: [
               const Icon(

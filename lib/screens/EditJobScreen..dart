@@ -65,8 +65,6 @@ class _EditJobScreenState extends State<EditJobScreen> {
         builder: (context, state) {
           return Column(
             children: [
-
-              /// ================= MODERN GRADIENT HEADER =================
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
@@ -124,7 +122,6 @@ class _EditJobScreenState extends State<EditJobScreen> {
                 ),
               ),
 
-              /// ================= FORM BODY =================
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
@@ -149,7 +146,6 @@ class _EditJobScreenState extends State<EditJobScreen> {
 
                       const SizedBox(height: 30),
 
-                      /// ================= SAVE BUTTON (BRAND GRADIENT) =================
                       state is AuthLoading
                           ? const CircularProgressIndicator()
                           : SizedBox(
@@ -220,7 +216,6 @@ class _EditJobScreenState extends State<EditJobScreen> {
     );
   }
 
-  /// ================= MODERN INPUT FIELD =================
   Widget _modernField(String label, TextEditingController c,
       IconData icon,
       {int max = 1}) {

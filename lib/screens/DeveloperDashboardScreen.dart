@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/api_service.dart';
+import '../features/chat/ChatCubit.dart';
+import '../features/chat/ChatState.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
 import 'JobListScreen.dart';
@@ -17,10 +21,28 @@ class DeveloperDashboardScreen extends StatefulWidget {
 class _DeveloperDashboardScreenState
     extends State<DeveloperDashboardScreen> {
 
+  Map<String, dynamic> _counts = {
+    "applied": 0,
+    "messages": 0,
+    "interview": 0,
+  };
+
   @override
   void initState() {
     super.initState();
     context.read<JobsCubit>().loadDeveloperDashboard();
+    print("✅ CALLED loadDeveloperDashboard");
+    context.read<JobsCubit>().connectJobHub();
+
+    context.read<ChatCubit>().stream.listen((state) {
+      if (state is MessageCountUpdated) {
+        if (mounted) {
+          setState(() {
+            _counts["messages"] = state.newCount;
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -29,134 +51,207 @@ class _DeveloperDashboardScreenState
       length: 2,
       child: Scaffold(
         backgroundColor: const Color(0xFFF4F7F6),
+
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(color: Colors.black12, blurRadius: 10)
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _bottomIcon(Icons.person, () async {
+                final prefs = await SharedPreferences.getInstance();
+                final token = prefs.getString("token") ?? "";
+                if (token.isEmpty) return;
+
+                final api = ApiService();
+                final data = await api.getUserData(token);
+
+                Navigator.pushNamed(
+                  context,
+                  "/edit-profile",
+                  arguments: data,
+                );
+              }),
+              _bottomIcon(Icons.chat_bubble_outline,
+                      () => Navigator.pushNamed(context, "/chats")),
+              _bottomIcon(Icons.favorite_border, () async {
+                final prefs = await SharedPreferences.getInstance();
+                final userId = prefs.getInt("userId");
+                if (userId != null) {
+                  Navigator.pushNamed(context, "/saved-jobs",
+                      arguments: userId);
+                }
+              }),
+              _bottomIcon(Icons.history,
+                      () => Navigator.pushNamed(context, "/my-applications")),
+              _bottomIcon(Icons.account_circle_outlined, () {
+                _showAccountSheet(context);
+              }),
+            ],
+          ),
+        ),
+
         body: SafeArea(
           child: Column(
             children: [
 
-              /// ================= HEADER =================
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 45, 20, 25),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF1FA463),
+                      Color(0xFF159957),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(35),
+                    bottomRight: Radius.circular(35),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    Row(
+                      children: [
+
+                        const CircleAvatar(
+                          radius: 26,
+                          backgroundImage: AssetImage("assets/images/icon.png"),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        const Expanded(
+                          child: Text(
+                            "Welcome back 👋",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                        IconButton(
+                          icon: const Icon(
+                            Icons.notifications_none,
+                            color: Colors.white,
+                            size: 26,
+                          ),
+                          onPressed: () =>
+                              Navigator.pushNamed(context, "/notifications"),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    GestureDetector(
+                      onTap: () {
+                        final jobsState = context.read<JobsCubit>().state;
+                        List jobs = [];
+                        if (jobsState is DeveloperDashboardLoaded) {
+                          jobs = jobsState.jobs;
+                        } else if (jobsState is JobsLoaded) {
+                          jobs = jobsState.jobs;
+                        }
+                        Navigator.pushNamed(
+                          context,
+                          "/SearchJobsScreen",
+                          arguments: jobs,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.search, color: Colors.grey),
+                            SizedBox(width: 10),
+                            Text(
+                              "Search jobs, companies...",
+                              style: TextStyle(color: Colors.grey, fontSize: 15),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               BlocBuilder<JobsCubit, JobsState>(
                 builder: (context, state) {
 
-                  Map<String, dynamic> counts = {
-                    "applied": 0,
-                    "messages": 0,
-                    "interview": 0,
-                  };
-
                   if (state is DeveloperDashboardLoaded) {
-                    counts = state.counts;
+                    _counts = Map<String, dynamic>.from(state.counts);
+                  }
+                  if (state is DeveloperApplyCountUpdated) {
+                    _counts = Map<String, dynamic>.from(_counts);
+                    _counts["applied"] = state.applyCount;
+                  }
+                  if (state is StatusUpdatedForDeveloper) {
+                    _counts = Map<String, dynamic>.from(_counts);
+                    _counts["interview"] = state.countInterview;
                   }
 
-                  return Container(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF1FA463), Color(0xFF159957)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(35),
-                        bottomRight: Radius.circular(35),
-                      ),
-                    ),
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
 
-                        /// TOP BAR
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-
-                            /// ✅ Welcome Text (مش Expanded)
-                            const Text(
-                              "Welcome back 👋",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-
-                            const Spacer(),
-
-                            /// ✅ Icons تاخد المساحة المتبقية
-                            Expanded(
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-
-                                    _iconButton(Icons.person, () async {
-                                      final prefs = await SharedPreferences.getInstance();
-                                      final token = prefs.getString("token") ?? "";
-                                      if (token.isEmpty) return;
-
-                                      final api = ApiService();
-                                      final data = await api.getUserData(token);
-
-                                      Navigator.pushNamed(
-                                        context,
-                                        "/edit-profile",
-                                        arguments: data,
-                                      );
-                                    }),
-
-                                    _iconButton(Icons.chat_bubble_outline, () {
-                                      Navigator.pushNamed(context, "/chats");
-                                    }),
-
-                                    _iconButton(Icons.notifications_none, () {
-                                      Navigator.pushNamed(context, "/notifications");
-                                    }),
-
-                                    _iconButton(Icons.favorite_border, () async {
-                                      final prefs = await SharedPreferences.getInstance();
-                                      final userId = prefs.getInt("userId");
-
-                                      if (userId != null) {
-                                        Navigator.pushNamed(
-                                          context,
-                                          "/saved-jobs",
-                                          arguments: userId,
-                                        );
-                                      }
-                                    }),
-
-                                    _iconButton(Icons.history, () {
-                                      Navigator.pushNamed(context, "/my-applications");
-                                    }),
-
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 30),
-
-                        /// COUNTS CARDS
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _modernCountCard(counts["applied"] ?? 0, "Applied"),
-                            _modernCountCard(counts["messages"] ?? 0, "Messages"),
-                            _modernCountCard(counts["interview"] ?? 0, "Interviews"),
+                            _modernCountCard(_counts["applied"] ?? 0, "Applied"),
+                            _modernCountCard(_counts["messages"] ?? 0, "Messages"),
+                            _modernCountCard(_counts["interview"] ?? 0, "Interviews"),
                           ],
                         ),
 
-                        const SizedBox(height: 25),
+                        const SizedBox(height: 18),
 
-                        const TabBar(
-                          indicatorColor: Colors.white,
-                          labelStyle: TextStyle(fontWeight: FontWeight.bold),
-                          tabs: [
-                            Tab(text: "All Jobs"),
-                            Tab(text: "Recommended"),
-                          ],
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Explore Opportunities",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Color(0xFF1E1E1E),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: const TabBar(
+                            indicatorColor: Color(0xFF1FA463),
+                            labelColor: Color(0xFF1FA463),
+                            unselectedLabelColor: Colors.grey,
+                            tabs: [
+                              Tab(text: "All Jobs"),
+                              Tab(text: "Recommended"),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -164,7 +259,6 @@ class _DeveloperDashboardScreenState
                 },
               ),
 
-              /// ================= TAB VIEW =================
               const Expanded(
                 child: TabBarView(
                   children: [
@@ -182,8 +276,8 @@ class _DeveloperDashboardScreenState
 
   Widget _modernCountCard(int number, String label) {
     return Container(
-      width: 100,
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      width: 90,
+      padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -200,34 +294,193 @@ class _DeveloperDashboardScreenState
           Text(
             number.toString(),
             style: const TextStyle(
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: Color(0xFF1FA463),
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.grey,
-            ),
-          ),
+          const SizedBox(height: 4),
+          Text(label,
+              style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),
     );
   }
 
-  Widget _iconButton(IconData icon, VoidCallback onTap) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
+  Widget _bottomIcon(IconData icon, VoidCallback onTap) {
+    return IconButton(
+      icon: Icon(icon, color: const Color(0xFF1FA463), size: 26),
+      onPressed: onTap,
+    );
+  }
+
+  void _showAccountSheet(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> accounts =
+        prefs.getStringList("saved_accounts") ?? [];
+
+    final currentToken = prefs.getString("token") ?? "";
+
+    String currentEmail = "";
+    for (final a in accounts) {
+      try {
+        final decoded = jsonDecode(a);
+        if (decoded["token"] == currentToken) {
+          currentEmail = decoded["email"];
+          break;
+        }
+      } catch (_) {}
+    }
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white, size: 20),
-        onPressed: onTap,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Accounts",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            ...accounts.map((a) {
+              final acc = jsonDecode(a);
+              final isActive = acc["email"] == currentEmail;
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: acc["role"] == "company"
+                      ? Colors.blue.withOpacity(0.15)
+                      : const Color(0xFF1FA463).withOpacity(0.15),
+                  child: Icon(
+                    acc["role"] == "company"
+                        ? Icons.business
+                        : Icons.person,
+                    color: acc["role"] == "company"
+                        ? Colors.blue
+                        : const Color(0xFF1FA463),
+                  ),
+                ),
+                title: Text(
+                  acc["name"] ?? acc["email"],
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                    acc["role"] == "company" ? "Company" : "Developer"),
+                trailing: isActive
+                    ? const Icon(Icons.check_circle,
+                    color: Color(0xFF1FA463))
+                    : null,
+                onTap: () async {
+                  Navigator.pop(context);
+                  await prefs.setString("token", acc["token"]);
+                  await prefs.setString("role", acc["role"]);
+                  await prefs.setString("userName", acc["name"] ?? "");
+                  await prefs.setString("appUser", acc["appUser"] ?? "");
+                  if (acc["userId"] != null) {
+                    await prefs.setInt("userId", acc["userId"]);
+                  }
+                  if (context.mounted) {
+                    if (acc["role"] == "company") {
+                      Navigator.pushReplacementNamed(
+                          context, "/company-dashboard");
+                    } else {
+                      Navigator.pushReplacementNamed(
+                          context, "/developer-dashboard");
+                    }
+                  }
+                },
+              );
+            }).toList(),
+
+            const Divider(height: 24),
+
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1FA463).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.add, color: Color(0xFF1FA463)),
+              ),
+              title: const Text("Add Account",
+                  style: TextStyle(fontWeight: FontWeight.w600)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, "/login");
+              },
+            ),
+
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.logout, color: Colors.red),
+              ),
+              title: const Text("Logout",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, color: Colors.red)),
+              onTap: () async {
+                Navigator.pop(context);
+                accounts.removeWhere((a) {
+                  try {
+                    return jsonDecode(a)["email"] == currentEmail;
+                  } catch (_) {
+                    return false;
+                  }
+                });
+                await prefs.setStringList("saved_accounts", accounts);
+
+                if (accounts.isNotEmpty) {
+                  final nextAcc = jsonDecode(accounts.last);
+                  await prefs.setString("token", nextAcc["token"]);
+                  await prefs.setString("role", nextAcc["role"]);
+                  await prefs.setString("userName", nextAcc["name"] ?? "");
+                  if (nextAcc["userId"] != null) {
+                    await prefs.setInt("userId", nextAcc["userId"]);
+                  }
+                  if (context.mounted) {
+                    if (nextAcc["role"] == "company") {
+                      Navigator.pushReplacementNamed(
+                          context, "/company-dashboard");
+                    } else {
+                      Navigator.pushReplacementNamed(
+                          context, "/developer-dashboard");
+                    }
+                  }
+                } else {
+                  await prefs.clear();
+                  if (context.mounted) {
+                    Navigator.pushReplacementNamed(context, "/login");
+                  }
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }

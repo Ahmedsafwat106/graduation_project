@@ -18,7 +18,6 @@ class ForgotPasswordScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 40),
 
-              /// ===== LOGO + TITLE =====
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
@@ -56,7 +55,6 @@ class ForgotPasswordScreen extends StatelessWidget {
 
               const SizedBox(height: 35),
 
-              /// ===== MAIN CARD =====
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -95,7 +93,6 @@ class ForgotPasswordScreen extends StatelessWidget {
 
                     const SizedBox(height: 25),
 
-                    /// ===== EMAIL FIELD (PREMIUM STYLE) =====
                     Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFFF3F6FA),
@@ -119,8 +116,6 @@ class ForgotPasswordScreen extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 30),
-
-                    /// ===== SEND BUTTON (GRADIENT + SHADOW) =====
                     GestureDetector(
                       onTap: () async {
                         try {
@@ -179,7 +174,6 @@ class ForgotPasswordScreen extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
-                    /// ===== BACK TO LOGIN (UX TOUCH) =====
                     Center(
                       child: TextButton(
                         onPressed: () => Navigator.pop(context),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,14 +17,27 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final result = await api.login(email, password);
 
-      final token = result["token"] ??
-          result["Token"] ??
-          result["accessToken"] ??
-          result["jwt"] ??
-          "";
+      print("LOGIN RESPONSE => $result");
+
+      String token = "";
+
+      if (result["token"] != null) {
+        token = result["token"];
+      } else if (result["Token"] != null) {
+        token = result["Token"];
+      } else if (result["accessToken"] != null) {
+        token = result["accessToken"];
+      } else if (result["jwt"] != null) {
+        token = result["jwt"];
+      } else if (result["data"] != null &&
+          result["data"]["token"] != null) {
+        token = result["data"]["token"];
+      }
+
+      print("ACTUAL TOKEN => $token");
 
       if (token.isEmpty) {
-        throw Exception("Login failed: No token returned from API");
+        throw Exception("Login failed: Token is EMPTY from API");
       }
 
       final prefs = await SharedPreferences.getInstance();
@@ -30,19 +45,26 @@ class AuthCubit extends Cubit<AuthState> {
       await prefs.setString("token", token);
       await prefs.setString("role", role);
 
-      print("🔐 TOKEN SAVED");
+      print("🔐 TOKEN SAVED SUCCESSFULLY");
 
-      // ================= GET USER DATA =================
-      final userData = await api.getUserData(token);
+      Map<String, dynamic>? userData;
 
-      final int? fixedUserId = userData["id"];
-      final String? appUser = userData["appUser"];
-      final String? name = userData["name"];
+      try {
+        userData = await api.getUserData(token);
+        print("USER DATA RESPONSE => $userData");
+      } catch (e) {
 
-      // ================= STORAGE =================
+        print("⚠️ GET USER DATA ERROR => $e");
+      }
+
+      final int? fixedUserId = userData?["id"];
+      final String? appUser = userData?["appUser"];
+      final String? name = userData?["name"];
+
 
       if (name != null && name.isNotEmpty) {
         await prefs.setString("userName", name);
+        print("✅ USER NAME SAVED => $name");
       }
 
       if (appUser != null && appUser.isNotEmpty) {
@@ -54,14 +76,36 @@ class AuthCubit extends Cubit<AuthState> {
         await prefs.setInt("userId", fixedUserId);
         print("✅ USER ID SAVED => $fixedUserId");
       } else {
-        print("⚠️ USER ID IS NULL");
+        print("⚠️ USER ID IS NULL (لكن اللوجين هيكمل عادي)");
       }
+
+      final List<String> savedAccounts =
+          prefs.getStringList("saved_accounts") ?? [];
+
+      final newAccount = jsonEncode({
+        "email": email,
+        "token": token,
+        "role": role,
+        "name": name ?? email,
+        "userId": fixedUserId,
+        "appUser": appUser ?? "",
+      });
+
+      savedAccounts.removeWhere((a) {
+        try {
+          return jsonDecode(a)["email"] == email;
+        } catch (_) {
+          return false;
+        }
+      });
+
+      savedAccounts.add(newAccount);
+      await prefs.setStringList("saved_accounts", savedAccounts);
 
       // ================= SEND DEVICE ID =================
       await sendDeviceIdAfterLogin();
 
       emit(AuthSuccess("LOGIN_SUCCESS"));
-
     } catch (e) {
       print("❌ LOGIN ERROR => $e");
       emit(AuthFailure(e.toString()));
@@ -70,17 +114,6 @@ class AuthCubit extends Cubit<AuthState> {
 
 
 
-
-  Future<void> registerDeveloper(
-      String name, String email, String password) async {
-    emit(AuthLoading());
-    try {
-      await api.registerDeveloper(name, email, password);
-      emit(AuthSuccess("REGISTERED_DEVELOPER"));
-    } catch (e) {
-      emit(AuthFailure(e.toString()));
-    }
-  }
 
   Future<void> registerCompany(
       String name,
@@ -91,7 +124,18 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       await api.registerCompany(name, serial, phone, email, password);
-      emit(AuthSuccess("REGISTERED_COMPANY"));
+      await login(email, password, "company");
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> registerDeveloper(
+      String name, String email, String password) async {
+    emit(AuthLoading());
+    try {
+      await api.registerDeveloper(name, email, password);
+      await login(email, password, "developer");
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }
@@ -127,10 +171,10 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<String?> getDeviceId() async {
-    // ده الـ Player ID الحقيقي بتاع الجهاز
+
     final deviceId = OneSignal.User.pushSubscription.id;
 
-    // نطبعه في التيرمنال عشان تاخده للباك وتتأكد
+
     print("ONESIGNAL PLAYER ID => $deviceId");
 
     return deviceId;
@@ -140,26 +184,47 @@ class AuthCubit extends Cubit<AuthState> {
 
   // ================= SEND DEVICE ID =================
   Future<void> sendDeviceIdAfterLogin() async {
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token") ?? "";
 
     if (token.isEmpty) return;
 
-    final deviceId = OneSignal.User.pushSubscription.id;
+    String? deviceId;
 
-    if (deviceId != null && deviceId.isNotEmpty) {
-      print("🔥 PLAYER ID => $deviceId");
+    for (int i = 0; i < 5; i++) {
 
-      try {
-        await api.sendDeviceId(token, deviceId);
-        print("✅ DEVICE ID SENT SUCCESSFULLY");
-      } catch (e) {
-        print("❌ SEND DEVICE ID ERROR: $e");
+      deviceId = OneSignal.User.pushSubscription.id;
+
+      if (deviceId != null && deviceId.isNotEmpty) {
+        break;
       }
-    } else {
-      print("❌ DEVICE ID IS NULL");
+
+      print("⌛ Waiting for OneSignal Player ID...");
+      await Future.delayed(const Duration(seconds: 2));
     }
+
+    if (deviceId == null || deviceId.isEmpty) {
+      print("❌ FAILED TO GET PLAYER ID");
+      return;
+    }
+
+    print("🔥 PLAYER ID => $deviceId");
+
+    try {
+
+      await api.sendDeviceId(token, deviceId);
+
+      print("✅ DEVICE ID SENT SUCCESSFULLY");
+
+    } catch (e) {
+
+      print("❌ SEND DEVICE ID ERROR => $e");
+
+    }
+
   }
+
 
 
 }

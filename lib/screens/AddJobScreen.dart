@@ -46,7 +46,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
               const SnackBar(content: Text("Job Added Successfully ✅")),
             );
             context.read<JobsCubit>().loadCompanyJobs();
-            Navigator.pushReplacementNamed(context, "/company-jobs");
+            Navigator.pushNamed(context, "/company-jobs");
           }
 
           if (state is JobsFailure) {
@@ -59,7 +59,6 @@ class _AddJobScreenState extends State<AddJobScreen> {
           return Column(
             children: [
 
-              /// ================= MODERN HEADER (نفس الداشبورد) =================
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
@@ -80,7 +79,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => Navigator.pushReplacementNamed(context, "/company-dashboard"),
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
@@ -112,11 +111,29 @@ class _AddJobScreenState extends State<AddJobScreen> {
                         ),
                       ],
                     ),
+
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        context.read<JobsCubit>().loadCompanyJobs();
+                        Navigator.pushNamed(context, "/company-jobs");
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.list_alt_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
 
-              /// ================= FORM BODY =================
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
@@ -157,7 +174,6 @@ class _AddJobScreenState extends State<AddJobScreen> {
 
                       const SizedBox(height: 15),
 
-                      /// ================= SKILLS CARD =================
                       Container(
                         padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
@@ -249,7 +265,6 @@ class _AddJobScreenState extends State<AddJobScreen> {
 
                       const SizedBox(height: 30),
 
-                      /// ================= GRADIENT BUTTON (زي الداشبورد) =================
                       state is JobsLoading
                           ? const CircularProgressIndicator()
                           : SizedBox(
@@ -342,7 +357,6 @@ class _AddJobScreenState extends State<AddJobScreen> {
     );
   }
 
-  /// ================= MODERN INPUT FIELD =================
   Widget _modernField(String label, TextEditingController controller,
       IconData icon,
       {int maxLines = 1}) {
@@ -367,7 +381,6 @@ class _AddJobScreenState extends State<AddJobScreen> {
     );
   }
 
-  /// ================= MODERN DROPDOWN =================
   Widget _modernDropdown(
       String label,
       String value,

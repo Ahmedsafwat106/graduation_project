@@ -28,10 +28,13 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
   @override
   Widget build(BuildContext context) {
 
-    final int? jobId =
-        widget.job["id"] ??
-            widget.job["jobId"] ??
-            widget.job["job_id"];
+    int? jobId;
+    final rawId = widget.job["id"] ?? widget.job["jobId"] ?? widget.job["job_id"];
+    if (rawId is int) {
+      jobId = rawId;
+    } else if (rawId is String) {
+      jobId = int.tryParse(rawId);
+    }
 
     if (jobId == null) {
       return const Scaffold(
@@ -63,7 +66,6 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
         child: Column(
           children: [
 
-            /// ================= MODERN HEADER =================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
@@ -120,15 +122,16 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
               ),
             ),
 
-            /// ================= BODY =================
-            Expanded(
-              child: Padding(
+
+    Expanded(
+    child: SingleChildScrollView(
+    child: Padding(
+
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 25),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    /// ============ JOB CARD (Premium) ============
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(18),
@@ -158,19 +161,20 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
                           Text(
                             widget.job["description"] ??
                                 widget.job["desctiption"] ??
+                                widget.job["jobName"] ??
                                 "",
                             style: const TextStyle(
                               color: Colors.black87,
-                              height: 1.5,
+                              height: 1.7,
+                              fontSize: 15,
                             ),
-                          ),
+                          )
                         ],
                       ),
                     ),
 
                     const SizedBox(height: 24),
 
-                    /// ============ SELECT CV TITLE ============
                     const Text(
                       "Select CV",
                       style: TextStyle(
@@ -182,7 +186,6 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
 
                     const SizedBox(height: 12),
 
-                    /// ============ CV DROPDOWN CARD ============
                     BlocBuilder<CvCubit, CvState>(
                       builder: (context, state) {
 
@@ -247,9 +250,8 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
                       },
                     ),
 
-                    const Spacer(),
+                    const SizedBox(height: 30),
 
-                    /// ============ GRADIENT APPLY BUTTON ============
                     SizedBox(
                       width: double.infinity,
                       height: 55,
@@ -284,7 +286,7 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
                               : () {
                             context
                                 .read<ApplicationsCubit>()
-                                .applyJob(jobId, selectedCvId!);
+                                .applyJob(jobId!, selectedCvId!);
                           },
                           child: const Text(
                             "Confirm Apply",
@@ -301,6 +303,7 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
                 ),
               ),
             ),
+      ),
           ],
         ),
       ),

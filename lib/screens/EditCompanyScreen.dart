@@ -35,7 +35,7 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
       backgroundColor: const Color(0xFFF4F7F6),
       body: BlocConsumer<ProfileCubit, ProfileState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
+          if (state is ProfileSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Company Updated ✓")),
             );
@@ -46,7 +46,6 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
           return Column(
             children: [
 
-              /// ================= MODERN GRADIENT HEADER =================
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
@@ -103,7 +102,6 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
                 ),
               ),
 
-              /// ================= FORM =================
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
@@ -132,8 +130,6 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
                       ),
 
                       const SizedBox(height: 30),
-
-                      /// ================= SAVE BUTTON (BRAND GRADIENT) =================
                       state is AuthLoading
                           ? const CircularProgressIndicator()
                           : SizedBox(
@@ -194,7 +190,6 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
     );
   }
 
-  /// ================= MODERN INPUT FIELD =================
   Widget _modernField(
       String label, TextEditingController controller, IconData icon) {
     return Container(
