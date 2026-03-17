@@ -78,7 +78,7 @@ class ApiService {
 
     final body = {
       "Title": title,
-      "Desctiption": description,
+      "Description": description,
       "Location": location,
       "MinimumExperience": minExp,
       "MaximumExperience": maxExp,
