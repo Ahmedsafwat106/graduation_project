@@ -142,7 +142,6 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                     },
                   ),
 
-                  // ✅ Delete
                   ListTile(
                     leading: const Icon(
                       Icons.delete_outline,
@@ -300,7 +299,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
   Widget _buildBody() {
     return BlocConsumer<ChatCubit, ChatState>(
       listener: (context, state) {
-        // ✅ scroll لأسفل أوتوماتيك لما تيجي رسالة جديدة
+
         if (state is ChatMessagesLoaded) {
           Future.delayed(const Duration(milliseconds: 100), () {
             if (_scrollController.hasClients) {

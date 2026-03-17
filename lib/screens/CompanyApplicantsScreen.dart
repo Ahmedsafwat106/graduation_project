@@ -23,8 +23,8 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
   int? companyId;
   bool isCompanyLoaded = false;
   int? _loadingUserId;
+  final Map<int, String> _statusOverrides = {};
 
-  // real-time counts — بيتحدث من JobsCubit
   int? _rtNew;
   int? _rtInterview;
   int? _rtAccepted;
@@ -103,7 +103,8 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: IconButton(
-                            icon: const Icon(Icons.arrow_back, color: Colors.white),
+                            icon: const Icon(Icons.arrow_back,
+                                color: Colors.white),
                             onPressed: () => Navigator.pop(context),
                           ),
                         ),
@@ -284,9 +285,10 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
   }
 
   Widget _modernApplicantCard(Map user) {
-    final status = user["status"] ?? "New";
-    final statusColor = _getStatusColor(status);
-    final userId = user["userId"] ?? 0;
+    final int userId = user["userId"] ?? 0;
+    final String status =
+        _statusOverrides[userId] ?? user["status"] ?? "New";
+    final Color statusColor = _getStatusColor(status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -378,15 +380,21 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                 iconEnabledColor: statusColor,
                 items: const [
                   DropdownMenuItem(value: "New", child: Text("New")),
-                  DropdownMenuItem(value: "Reviewed", child: Text("Reviewed")),
-                  DropdownMenuItem(value: "Interview", child: Text("Interview")),
-                  DropdownMenuItem(value: "Rejected", child: Text("Rejected")),
+                  DropdownMenuItem(
+                      value: "Reviewed", child: Text("Reviewed")),
+                  DropdownMenuItem(
+                      value: "Interview", child: Text("Interview")),
+                  DropdownMenuItem(
+                      value: "Rejected", child: Text("Rejected")),
                 ],
                 onChanged: (value) {
                   if (value != null) {
+                    setState(() {
+                      _statusOverrides[userId] = value;
+                    });
                     context.read<ApplicationsCubit>().updateStatus(
                       widget.jobId,
-                      user["userId"],
+                      userId,
                       value,
                     );
                   }
@@ -425,12 +433,15 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                 onPressed: _loadingUserId == userId
                     ? null
                     : () async {
+
                   setState(() => _loadingUserId = userId);
 
                   final chatCubit = context.read<ChatCubit>();
                   final prefs = await SharedPreferences.getInstance();
 
-                  if (!isCompanyLoaded || companyId == null || userId == 0) {
+                  if (!isCompanyLoaded ||
+                      companyId == null ||
+                      userId == 0) {
                     setState(() => _loadingUserId = null);
                     return;
                   }
@@ -444,6 +455,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                       widget.jobId,
                       companyId!,
                     );
+
                     if (convoId != null) {
                       await prefs.setInt(key, convoId);
                     }
@@ -451,28 +463,23 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
 
                   setState(() => _loadingUserId = null);
 
-                  if (convoId == null && mounted) {
+                  if (convoId == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                          "Cannot start chat: applicant has not applied for this job or conversation failed to create.",
-                        ),
+                        content: Text("Failed to start chat"),
                         backgroundColor: Colors.red,
-                        duration: Duration(seconds: 4),
                       ),
                     );
                     return;
                   }
 
-                  if (convoId != null && mounted) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ChatDetailsScreen(
-                          conversationId: convoId!,
-                        ),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ChatDetailsScreen(
+                        conversationId: convoId!,
                       ),
-                    );
-                  }
+                    ),
+                  );
                 },
                 child: _loadingUserId == userId
                     ? const SizedBox(

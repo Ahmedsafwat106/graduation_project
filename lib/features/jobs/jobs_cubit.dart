@@ -51,7 +51,7 @@ class JobsCubit extends Cubit<JobsState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
-
+      print("ADD JOB TOKEN => $token");
       if (token.isEmpty) {
         emit(JobsFailure("No token found"));
         return;
@@ -197,24 +197,20 @@ class JobsCubit extends Cubit<JobsState> {
   }
   Future<void> loadCompanyDashboard() async {
     emit(JobsLoading());
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
+      if (token.isEmpty) throw Exception("No token found");
 
-      if (token.isEmpty) {
-        throw Exception("No token found");
+      Map<String, dynamic> counts = {};
+      try {
+        counts = await api.getCompanyCount(token);
+      } catch (e) {
+        print("⚠️ company count error: $e");
+        counts = {"applicants": 0, "hires": 0, "activeJob": 0};
       }
 
-      final countsRaw = await api.getCompanyCount(token);
       final jobs = await api.getAllCompanyJobs(token);
-
-      final counts = {
-        "activeJob": countsRaw["activeJob"] ?? 0,
-        "applicants": countsRaw["applicants"] ?? 0,
-        "hires": countsRaw["hires"] ?? 0,
-      };
-
       emit(CompanyDashboardLoaded(counts: counts, jobs: jobs));
 
     } catch (e) {

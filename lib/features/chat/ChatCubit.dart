@@ -15,7 +15,6 @@ class ChatCubit extends Cubit<ChatState> {
 
   ChatCubit(this.api) : super(ChatInitial());
 
-  // ================= START CONVERSATION (COMPANY ONLY) =================
   Future<int?> startConversation(
       int userId,
       int jobId,
@@ -39,10 +38,6 @@ class ChatCubit extends Cubit<ChatState> {
 
       final convoId = result["conversationId"];
 
-      if (convoId == null) {
-        emit(ChatFailure("No conversationId returned"));
-        return null;
-      }
 
       return convoId;
 
@@ -52,7 +47,6 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  // ================= LOAD CHAT =================
   Future<void> loadChatMessages(int conversationId) async {
     emit(ChatLoading());
 
@@ -74,7 +68,6 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  // ================= SEND MESSAGE =================
   Future<void> sendMessage(
       int conversationId,
       String message,
@@ -103,7 +96,6 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  // ================= SIGNALR =================
   Future<void> _startSignalR(String token) async {
     if (_connection != null &&
         _connection!.state == HubConnectionState.Connected) {
@@ -252,7 +244,6 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  // ================= UPDATE MESSAGE =================
   Future<void> updateMessage(
       int messageId,
       int conversationId,

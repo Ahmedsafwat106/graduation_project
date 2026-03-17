@@ -102,8 +102,7 @@ class AuthCubit extends Cubit<AuthState> {
       savedAccounts.add(newAccount);
       await prefs.setStringList("saved_accounts", savedAccounts);
 
-      // ================= SEND DEVICE ID =================
-      await sendDeviceIdAfterLogin();
+      await sendOneSignalIdAfterLogin();
 
       emit(AuthSuccess("LOGIN_SUCCESS"));
     } catch (e) {
@@ -111,8 +110,6 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthFailure(e.toString()));
     }
   }
-
-
 
 
   Future<void> registerCompany(
@@ -172,7 +169,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<String?> getDeviceId() async {
 
-    final deviceId = OneSignal.User.pushSubscription.id;
+    final deviceId = await OneSignal.User.getOnesignalId();
 
 
     print("ONESIGNAL PLAYER ID => $deviceId");
@@ -180,51 +177,46 @@ class AuthCubit extends Cubit<AuthState> {
     return deviceId;
   }
 
-
-
-  // ================= SEND DEVICE ID =================
-  Future<void> sendDeviceIdAfterLogin() async {
+  Future<void> sendOneSignalIdAfterLogin() async {
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token") ?? "";
 
     if (token.isEmpty) return;
 
-    String? deviceId;
+    String? oneSignalId;
 
     for (int i = 0; i < 5; i++) {
 
-      deviceId = OneSignal.User.pushSubscription.id;
+      oneSignalId = await OneSignal.User.getOnesignalId();
 
-      if (deviceId != null && deviceId.isNotEmpty) {
+      if (oneSignalId != null && oneSignalId.isNotEmpty) {
         break;
       }
 
-      print("⌛ Waiting for OneSignal Player ID...");
+      print("⌛ Waiting for OneSignal ID...");
       await Future.delayed(const Duration(seconds: 2));
     }
 
-    if (deviceId == null || deviceId.isEmpty) {
-      print("❌ FAILED TO GET PLAYER ID");
+    if (oneSignalId == null || oneSignalId.isEmpty) {
+      print("❌ FAILED TO GET ONESIGNAL ID");
       return;
     }
 
-    print("🔥 PLAYER ID => $deviceId");
+    print("🔥 ONESIGNAL ID => $oneSignalId");
 
     try {
 
-      await api.sendDeviceId(token, deviceId);
+      await api.sendOneSignalId(token, oneSignalId);
 
-      print("✅ DEVICE ID SENT SUCCESSFULLY");
+      print("✅ ONESIGNAL ID SENT SUCCESSFULLY");
 
     } catch (e) {
 
-      print("❌ SEND DEVICE ID ERROR => $e");
+      print("❌ SEND ONESIGNAL ID ERROR => $e");
 
     }
-
   }
-
 
 
 }

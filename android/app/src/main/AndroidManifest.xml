@@ -5,17 +5,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
 
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.VIEW"/>
-            <data android:scheme="https"/>
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
-        </intent>
-    </queries>
-
     <application
         android:label="DevJob"
         android:name="${applicationName}"
@@ -26,12 +15,10 @@
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize"
-            android:enableOnBackInvokedCallback="true">
+            android:windowSoftInputMode="adjustResize">
 
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
@@ -44,22 +31,16 @@
 
         </activity>
 
-        <meta-data
-            android:name="flutterEmbedding"
-            android:value="2"/>
+        <meta-data android:name="flutterEmbedding" android:value="2"/>
 
         <meta-data
             android:name="com.onesignal.NotificationIcon"
             android:resource="@mipmap/ic_launcher"/>
 
+
         <meta-data
             android:name="com.onesignal.NotificationChannel.DEFAULT_IMPORTANCE"
             android:value="HIGH"/>
 
-        <meta-data
-            android:name="com.onesignal.NotificationChannel.DEFAULT"
-            android:value="chat_messages"/>
-
     </application>
-
 </manifest>

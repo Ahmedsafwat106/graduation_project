@@ -98,7 +98,6 @@ class SignalRService {
         .withAutomaticReconnect()
         .build();
 
-    // ── UpdateApplyCount ─────────────────────────────────────
     _jobConnection!.on("UpdateApplyCount", (arguments) {
       if (arguments == null || arguments.isEmpty) return;
       final data = arguments.first as Map<String, dynamic>;

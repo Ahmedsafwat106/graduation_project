@@ -288,7 +288,6 @@ class _JobListScreenState extends State<JobListScreen> {
               ),
               onPressed: () async {
                 if (canApplyInsideApp) {
-                  // ✅ Internal → ApplyJobScreen
                   Navigator.push(
                     context,
                     MaterialPageRoute(

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "245349808052",
+    "project_id": "devjob-850d8",
+    "storage_bucket": "devjob-850d8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:245349808052:android:188d0e86a10ef2b417e4e1",
+        "android_client_info": {
+          "package_name": "com.example.graduation_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWifvFbJyolGG9MpRsYLEWJFxjzk3rLUM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

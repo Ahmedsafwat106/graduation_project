@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'core/api_service.dart';
 import 'features/applications/applications_cubit.dart';
 import 'features/auth/AuthCubit.dart';
@@ -37,53 +35,25 @@ import 'screens/SearchJobsScreen.dart';
 import 'screens/EditJobScreen..dart';
 
 Future<void> main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
 
-  OneSignal.initialize("c909710b-0f3f-4b4e-90ad-7248a038d596");
+  OneSignal.initialize("d1e9d034-5883-42c7-886b-60cad9162599");
 
   await OneSignal.Notifications.requestPermission(true);
 
-  OneSignal.User.pushSubscription.addObserver((state) async {
-    final playerId = state.current.id;
+  OneSignal.Notifications.addForegroundWillDisplayListener((event) {
+    OneSignal.Notifications.addClickListener((event) {
+      print("📱 Notification Clicked");
+    });
+    print("🔔 Notification Received: ${event.notification.title}");
 
-    print("🔥 PLAYER ID GENERATED => $playerId");
+    event.preventDefault();
 
-    if (playerId == null || playerId.isEmpty) return;
-
-
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token") ?? "";
-
-    if (token.isEmpty) return;
-
-    try {
-      await ApiService().sendDeviceId(token, playerId);
-      print("✅ DEVICE ID AUTO-SENT => $playerId");
-    } catch (e) {
-      print("❌ AUTO SEND DEVICE ID ERROR => $e");
-    }
+    event.notification.display();
   });
-
-  const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'chat_messages',
-    'Chat Messages',
-    importance: Importance.high,
-    playSound: true,
-    sound: RawResourceAndroidNotificationSound('notification_sound'),
-  );
-
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
-
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-      AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
 
   runApp(const DevJobApp());
 }
-
 
 class DevJobApp extends StatelessWidget {
   const DevJobApp({super.key});
@@ -135,7 +105,6 @@ class DevJobApp extends StatelessWidget {
         ),
 
         title: "DevJob",
-
         initialRoute: "/splash",
 
         onGenerateRoute: (settings) {
@@ -257,11 +226,6 @@ class DevJobApp extends StatelessWidget {
                 builder: (_) => const ChatListScreen(),
               );
 
-            case "/SearchJobsScreen":
-              return MaterialPageRoute(
-                builder: (_) => const SearchJobsScreen(jobs: []),
-              );
-
             case "/chat-details":
               final args = settings.arguments as Map?;
               final conversationId = args?["conversationId"];
@@ -273,7 +237,6 @@ class DevJobApp extends StatelessWidget {
                   ),
                 );
               }
-
               return MaterialPageRoute(
                 builder: (_) => ChatDetailsScreen(
                   conversationId: conversationId,

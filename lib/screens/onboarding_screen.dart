@@ -82,7 +82,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                   ),
                 ),
 
-                /// SKIP BUTTON
                 Positioned(
                   right: 15,
                   top: 5,

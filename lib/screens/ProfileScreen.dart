@@ -184,7 +184,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                             const SizedBox(height: 25),
 
-                            /// VIEW APPLICANTS BUTTON (GRADIENT)
                             SizedBox(
                               width: double.infinity,
                               height: 55,

@@ -230,7 +230,6 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
 
                                 const SizedBox(width: 10),
 
-                                /// Edit
                                 _actionButton(
                                   icon: Icons.edit_outlined,
                                   color: Colors.orange,

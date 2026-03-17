@@ -5,7 +5,6 @@ class ApiService {
   static const base = "http://devjob.runasp.net/api/Auth";
   static const baseCv = "http://devjob.runasp.net/api/CV";
 
-  // REGISTER DEVELOPER
   Future<Map<String, dynamic>> registerDeveloper(String fullName, String email,
       String password) async {
     final parts = fullName.trim().split(' ');
@@ -29,7 +28,6 @@ class ApiService {
     return _handle(r, "Developer Register Failed");
   }
 
-  // REGISTER COMPANY
   Future<Map<String, dynamic>> registerCompany(String name, String serial,
       String phone, String email, String password) async {
     final body = {
@@ -50,7 +48,6 @@ class ApiService {
     return _handle(r, "Company Register Failed");
   }
 
-  // LOGIN
   Future<Map<String, dynamic>> login(String email, String password) async {
     final r = await http.post(
       Uri.parse("$base/Login"),
@@ -64,7 +61,6 @@ class ApiService {
     return _handle(r, "Login Failed");
   }
 
-  // ================= ADD JOB (COMPANY) =================
   Future<Map<String, dynamic>> addJob(
       String token,
       String title,
@@ -81,20 +77,21 @@ class ApiService {
     final url = "http://devjob.runasp.net/api/jobs/add-job";
 
     final body = {
-      "title": title,
-      "description": description,
-      "location": location,
-      "minimumExperience": minExp,
-      "maximumExperience": maxExp,
+      "Title": title,
+      "Desctiption": description,
+      "Location": location,
+      "MinimumExperience": minExp,
+      "MaximumExperience": maxExp,
       "JobLevel": jobLevel,
       "EmploymentType": employmentType,
       "JobType": jobType,
-      "skills": skills,
+      "Skills": skills,
     };
 
     print("========== ADD JOB DEBUG ==========");
     print("BODY => ${jsonEncode(body)}");
-
+    print("TOKEN => $token");
+    print("BODY => ${jsonEncode(body)}");
     final r = await http.post(
       Uri.parse(url),
       headers: {
@@ -110,7 +107,6 @@ class ApiService {
     return _handle(r, "Add Job Failed");
   }
 
-  // ================= APPLY JOB =================
   Future<Map<String, dynamic>> applyJob(
       String token,
       int jobId,
@@ -140,8 +136,6 @@ class ApiService {
     throw Exception(decoded["message"] ?? "Apply Job Failed");
   }
 
-
-  // ================= DELETE JOB =================
   Future<void> deleteJob(String token, int jobId) async {
     final r = await http.delete(
       Uri.parse("http://devjob.runasp.net/api/jobs?jobid=$jobId"),
@@ -155,7 +149,6 @@ class ApiService {
     }
   }
 
-// MY APPLICATIONS (DEVELOPER)
   Future<List> getMyApplications(String token) async {
     final r = await http.get(
       Uri.parse("http://devjob.runasp.net/api/applications/my"),
@@ -230,8 +223,6 @@ class ApiService {
     throw Exception("Failed to load user count");
   }
 
-// GET ALL APPLICANTS
-
   Future<List> getAllApplicants(String token, int jobId) async {
     final r = await http.get(
       Uri.parse(
@@ -266,25 +257,26 @@ class ApiService {
 
     return _handle(r, "Get Company Data Failed");
   }
-
   Future<Map<String, dynamic>> getCompanyCount(String token) async {
     final r = await http.get(
       Uri.parse("http://devjob.runasp.net/api/jobs/company-count"),
-      headers: {
-        "Authorization": "Bearer $token",
-      },
+      headers: {"Authorization": "Bearer $token"},
     );
+
+    print("COMPANY COUNT STATUS => ${r.statusCode}");
+    print("COMPANY COUNT BODY => ${r.body}");
 
     if (r.statusCode == 200) {
       final decoded = jsonDecode(r.body);
 
-      if (decoded["success"] == true &&
-          decoded["companyCount"] != null) {
-        return decoded["companyCount"];
+      if (decoded["companyCount"] != null) {
+        return Map<String, dynamic>.from(decoded["companyCount"]);
       }
+
+      return Map<String, dynamic>.from(decoded);
     }
 
-    throw Exception("Failed to load company count");
+    throw Exception("Failed to load company count: ${r.body}");
   }
   Future<void> addSavedJob(
       String token,
@@ -358,7 +350,6 @@ class ApiService {
     throw Exception("Load Saved Jobs Failed: ${r.body}");
   }
 
-// UPDATE APPLICANT STATUS (COMPANY)
   Future<Map<String, dynamic>> updateApplicantStatus(
       String token,
       int jobId,
@@ -382,7 +373,6 @@ class ApiService {
     return _handle(r, "Update Status Failed");
   }
 
-// GET APPLICANT COUNT (COMPANY)
   Future<Map<String, dynamic>> getApplicantCount(
       String token,
       int jobId,
@@ -408,7 +398,6 @@ class ApiService {
     throw Exception("Failed to load applicant count");
   }
 
-// SAVE USER PREFERENCES (DEVELOPER)
   Future<Map<String, dynamic>> saveUserPreferences(
       String token,
       List<String> jobTypes,
@@ -434,7 +423,6 @@ class ApiService {
     return _handle(r, "Save Preferences Failed");
   }
 
-// GET ALL SKILLS
   Future<List<String>> getAllSkills() async {
 
     final r = await http.get(
@@ -452,8 +440,6 @@ class ApiService {
     throw Exception("Failed to load skills");
   }
 
-
-// ================= START CONVERSATION (COMPANY) =================
   Future<Map<String, dynamic>> startConversation(
       String token,
       int userId,
@@ -484,15 +470,14 @@ class ApiService {
 
     print("START CONVERSATION RESPONSE => $decoded");
 
-    if (r.statusCode == 200 && decoded["conversationId"] != null) {
+    if (r.statusCode == 200 && decoded["succes"] == true) {
       return decoded;
     }
 
-    throw Exception("Start Conversation Failed: ${r.body}");
+    throw Exception(decoded["message"] ?? "Start Conversation Failed");
 
   }
 
-  // ================= GET ALL CHATS (DEVELOPER) =================
   Future<List> getAllDeveloperChats(String token) async {
     final r = await http.get(
       Uri.parse("http://devjob.runasp.net/api/chat/all-chats"),
@@ -514,7 +499,7 @@ class ApiService {
 
     throw Exception("Load Chats Failed: ${r.body}");
   }
-  // ================= LOAD CHAT MESSAGES =================
+
   Future<List> loadChatMessages(String token, int conversationId) async {
 
     final url =
@@ -549,7 +534,7 @@ class ApiService {
 
     throw Exception("Load Chat Failed: ${r.body}");
   }
-  // ================= SEND MESSAGE =================
+
   Future<Map<String, dynamic>> sendMessage(
       String token,
       int conversationId,
@@ -589,7 +574,6 @@ class ApiService {
     throw Exception(decoded["message"] ?? "Send Message Failed");
   }
 
-// JOB APPLICANTS (COMPANY)
   Future<List> getJobApplicants(String token, int jobId) async {
     final r = await http.get(
       Uri.parse(
@@ -633,7 +617,6 @@ class ApiService {
     }
   }
 
-  // ================= COMPANY JOBS =================
   Future<List> getAllCompanyJobs(String token) async {
     final r = await http.get(
       Uri.parse("http://devjob.runasp.net/api/jobs/get-all-jobs"),
@@ -717,7 +700,6 @@ class ApiService {
     throw Exception("Failed to load recommended jobs: ${r.body}");
   }
 
-// FORGOT PASSWORD
   Future<Map<String, dynamic>> forgot(String email) async {
     final r = await http.post(
       Uri.parse("$base/forget-password"),
@@ -731,7 +713,6 @@ class ApiService {
     return _handle(r, "Forgot Password Failed");
   }
 
-// RESET PASSWORD
   Future<Map<String, dynamic>> resetPassword(String token,
       String email,
       String password,
@@ -750,7 +731,6 @@ class ApiService {
     return _handle(r, "Reset Password Failed");
   }
 
-  // UPLOAD CV
   Future<Map<String, dynamic>> uploadCv(String filePath, String token) async {
     final request = http.MultipartRequest(
       "POST",
@@ -772,7 +752,6 @@ class ApiService {
     return _handle(response, "Upload CV Failed");
   }
 
-  // GET USER DATA
   Future<Map<String, dynamic>> getUserData(String token) async {
     final r = await http.get(
       Uri.parse("http://devjob.runasp.net/api/User/get-user-data"),
@@ -802,7 +781,6 @@ class ApiService {
     throw Exception("Get User Data Failed: ${r.body}");
   }
 
-  // UPDATE DEVELOPER PROFILE
   Future<Map<String, dynamic>> updateUserProfile(String token,
       String first,
       String last,
@@ -827,7 +805,6 @@ class ApiService {
     return _handle(r, "Update User Profile Failed");
   }
 
-  // UPDATE COMPANY PROFILE
   Future<Map<String, dynamic>> updateCompanyProfile(String token,
       String companyName,
       String phone,
@@ -852,7 +829,6 @@ class ApiService {
     return _handle(r, "Update Company Profile Failed");
   }
 
-  // CHANGE EMAIL
   Future<Map<String, dynamic>> changeEmail(String token,
       String newEmail) async {
     final uri =
@@ -865,7 +841,6 @@ class ApiService {
     return _handle(r, "Change Email Failed");
   }
 
-// GET ALL CVS
   Future<List> getAllCvs(String token) async {
     final r = await http.get(
       Uri.parse("http://devjob.runasp.net/api/cv/all-cv"),
@@ -899,7 +874,6 @@ class ApiService {
     throw Exception("Get CVs Failed: ${r.body}");
   }
 
-// DELETE CV
   Future<void> deleteCv(String token, int cvId) async {
     final r = await http.delete(
       Uri.parse("http://devjob.runasp.net/api/cv?cvid=$cvId"),
@@ -913,7 +887,6 @@ class ApiService {
     }
   }
 
-  // UNIVERSAL HANDLER
   Map<String, dynamic> _handle(http.Response r, String msg) {
     if (r.statusCode == 200 || r.statusCode == 201) {
       final text = r.body.trim();
@@ -931,11 +904,11 @@ class ApiService {
     throw Exception("$msg: ${r.body}");
   }
 
-  Future<void> sendDeviceId(String token, String deviceId) async {
+  Future<void> sendOneSignalId(String token, String oneSignalId) async {
 
-    final url = "http://devjob.runasp.net/api/notification/device-id/$deviceId";
+    final url = "http://devjob.runasp.net/api/notification/device-id/$oneSignalId";
 
-    print("========== SEND DEVICE ID ==========");
+    print("========== SEND ONESIGNAL ID ==========");
     print("URL => $url");
     print("TOKEN => $token");
 
@@ -952,7 +925,7 @@ class ApiService {
     print("===================================");
 
     if (r.statusCode != 200) {
-      throw Exception("Send Device ID Failed: ${r.body}");
+      throw Exception("Send OneSignal ID Failed: ${r.body}");
     }
   }
   Future<Map<String, dynamic>> deleteMessage(
@@ -994,7 +967,7 @@ class ApiService {
     );
     return _handle(r, "Update Message Failed");
   }
-  // ALL JOBS - NO AUTH
+
   Future<List> getAllJobs() async {
     final r = await http.get(
       Uri.parse("http://devjob.runasp.net/api/jobs/all-jobs"),
