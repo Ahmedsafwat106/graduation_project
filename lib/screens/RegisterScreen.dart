@@ -16,6 +16,31 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  String? validatePassword(String value) {
+    if (value.isEmpty) return "Password is required";
+
+    if (value.length < 8) {
+      return "At least 8 characters";
+    }
+
+    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+      return "Must contain uppercase letter";
+    }
+
+    if (!RegExp(r'[a-z]').hasMatch(value)) {
+      return "Must contain lowercase letter";
+    }
+
+    if (!RegExp(r'[0-9]').hasMatch(value)) {
+      return "Must contain number";
+    }
+
+    if (!RegExp(r'[!@#\$&*~]').hasMatch(value)) {
+      return "Must contain special character (@,#,...)";
+    }
+
+    return null;
+  }
   bool _obscure = true;
   late String role;
 
@@ -201,10 +226,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                                   if (role == "developer") {
 
+                                    final passError = validatePassword(devPass.text);
+
                                     if (devName.text.isEmpty ||
                                         devEmail.text.isEmpty ||
                                         devPass.text.isEmpty) {
                                       _error("Fill all developer fields");
+                                      return;
+                                    }
+
+                                    if (passError != null) {
+                                      _error(passError);
+                                      return;
+                                    }
+
+                                    if (devPass.text != devConfirm.text) {
+                                      _error("Passwords do not match");
                                       return;
                                     }
 
@@ -213,8 +250,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       devEmail.text,
                                       devPass.text,
                                     );
-
                                   } else {
+
+                                    final passError = validatePassword(comPass.text);
 
                                     if (comName.text.isEmpty ||
                                         comEmail.text.isEmpty ||
@@ -222,6 +260,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         comPhone.text.isEmpty ||
                                         comPass.text.isEmpty) {
                                       _error("Fill all company fields");
+                                      return;
+                                    }
+
+                                    if (passError != null) {
+                                      _error(passError);
+                                      return;
+                                    }
+
+                                    if (comPass.text != comConfirm.text) {
+                                      _error("Passwords do not match");
                                       return;
                                     }
 
