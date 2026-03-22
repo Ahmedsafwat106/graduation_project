@@ -112,27 +112,60 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
 
-  Future<void> registerCompany(
-      String name,
-      String serial,
-      String phone,
-      String email,
-      String password) async {
+  Future<void> registerDeveloper(
+      String name, String email, String password) async {
     emit(AuthLoading());
     try {
-      await api.registerCompany(name, serial, phone, email, password);
-      await login(email, password, "company");
+      final result = await api.registerDeveloper(name, email, password);
+
+      if (result["token"] != null || result["Token"] != null) {
+        final token = result["token"] ?? result["Token"];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("token", token);
+        await prefs.setString("role", "developer");
+
+        try {
+          final userData = await api.getUserData(token);
+          if (userData["name"] != null) {
+            await prefs.setString("userName", userData["name"]);
+          }
+          if (userData["appUser"] != null) {
+            await prefs.setString("appUser", userData["appUser"]);
+          }
+          if (userData["id"] != null) {
+            await prefs.setInt("userId", userData["id"]);
+          }
+        } catch (_) {}
+
+        await sendOneSignalIdAfterLogin();
+        emit(AuthSuccess("LOGIN_SUCCESS"));
+      } else {
+        emit(AuthSuccess("REGISTERED_DEVELOPER"));
+      }
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }
   }
 
-  Future<void> registerDeveloper(
-      String name, String email, String password) async {
+  Future<void> registerCompany(
+      String name, String serial, String phone,
+      String email, String password) async {
     emit(AuthLoading());
     try {
-      await api.registerDeveloper(name, email, password);
-      await login(email, password, "developer");
+      final result = await api.registerCompany(
+          name, serial, phone, email, password);
+
+      if (result["token"] != null || result["Token"] != null) {
+        final token = result["token"] ?? result["Token"];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("token", token);
+        await prefs.setString("role", "company");
+
+        await sendOneSignalIdAfterLogin();
+        emit(AuthSuccess("LOGIN_SUCCESS"));
+      } else {
+        emit(AuthSuccess("REGISTERED_COMPANY"));
+      }
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }

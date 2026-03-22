@@ -138,17 +138,18 @@ class JobsCubit extends Cubit<JobsState> {
 
   Future<void> loadRecommendedJobs() async {
     emit(JobsLoading());
-
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token") ?? "";
-
-    if (token.isEmpty) {
-      emit(JobsFailure("No token found"));
-      return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+      if (token.isEmpty) {
+        emit(JobsFailure("No token found"));
+        return;
+      }
+      final jobs = await api.getRecommendedJobs(token);
+      emit(JobsLoaded(jobs));
+    } catch (e) {
+      emit(JobsFailure(e.toString()));
     }
-
-    final jobs = await api.getRecommendedJobs(token);
-    emit(JobsLoaded(jobs));
   }
 
   Future<void> savePreferences(

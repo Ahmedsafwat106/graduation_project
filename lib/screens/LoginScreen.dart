@@ -120,7 +120,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
 
-                        /// TITLE
                         const Center(
                           child: Text(
                             "Welcome Back",

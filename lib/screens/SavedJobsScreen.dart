@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
 import 'ApplyJobScreen.dart';
-import 'SearchJobsScreen.dart';
+
 
 class SavedJobsScreen extends StatefulWidget {
   final int userId;
@@ -85,28 +85,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
 
                       Row(
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.search, color: Colors.white),
-                              onPressed: () {
-                                final state = context.read<JobsCubit>().state;
-                                if (state is SavedJobsLoaded) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => SearchJobsScreen(
-                                        jobs: state.jobs,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                          ),
+
 
                           BlocBuilder<JobsCubit, JobsState>(
                             builder: (context, state) {

@@ -22,11 +22,16 @@ class JobListScreen extends StatefulWidget {
 
 class _JobListScreenState extends State<JobListScreen> {
   int? userId;
+  final Set<int> _savedJobIds = {};
   @override
   void initState() {
     super.initState();
     _loadUser();
-    context.read<JobsCubit>().loadJobs();
+    if (widget.loadType == JobLoadType.recommended) {
+      context.read<JobsCubit>().loadRecommendedJobs();
+    } else {
+      context.read<JobsCubit>().loadJobs();
+    }
   }
 
   Future<void> _loadUser() async {
@@ -97,7 +102,11 @@ class _JobListScreenState extends State<JobListScreen> {
                     onPressed: () {
                       Navigator.pushNamed(context, "/advanced-filter")
                           .then((_) {
-                        context.read<JobsCubit>().loadRecommendedJobs();
+                        if (widget.loadType == JobLoadType.recommended) {
+                          context.read<JobsCubit>().loadRecommendedJobs();
+                        } else {
+                          context.read<JobsCubit>().loadJobs();
+                        }
                       });
                     },
                   ),
@@ -212,13 +221,35 @@ class _JobListScreenState extends State<JobListScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.favorite_border,
-                        color: Color(0xFF1FA463)),
+                    icon: Icon(
+                      _savedJobIds.contains(jobId)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: _savedJobIds.contains(jobId)
+                          ? Colors.red
+                          : const Color(0xFF1FA463),
+                    ),
                     onPressed: () {
                       if (userId == null || jobId == null) return;
+
+                      setState(() {
+                        if (_savedJobIds.contains(jobId)) {
+                          _savedJobIds.remove(jobId);
+                        } else {
+                          _savedJobIds.add(jobId!);
+                        }
+                      });
+
                       context.read<JobsCubit>().saveJob(userId!, jobId!);
+
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Job Saved ✅")),
+                        SnackBar(
+                          content: Text(
+                            _savedJobIds.contains(jobId)
+                                ? "Job Saved ✅"
+                                : "Job Removed",
+                          ),
+                        ),
                       );
                     },
                   ),
