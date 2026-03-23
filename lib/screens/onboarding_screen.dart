@@ -13,6 +13,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   final List<Map<String, String>> pages = [
     {
       "image": "assets/images/onboarding1.jpg",
@@ -37,7 +43,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   Future<void> _finishOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool("onboarding_done", true);
-
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -46,6 +51,27 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final screenH = mq.size.height;
+    final screenW = mq.size.width;
+
+    final isSmall = screenH < 650;
+    final isMedium = screenH < 800;
+
+
+    final imageH = isSmall
+        ? screenH * 0.28
+        : isMedium
+        ? screenH * 0.32
+        : screenH * 0.38;
+
+    final titleSize = isSmall ? 18.0 : isMedium ? 20.0 : 23.0;
+    final subtitleSize = isSmall ? 13.0 : isMedium ? 14.0 : 15.5;
+    final headerPadTop = isSmall ? 12.0 : 18.0;
+    final sectionGap = isSmall ? 16.0 : isMedium ? 22.0 : 28.0;
+    final buttonH = isSmall ? 48.0 : 54.0;
+    final bottomPad = isSmall ? 16.0 : 24.0;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F6),
       body: SafeArea(
@@ -56,35 +82,31 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 30),
+                  padding: EdgeInsets.fromLTRB(24, headerPadTop, 24, 18),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        Color(0xFF1FA463),
-                        Color(0xFF159957),
-                      ],
+                      colors: [Color(0xFF1FA463), Color(0xFF159957)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(35),
-                      bottomRight: Radius.circular(35),
+                      bottomLeft: Radius.circular(32),
+                      bottomRight: Radius.circular(32),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     "DevJob",
                     style: TextStyle(
-                      fontSize: 30,
+                      fontSize: isSmall ? 24 : 28,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                       letterSpacing: 1,
                     ),
                   ),
                 ),
-
                 Positioned(
-                  right: 15,
-                  top: 5,
+                  right: 12,
+                  top: 4,
                   child: TextButton(
                     onPressed: _finishOnboarding,
                     child: const Text(
@@ -99,28 +121,30 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               ],
             ),
 
-            Expanded(
+            SizedBox(
+              height: screenH * 0.65,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: pages.length,
                 onPageChanged: (i) => setState(() => _currentIndex = i),
                 itemBuilder: (context, i) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(22, 30, 22, 10),
+                  return SingleChildScrollView(
+                      child: Padding(
+                    padding: EdgeInsets.fromLTRB(20, sectionGap, 20, 8),
                     child: Column(
                       children: [
 
                         Container(
                           width: double.infinity,
-                          height: 320,
+                          height: imageH,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(26),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 40,
-                                offset: const Offset(0, 15),
-                              )
+                                color: Colors.black.withOpacity(0.07),
+                                blurRadius: 28,
+                                offset: const Offset(0, 10),
+                              ),
                             ],
                             image: DecorationImage(
                               image: AssetImage(pages[i]["image"]!),
@@ -129,27 +153,28 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                           ),
                         ),
 
-                        const SizedBox(height: 35),
+                        SizedBox(height: sectionGap),
 
                         Text(
                           pages[i]["title"]!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 24,
+                          style: TextStyle(
+                            fontSize: titleSize,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1E1E1E),
+                            color: const Color(0xFF1E1E1E),
                           ),
                         ),
 
-                        const SizedBox(height: 16),
+                        SizedBox(height: isSmall ? 10 : 14),
 
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenW * 0.04),
                           child: Text(
                             pages[i]["subtitle"]!,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: subtitleSize,
                               height: 1.6,
                               color: Colors.grey.shade600,
                             ),
@@ -157,9 +182,11 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                         ),
                       ],
                     ),
+                      ),
                   );
                 },
               ),
+
             ),
 
             Row(
@@ -168,9 +195,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 pages.length,
                     (i) => AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  margin:
-                  const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-                  width: _currentIndex == i ? 26 : 8,
+                  margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+                  width: _currentIndex == i ? 24 : 8,
                   height: 8,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(40),
@@ -183,37 +209,34 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             ),
 
             Padding(
-              padding: const EdgeInsets.fromLTRB(22, 0, 22, 28),
+              padding: EdgeInsets.fromLTRB(22, 4, 22, bottomPad),
               child: SizedBox(
                 width: double.infinity,
-                height: 58,
+                height: buttonH,
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF1FA463),
-                        Color(0xFF159957),
-                      ],
+                      colors: [Color(0xFF1FA463), Color(0xFF159957)],
                     ),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.green.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(18),
                       onTap: () {
                         if (_currentIndex == pages.length - 1) {
                           _finishOnboarding();
                         } else {
                           _pageController.nextPage(
-                            duration: const Duration(milliseconds: 500),
+                            duration: const Duration(milliseconds: 350),
                             curve: Curves.easeInOut,
                           );
                         }
@@ -223,9 +246,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                           _currentIndex == pages.length - 1
                               ? "Get Started"
                               : "Next",
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: isSmall ? 15 : 17,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
