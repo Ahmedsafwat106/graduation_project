@@ -540,16 +540,8 @@ class ApiService {
       int conversationId,
       String message,
       ) async {
-
-    final url = "http://devjob.runasp.net/api/chat/send-message";
-
-    print("===== SEND MESSAGE DEBUG =====");
-    print("URL => $url");
-    print("CONVERSATION ID => $conversationId");
-    print("MESSAGE => $message");
-
     final r = await http.post(
-      Uri.parse(url),
+      Uri.parse("http://devjob.runasp.net/api/chat/send-message"),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
@@ -560,7 +552,6 @@ class ApiService {
         "Message": message,
       }),
     );
-
     print("STATUS CODE => ${r.statusCode}");
     print("RESPONSE BODY => ${r.body}");
     print("==============================");
@@ -933,19 +924,23 @@ class ApiService {
       int messageId,
       int conversationId,
       ) async {
-    final r = await http.delete(
+
+    final request = http.Request(
+      "DELETE",
       Uri.parse("http://devjob.runasp.net/api/chat"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "messageId": messageId,
-        "conversationId": conversationId,
-      }),
     );
 
-    return _handle(r, "Delete Message Failed");
+    request.headers["Authorization"] = "Bearer $token";
+    request.headers["Content-Type"] = "application/json";
+    request.body = jsonEncode({
+      "messageId": messageId,
+      "conversationId": conversationId,
+    });
+
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+
+    return _handle(response, "Delete Message Failed");
   }
   Future<Map<String, dynamic>> updateMessage(
       String token,

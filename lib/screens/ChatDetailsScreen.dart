@@ -153,7 +153,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                     ),
                     onTap: () {
                       Navigator.pop(context);
-                      if (messageId != null) {
+                      if (messageId != null && messageId > 0) {
                         context.read<ChatCubit>().deleteMessage(
                           messageId,
                           widget.conversationId,
