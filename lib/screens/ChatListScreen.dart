@@ -14,11 +14,19 @@ class ChatListScreen extends StatefulWidget {
 class _ChatListScreenState extends State<ChatListScreen> {
 
   List _cachedChats = [];
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
     context.read<ChatCubit>().loadAllChats();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -33,10 +41,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF1FA463),
-                    Color(0xFF159957),
-                  ],
+                  colors: [Color(0xFF1FA463), Color(0xFF159957)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -57,8 +62,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back,
-                              color: Colors.white),
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
@@ -89,11 +93,26 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         ),
                       ],
                     ),
-                    child: const TextField(
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() => _isSearching = value.trim().isNotEmpty);
+                        context.read<ChatCubit>().searchConversations(value);
+                      },
                       decoration: InputDecoration(
-                        icon: Icon(Icons.search, color: Color(0xFF1FA463)),
+                        icon: const Icon(Icons.search, color: Color(0xFF1FA463)),
                         hintText: "Search conversations...",
                         border: InputBorder.none,
+                        suffixIcon: _isSearching
+                            ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _isSearching = false);
+                            context.read<ChatCubit>().loadAllChats();
+                          },
+                        )
+                            : null,
                       ),
                     ),
                   ),
@@ -125,10 +144,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   }
 
                   if (_cachedChats.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
-                        "No chats yet",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        _isSearching ? "No results found" : "No chats yet",
+                        style: const TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                     );
                   }
@@ -137,9 +156,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
                     itemCount: _cachedChats.length,
                     itemBuilder: (context, index) {
-
                       final chat = _cachedChats[index];
                       final conversationId = chat["conversationId"];
+
+                      final String name = chat["userName"] ?? "Unknown";
+                      final String lastMsg = chat["lastMessage"] ??
+                          chat["message"] ??
+                          "No messages yet";
+                      final String? rawDate =
+                          chat["dateTime"] ?? chat["date"];
+                      final String date = rawDate != null && rawDate.length >= 10
+                          ? rawDate.substring(0, 10)
+                          : "";
 
                       return InkWell(
                         borderRadius: BorderRadius.circular(22),
@@ -154,6 +182,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                             ),
                           ).then((_) {
                             if (mounted) {
+                              _searchController.clear();
+                              setState(() => _isSearching = false);
                               context.read<ChatCubit>().loadAllChats();
                             }
                           });
@@ -207,7 +237,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            chat["userName"] ?? "Unknown",
+                                            name,
                                             style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
@@ -216,11 +246,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        if (chat["dateTime"] != null)
+                                        if (date.isNotEmpty)
                                           Text(
-                                            chat["dateTime"]
-                                                .toString()
-                                                .substring(0, 10),
+                                            date,
                                             style: const TextStyle(
                                               fontSize: 12,
                                               color: Colors.grey,
@@ -232,7 +260,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     const SizedBox(height: 6),
 
                                     Text(
-                                      chat["lastMessage"] ?? "No messages yet",
+                                      lastMsg,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(

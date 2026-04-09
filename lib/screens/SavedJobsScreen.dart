@@ -4,7 +4,6 @@ import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
 import 'ApplyJobScreen.dart';
 
-
 class SavedJobsScreen extends StatefulWidget {
   final int userId;
 
@@ -16,6 +15,10 @@ class SavedJobsScreen extends StatefulWidget {
 
 class _SavedJobsScreenState extends State<SavedJobsScreen> {
 
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
+  List _cachedJobs = [];
+
   @override
   void initState() {
     super.initState();
@@ -23,42 +26,39 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F6),
-
-
       body: SafeArea(
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
-          child: Column(
-            children: [
+        child: Column(
+          children: [
 
-              InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () {},
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color(0xFF1FA463),
-                        Color(0xFF159957),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(35),
-                      bottomRight: Radius.circular(35),
-                    ),
-                  ),
-                  child: Row(
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(35),
+                  bottomRight: Radius.circular(35),
+                ),
+              ),
+              child: Column(
+                children: [
+
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-
                       Row(
                         children: [
                           Container(
@@ -82,135 +82,178 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                           ),
                         ],
                       ),
-
-                      Row(
-                        children: [
-
-
-                          BlocBuilder<JobsCubit, JobsState>(
-                            builder: (context, state) {
-                              if (state is SavedJobsLoaded) {
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    "${state.jobs.length} Saved",
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                );
-                              }
-                              return const SizedBox();
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              Expanded(
-                child: BlocBuilder<JobsCubit, JobsState>(
-                  builder: (context, state) {
-
-                    if (state is JobsLoading) {
-                      return ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: 6,
-                        itemBuilder: (context, index) {
+                      BlocBuilder<JobsCubit, JobsState>(
+                        builder: (context, state) {
+                          final count = state is SavedJobsLoaded
+                              ? state.jobs.length
+                              : _cachedJobs.length;
+                          if (count == 0) return const SizedBox();
                           return Container(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            height: 90,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
+                              color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              "$count Saved",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           );
                         },
-                      );
-                    }
+                      ),
+                    ],
+                  ),
 
-                    if (state is SavedJobsLoaded) {
-                      if (state.jobs.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.bookmark_border,
-                                  size: 60, color: Colors.grey),
-                              SizedBox(height: 12),
-                              Text(
-                                "No saved jobs yet",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                "Start saving jobs to see them here",
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
+                  const SizedBox(height: 16),
 
-                      return RefreshIndicator(
-                        color: const Color(0xFF1FA463),
-                        onRefresh: () async {
-                          context.read<JobsCubit>().loadSavedJobs(widget.userId);
-                        },
-                        child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                          itemCount: state.jobs.length,
-                          itemBuilder: (context, index) {
-                            final job = state.jobs[index];
-                            return _modernJobCard(job);
-                          },
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                      );
-                    }
-
-                    if (state is JobsFailure) {
-                      return Center(child: Text(state.message));
-                    }
-
-                    return const SizedBox();
-                  },
-                ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() => _isSearching = value.trim().isNotEmpty);
+                        if (value.trim().isEmpty) {
+                          context.read<JobsCubit>().loadSavedJobs(widget.userId);
+                        } else {
+                          context.read<JobsCubit>().searchSavedJobs(value);
+                        }
+                      },
+                      decoration: InputDecoration(
+                        icon: const Icon(Icons.search, color: Color(0xFF1FA463)),
+                        hintText: "Search saved jobs...",
+                        border: InputBorder.none,
+                        suffixIcon: _isSearching
+                            ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _isSearching = false);
+                            context.read<JobsCubit>().loadSavedJobs(widget.userId);
+                          },
+                        )
+                            : null,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Expanded(
+              child: BlocBuilder<JobsCubit, JobsState>(
+                builder: (context, state) {
+
+                  if (state is JobsLoading) {
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: 5,
+                      itemBuilder: (_, __) => Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        height: 90,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (state is SavedJobsLoaded) {
+                    _cachedJobs = state.jobs;
+                  }
+
+                  if (state is JobsFailure && _cachedJobs.isEmpty) {
+                    return Center(
+                      child: Text(
+                        state.message,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  }
+
+                  if (_cachedJobs.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.bookmark_border,
+                              size: 60, color: Colors.grey),
+                          const SizedBox(height: 12),
+                          Text(
+                            _isSearching ? "No results found" : "No saved jobs yet",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            _isSearching
+                                ? "Try a different search"
+                                : "Start saving jobs to see them here",
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    color: const Color(0xFF1FA463),
+                    onRefresh: () async {
+                      _searchController.clear();
+                      setState(() => _isSearching = false);
+                      context.read<JobsCubit>().loadSavedJobs(widget.userId);
+                    },
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                      itemCount: _cachedJobs.length,
+                        itemBuilder: (context, index) {
+                          return _modernJobCard(_cachedJobs[index], index);
+                        }
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _modernJobCard(Map job) {
+  Widget _modernJobCard(Map job, int index) {
+
+    final String name = job["jobName"] ?? job["title"] ?? "";
+    final String location = job["location"] ?? "";
+    final String savedDate = job["savedDate"] ?? "";
+    final List skills = job["skills"] ?? [];
+
+    bool isSaved = true;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 25,
-            spreadRadius: 2,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,25 +261,34 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
 
           Row(
             children: [
-              Container(
-                width: 45,
-                height: 45,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1FA463).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.bookmark, color: Color(0xFF1FA463)),
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  job["jobName"] ?? "",
+                  name,
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E1E1E),
                   ),
                 ),
+              ),
+
+              IconButton(
+                icon: Icon(
+                  isSaved ? Icons.bookmark : Icons.bookmark_border,
+                  color: isSaved ? Colors.green : Colors.grey,
+                ),
+                onPressed: () async {
+
+                  final cubit = context.read<JobsCubit>();
+
+                  setState(() {
+                    _cachedJobs.removeAt(index);
+                  });
+
+                  cubit.saveJob(
+                    widget.userId,
+                    job["jobId"] ?? job["id"],
+                  );
+                },
               ),
             ],
           ),
@@ -248,24 +300,53 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
               const Icon(Icons.location_on_outlined, size: 18, color: Colors.grey),
               const SizedBox(width: 6),
               Text(
-                job["location"] ?? "",
+                location,
                 style: const TextStyle(color: Colors.grey, fontSize: 13),
               ),
             ],
           ),
 
-          const SizedBox(height: 10),
+          if (savedDate.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.schedule, size: 16, color: Colors.grey),
+                const SizedBox(width: 6),
+                Text(
+                  "Saved $savedDate",
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ],
+            ),
+          ],
 
-          Row(
-            children: [
-              const Icon(Icons.schedule, size: 16, color: Colors.grey),
-              const SizedBox(width: 6),
-              Text(
-                "Saved ${job["savedDate"] ?? ""}",
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-            ],
-          ),
+          if (skills.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: skills
+                  .toSet()
+                  .take(4)
+                  .map((s) => Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1FA463).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  s.toString(),
+                  style: const TextStyle(
+                    color: Color(0xFF1FA463),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ))
+                  .toList(),
+            ),
+          ],
 
           const SizedBox(height: 18),
 
@@ -283,7 +364,6 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(18),
-
                   onTap: () {
                     Navigator.push(
                       context,

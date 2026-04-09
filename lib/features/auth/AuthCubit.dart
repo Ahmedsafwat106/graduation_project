@@ -37,7 +37,13 @@ class AuthCubit extends Cubit<AuthState> {
       print("ACTUAL TOKEN => $token");
 
       if (token.isEmpty) {
-        throw Exception("Login failed: Token is EMPTY from API");
+        final msg = result["message"]?.toString().toLowerCase() ?? "";
+        if (msg.contains("confirm") || msg.contains("verify") || msg.contains("email")) {
+          emit(AuthSuccess("VERIFY_EMAIL"));
+        } else {
+          throw Exception("Login failed: Token is EMPTY");
+        }
+        return;
       }
 
       final prefs = await SharedPreferences.getInstance();

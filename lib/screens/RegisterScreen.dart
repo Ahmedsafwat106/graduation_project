@@ -22,6 +22,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureComPass = true;
   bool _obscureComConfirm = true;
 
+  String? _devPassError;
+  String? _devConfirmError;
+  String? _comPassError;
+  String? _comConfirmError;
+
   late String role;
 
   final devName = TextEditingController();
@@ -44,12 +49,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   String? validatePassword(String value) {
     if (value.isEmpty) return "Password is required";
-    if (value.length < 8) return "At least 8 characters";
-    if (!RegExp(r'[A-Z]').hasMatch(value)) return "Must contain uppercase letter";
-    if (!RegExp(r'[a-z]').hasMatch(value)) return "Must contain lowercase letter";
-    if (!RegExp(r'[0-9]').hasMatch(value)) return "Must contain number";
-    if (!RegExp(r'[!@#\$&*~]').hasMatch(value)) return "Must contain special character (@,#,...)";
-    return null;
+    final errors = <String>[];
+    if (value.length < 8) errors.add("At least 8 characters");
+    if (!RegExp(r'[A-Z]').hasMatch(value)) errors.add("Uppercase letter");
+    if (!RegExp(r'[a-z]').hasMatch(value)) errors.add("Lowercase letter");
+    if (!RegExp(r'[0-9]').hasMatch(value)) errors.add("Number");
+    if (!RegExp(r'[!@#\$&*~]').hasMatch(value)) errors.add("Special character (!@#\$&*~)");
+    return errors.isEmpty ? null : errors.join(" • ");
   }
 
   @override
@@ -64,6 +70,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
             } else {
               Navigator.pushReplacementNamed(context, "/company-dashboard");
             }
+          }
+          if (state is AuthSuccess && state.message == "VERIFY_EMAIL") {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Please verify your email first 📧"),
+                backgroundColor: Colors.orange,
+                duration: Duration(seconds: 4),
+              ),
+            );
           }
           if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -169,6 +184,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Icons.lock_outline,
                             obscure: _obscureDevPass,
                             onToggle: () => setState(() => _obscureDevPass = !_obscureDevPass),
+                            errorText: _devPassError,
                           ),
                           _modernFieldPass(
                             "Confirm Password",
@@ -176,6 +192,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Icons.lock_outline,
                             obscure: _obscureDevConfirm,
                             onToggle: () => setState(() => _obscureDevConfirm = !_obscureDevConfirm),
+                            errorText: _devConfirmError,
                           ),
                         ] else ...[
                           _modernField("Company Name", comName, Icons.business_outlined),
@@ -188,6 +205,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Icons.lock_outline,
                             obscure: _obscureComPass,
                             onToggle: () => setState(() => _obscureComPass = !_obscureComPass),
+                            errorText: _comPassError,
                           ),
                           _modernFieldPass(
                             "Confirm Password",
@@ -195,6 +213,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Icons.lock_outline,
                             obscure: _obscureComConfirm,
                             onToggle: () => setState(() => _obscureComConfirm = !_obscureComConfirm),
+                            errorText: _comConfirmError,
                           ),
                         ],
 
@@ -208,10 +227,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Container(
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFF1FA463),
-                                  Color(0xFF159957),
-                                ],
+                                colors: [Color(0xFF1FA463), Color(0xFF159957)],
                               ),
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
@@ -222,96 +238,68 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               ],
                             ),
-
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF1FA463),
-                                    Color(0xFF159957),
-                                  ],
-                                ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
                                 borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.green.withOpacity(0.3),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 10),
-                                  ),
-                                ],
-                              ),
-
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(20),
-
-                                  onTap: () {
-                                    if (role == "developer") {
-                                      final passError = validatePassword(devPass.text);
-
-                                      if (devName.text.isEmpty ||
-                                          devEmail.text.isEmpty ||
-                                          devPass.text.isEmpty) {
-                                        _error("Fill all developer fields");
-                                        return;
-                                      }
-
-                                      if (passError != null) {
-                                        _error(passError);
-                                        return;
-                                      }
-
-                                      if (devPass.text != devConfirm.text) {
-                                        _error("Passwords do not match");
-                                        return;
-                                      }
-
-                                      context.read<AuthCubit>().registerDeveloper(
-                                        devName.text,
-                                        devEmail.text,
-                                        devPass.text,
-                                      );
-                                    } else {
-                                      final passError = validatePassword(comPass.text);
-
-                                      if (comName.text.isEmpty ||
-                                          comEmail.text.isEmpty ||
-                                          comSerial.text.isEmpty ||
-                                          comPhone.text.isEmpty ||
-                                          comPass.text.isEmpty) {
-                                        _error("Fill all company fields");
-                                        return;
-                                      }
-
-                                      if (passError != null) {
-                                        _error(passError);
-                                        return;
-                                      }
-
-                                      if (comPass.text != comConfirm.text) {
-                                        _error("Passwords do not match");
-                                        return;
-                                      }
-
-                                      context.read<AuthCubit>().registerCompany(
-                                        comName.text,
-                                        comSerial.text,
-                                        comPhone.text,
-                                        comEmail.text,
-                                        comPass.text,
-                                      );
+                                onTap: () {
+                                  if (role == "developer") {
+                                    if (devName.text.isEmpty ||
+                                        devEmail.text.isEmpty ||
+                                        devPass.text.isEmpty) {
+                                      _error("Fill all developer fields");
+                                      return;
                                     }
-                                  },
 
-                                  child: const Center(
-                                    child: Text(
-                                      "Sign Up",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    setState(() {
+                                      _devPassError = validatePassword(devPass.text);
+                                      _devConfirmError = devPass.text != devConfirm.text
+                                          ? "Passwords do not match"
+                                          : null;
+                                    });
+
+                                    if (_devPassError != null || _devConfirmError != null) return;
+
+                                    context.read<AuthCubit>().registerDeveloper(
+                                      devName.text,
+                                      devEmail.text,
+                                      devPass.text,
+                                    );
+                                  } else {
+                                    if (comName.text.isEmpty ||
+                                        comEmail.text.isEmpty ||
+                                        comSerial.text.isEmpty ||
+                                        comPhone.text.isEmpty ||
+                                        comPass.text.isEmpty) {
+                                      _error("Fill all company fields");
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      _comPassError = validatePassword(comPass.text);
+                                      _comConfirmError = comPass.text != comConfirm.text
+                                          ? "Passwords do not match"
+                                          : null;
+                                    });
+
+                                    if (_comPassError != null || _comConfirmError != null) return;
+
+                                    context.read<AuthCubit>().registerCompany(
+                                      comName.text,
+                                      comSerial.text,
+                                      comPhone.text,
+                                      comEmail.text,
+                                      comPass.text,
+                                    );
+                                  }
+                                },
+                                child: const Center(
+                                  child: Text(
+                                    "Sign Up",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
@@ -407,30 +395,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
       IconData icon, {
         required bool obscure,
         required VoidCallback onToggle,
+        String? errorText,
       }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF7F9FB),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: TextField(
-        controller: c,
-        obscureText: obscure,
-        decoration: InputDecoration(
-          hintText: hint,
-          prefixIcon: Icon(icon, color: const Color(0xFF1FA463)),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 18),
-          suffixIcon: IconButton(
-            icon: Icon(
-              obscure ? Icons.visibility : Icons.visibility_off,
-              color: Colors.grey,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF7F9FB),
+            borderRadius: BorderRadius.circular(20),
+            border: errorText != null
+                ? Border.all(color: Colors.red.shade300)
+                : null,
+          ),
+          child: TextField(
+            controller: c,
+            obscureText: obscure,
+            decoration: InputDecoration(
+              hintText: hint,
+              prefixIcon: Icon(icon, color: const Color(0xFF1FA463)),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 18),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  obscure ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: onToggle,
+              ),
             ),
-            onPressed: onToggle,
           ),
         ),
-      ),
+        if (errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 12, top: 4, bottom: 8),
+            child: Text(
+              errorText,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          )
+        else
+          const SizedBox(height: 16),
+      ],
     );
   }
 

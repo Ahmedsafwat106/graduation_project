@@ -284,4 +284,26 @@ class ChatCubit extends Cubit<ChatState> {
       emit(ChatFailure(e.toString()));
     }
   }
+
+  Future<void> searchConversations(String query) async {
+    if (query.trim().isEmpty) {
+      await loadAllChats();
+      return;
+    }
+
+    emit(ChatLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+      if (token.isEmpty) {
+        emit(ChatFailure("No token found"));
+        return;
+      }
+      final results = await api.searchConversations(token, query);
+      emit(ChatLoaded(results));
+    } catch (e) {
+      emit(ChatFailure(e.toString()));
+    }
+  }
+
 }

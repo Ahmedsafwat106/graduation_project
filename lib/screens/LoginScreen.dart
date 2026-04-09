@@ -108,6 +108,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             context, "/company-dashboard");
                       }
                     }
+                    if (state is AuthSuccess && state.message == "VERIFY_EMAIL") {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please verify your email first 📧"),
+                          backgroundColor: Colors.orange,
+                          duration: Duration(seconds: 4),
+                        ),
+                      );
+                    }
 
                     if (state is AuthFailure) {
                       ScaffoldMessenger.of(context).showSnackBar(

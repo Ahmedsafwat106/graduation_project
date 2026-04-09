@@ -4,16 +4,66 @@ import '../../core/api_service.dart';
 import '../../core/signalr_service.dart';
 import 'jobs_state..dart';
 
-
 class JobsCubit extends Cubit<JobsState> {
   final ApiService api;
+
+  List _cachedAllJobs = [];
+  List _cachedRecommendedJobs = [];
+
+  List get cachedAllJobs => _cachedAllJobs;
+  List get cachedRecommendedJobs => _cachedRecommendedJobs;
+
   JobsCubit(this.api) : super(JobsInitial());
 
-  Future<void> loadJobs() async {
+  Future<void> loadJobs({bool forceRefresh = false}) async {
+    if (_cachedAllJobs.isNotEmpty && !forceRefresh) {
+      emit(AllJobsLoaded(_cachedAllJobs));
+      return;
+    }
+
     emit(JobsLoading());
     try {
       final jobs = await api.getAllJobs();
-      emit(JobsLoaded(jobs));
+      _cachedAllJobs = jobs;
+      emit(AllJobsLoaded(jobs));
+    } catch (e) {
+      emit(JobsFailure(e.toString()));
+    }
+  }
+
+  Future<void> loadRecommendedJobs({bool forceRefresh = false}) async {
+    if (_cachedRecommendedJobs.isNotEmpty && !forceRefresh) {
+      emit(RecommendedJobsLoaded(_cachedRecommendedJobs));
+      return;
+    }
+
+    emit(JobsLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+      final jobs = await api.getRecommendedJobs(token);
+
+      final matched = jobs.where((job) {
+        final score = job["matchScore"];
+        if (score == null) return false;
+        final s = score is double
+            ? score
+            : double.tryParse(score.toString()) ?? 0.0;
+        return s > 0;
+      }).toList();
+
+      matched.sort((a, b) {
+        final sa = a["matchScore"] is double
+            ? a["matchScore"] as double
+            : double.tryParse(a["matchScore"].toString()) ?? 0.0;
+        final sb = b["matchScore"] is double
+            ? b["matchScore"] as double
+            : double.tryParse(b["matchScore"].toString()) ?? 0.0;
+        return sb.compareTo(sa);
+      });
+
+      _cachedRecommendedJobs = matched;
+      emit(RecommendedJobsLoaded(matched));
     } catch (e) {
       emit(JobsFailure(e.toString()));
     }
@@ -36,6 +86,7 @@ class JobsCubit extends Cubit<JobsState> {
       emit(JobsFailure(e.toString()));
     }
   }
+
   Future<void> addJob(
       String title,
       String description,
@@ -51,23 +102,14 @@ class JobsCubit extends Cubit<JobsState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
-      print("ADD JOB TOKEN => $token");
       if (token.isEmpty) {
         emit(JobsFailure("No token found"));
         return;
       }
 
       final result = await api.addJob(
-        token,
-        title,
-        description,
-        location,
-        minExp,
-        maxExp,
-        jobLevel,
-        employmentType,
-        jobType,
-        skills,
+        token, title, description, location,
+        minExp, maxExp, jobLevel, employmentType, jobType, skills,
       );
 
       if (result["success"] == true) {
@@ -100,14 +142,8 @@ class JobsCubit extends Cubit<JobsState> {
       }
 
       await api.updateJob(
-        token,
-        jobId,
-        title,
-        description,
-        location,
-        jobType,
-        jobLevel,
-        employmentType,
+        token, jobId, title, description,
+        location, jobType, jobLevel, employmentType,
       );
 
       emit(JobActionSuccess("JOB_UPDATED"));
@@ -136,7 +172,41 @@ class JobsCubit extends Cubit<JobsState> {
     }
   }
 
-  Future<void> loadRecommendedJobs() async {
+  Future<void> searchJobs(String query) async {
+    if (query.trim().isEmpty) {
+      if (_cachedAllJobs.isNotEmpty) {
+        emit(AllJobsLoaded(_cachedAllJobs));
+      } else {
+        await loadJobs();
+      }
+      return;
+    }
+
+    emit(JobsLoading());
+    try {
+      final q = query.toLowerCase();
+      final results = _cachedAllJobs.where((job) {
+        final title = (job["title"] ?? "").toString().toLowerCase();
+        final company = (job["companyName"] ?? job["company_name"] ?? "")
+            .toString().toLowerCase();
+        final location = (job["location"] ?? "").toString().toLowerCase();
+        final desc = (job["desctiption"] ?? job["description"] ?? "")
+            .toString().toLowerCase();
+        return title.contains(q) ||
+            company.contains(q) ||
+            location.contains(q) ||
+            desc.contains(q);
+      }).toList();
+
+      emit(JobsLoaded(results));
+    } catch (e) {
+      emit(JobsFailure(e.toString()));
+    }
+  }
+
+  Future<void> searchSavedJobs(String query) async {
+    if (query.trim().isEmpty) return;
+
     emit(JobsLoading());
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -145,8 +215,8 @@ class JobsCubit extends Cubit<JobsState> {
         emit(JobsFailure("No token found"));
         return;
       }
-      final jobs = await api.getRecommendedJobs(token);
-      emit(JobsLoaded(jobs));
+      final jobs = await api.searchSavedJobs(token, query);
+      emit(SavedJobsLoaded(jobs));
     } catch (e) {
       emit(JobsFailure(e.toString()));
     }
@@ -158,9 +228,7 @@ class JobsCubit extends Cubit<JobsState> {
       List<String> skills,
       int minimumSalary,
       ) async {
-
     emit(JobsLoading());
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
@@ -170,22 +238,14 @@ class JobsCubit extends Cubit<JobsState> {
         return;
       }
 
-      await api.saveUserPreferences(
-        token,
-        jobTypes,
-        jobLevel,
-        skills,
-        minimumSalary,
-      );
+      await api.saveUserPreferences(token, jobTypes, jobLevel, skills, minimumSalary);
 
-      final jobs = await api.getRecommendedJobs(token);
-      emit(JobsLoaded(jobs));
-
+      _cachedRecommendedJobs = [];
+      await loadRecommendedJobs(forceRefresh: true);
     } catch (e) {
       emit(JobsFailure(e.toString()));
     }
   }
-
 
   Future<void> loadAllSkills() async {
     emit(JobsLoading());
@@ -196,6 +256,7 @@ class JobsCubit extends Cubit<JobsState> {
       emit(JobsFailure(e.toString()));
     }
   }
+
   Future<void> loadCompanyDashboard() async {
     emit(JobsLoading());
     try {
@@ -213,30 +274,30 @@ class JobsCubit extends Cubit<JobsState> {
 
       final jobs = await api.getAllCompanyJobs(token);
       emit(CompanyDashboardLoaded(counts: counts, jobs: jobs));
-
     } catch (e) {
       emit(JobsFailure(e.toString()));
     }
   }
+
   Future<void> loadDeveloperDashboard() async {
     emit(JobsLoading());
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
-
       if (token.isEmpty) throw Exception("No token found");
 
       final counts = await api.getUserCount(token);
-      final jobs = await api.getAllJobs();
+      emit(DeveloperDashboardLoaded(counts: counts, jobs: []));
 
-      emit(DeveloperDashboardLoaded(counts: counts, jobs: jobs));
+      if (_cachedAllJobs.isEmpty) loadJobs();
+      if (_cachedRecommendedJobs.isEmpty) loadRecommendedJobs();
     } catch (e) {
       emit(JobsFailure(e.toString()));
     }
   }
+
   Future<void> loadSavedJobs(int userId) async {
     emit(JobsLoading());
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
@@ -257,27 +318,18 @@ class JobsCubit extends Cubit<JobsState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
-
-      print("===== CUBIT SAVE DEBUG =====");
-      print("TOKEN => $token");
-      print("USER ID => $userId");
-      print("JOB ID => $jobId");
-      print("============================");
-
       await api.addSavedJob(token, userId, jobId);
-
-      print("✅ SAVE COMPLETED");
-
+      print("✅ SAVE/UNSAVE COMPLETED");
     } catch (e) {
       print("❌ SAVE ERROR => $e");
       emit(JobsFailure(e.toString()));
     }
   }
+
   Future<void> connectJobHub() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token") ?? "";
     final myAppUser = prefs.getString("appUser") ?? "";
-    final myUserId = prefs.getInt("userId") ?? 0;
 
     if (token.isEmpty) return;
 

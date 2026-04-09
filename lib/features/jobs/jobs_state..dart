@@ -147,3 +147,18 @@ class StatusUpdatedForDeveloper extends JobsState {
     countInterview,
   ];
 }
+class AllJobsLoaded extends JobsState {
+  final List jobs;
+  AllJobsLoaded(this.jobs);
+
+  @override
+  List<Object?> get props => [jobs];
+}
+
+class RecommendedJobsLoaded extends JobsState {
+  final List jobs;
+  RecommendedJobsLoaded(this.jobs);
+
+  @override
+  List<Object?> get props => [jobs];
+}

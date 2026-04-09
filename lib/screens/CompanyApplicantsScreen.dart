@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,12 +19,11 @@ class CompanyApplicantsScreen extends StatefulWidget {
 }
 
 class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
-
-  String searchQuery = "";
   int? companyId;
   bool isCompanyLoaded = false;
   int? _loadingUserId;
   final Map<int, String> _statusOverrides = {};
+  Timer? _debounce;
 
   int? _rtNew;
   int? _rtInterview;
@@ -38,10 +38,27 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
     context.read<JobsCubit>().connectJobHub();
   }
 
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
   Future<void> _loadCompanyIdFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     companyId = prefs.getInt("userId");
     setState(() => isCompanyLoaded = true);
+  }
+
+  void _onSearch(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (value.trim().isEmpty) {
+        context.read<ApplicationsCubit>().loadApplicantsScreen(widget.jobId);
+      } else {
+        context.read<ApplicationsCubit>().searchApplicants(widget.jobId, value);
+      }
+    });
   }
 
   Color _getStatusColor(String status) {
@@ -77,7 +94,6 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
           },
           child: Column(
             children: [
-
               Container(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
                 decoration: const BoxDecoration(
@@ -94,7 +110,6 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     Row(
                       children: [
                         Container(
@@ -136,9 +151,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                         ],
                       ),
                       child: TextField(
-                        onChanged: (value) {
-                          setState(() => searchQuery = value.toLowerCase());
-                        },
+                        onChanged: _onSearch,
                         decoration: const InputDecoration(
                           icon: Icon(Icons.search, color: Color(0xFF1FA463)),
                           hintText: "Search applicants...",
@@ -171,25 +184,15 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 _countItem(
-                                  c["totalApplicant"] ?? 0,
-                                  "Total",
-                                  Colors.black,
-                                ),
+                                    c["totalApplicant"] ?? 0, "Total", Colors.black),
                                 _countItem(
-                                  _rtNew ?? c["totalNew"] ?? 0,
-                                  "New",
-                                  Colors.blue,
-                                ),
+                                    _rtNew ?? c["totalNew"] ?? 0, "New", Colors.blue),
                                 _countItem(
-                                  _rtInterview ?? c["totalInterview"] ?? 0,
-                                  "Interview",
-                                  const Color(0xFF1FA463),
-                                ),
+                                    _rtInterview ?? c["totalInterview"] ?? 0,
+                                    "Interview", const Color(0xFF1FA463)),
                                 _countItem(
-                                  _rtAccepted ?? c["totalReviewed"] ?? 0,
-                                  "Reviewed",
-                                  Colors.orange,
-                                ),
+                                    _rtAccepted ?? c["totalReviewed"] ?? 0,
+                                    "Reviewed", Colors.orange),
                               ],
                             ),
                           );
@@ -206,20 +209,12 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
               Expanded(
                 child: BlocBuilder<ApplicationsCubit, ApplicationsState>(
                   builder: (context, state) {
-
                     if (state is ApplicationsLoading) {
                       return const Center(child: CircularProgressIndicator());
                     }
 
                     if (state is ApplicantsScreenLoaded) {
-                      final filtered = state.applicants
-                          .where((user) => (user["name"] ?? "")
-                          .toString()
-                          .toLowerCase()
-                          .contains(searchQuery))
-                          .toList();
-
-                      if (filtered.isEmpty) {
+                      if (state.applicants.isEmpty) {
                         return Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -228,18 +223,12 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                                   size: 60, color: Colors.grey),
                               SizedBox(height: 12),
                               Text(
-                                "No applicants yet",
+                                "No applicants found",
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF1E1E1E),
                                 ),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                "No one has applied for this job yet",
-                                style: TextStyle(
-                                    color: Colors.grey, fontSize: 14),
                               ),
                             ],
                           ),
@@ -248,9 +237,9 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
 
                       return ListView.builder(
                         padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-                        itemCount: filtered.length,
+                        itemCount: state.applicants.length,
                         itemBuilder: (context, index) {
-                          return _modernApplicantCard(filtered[index]);
+                          return _modernApplicantCard(state.applicants[index]);
                         },
                       );
                     }
@@ -307,7 +296,6 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -347,23 +335,33 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
             style: const TextStyle(color: Colors.grey, fontSize: 13),
           ),
 
+          const SizedBox(height: 6),
+
+          Text(
+            "Applied: ${user["applyDate"] ?? ""}",
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
+          ),
+
           const SizedBox(height: 12),
 
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: (user["skillName"] as List?)
-                ?.map(
+            children: ((user["skillName"] as List?)?.toSet().toList() ?? [])
+                .take(5)
+                .map(
                   (skill) => Chip(
-                label: Text(skill),
+                label: Text(
+                  skill.toString(),
+                  style: const TextStyle(fontSize: 11),
+                ),
                 backgroundColor: const Color(0xFFF4F7F6),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
             )
-                .toList() ??
-                [],
+                .toList(),
           ),
 
           const SizedBox(height: 14),
@@ -380,23 +378,15 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                 iconEnabledColor: statusColor,
                 items: const [
                   DropdownMenuItem(value: "New", child: Text("New")),
-                  DropdownMenuItem(
-                      value: "Reviewed", child: Text("Reviewed")),
-                  DropdownMenuItem(
-                      value: "Interview", child: Text("Interview")),
-                  DropdownMenuItem(
-                      value: "Rejected", child: Text("Rejected")),
+                  DropdownMenuItem(value: "Reviewed", child: Text("Reviewed")),
+                  DropdownMenuItem(value: "Interview", child: Text("Interview")),
+                  DropdownMenuItem(value: "Rejected", child: Text("Rejected")),
                 ],
                 onChanged: (value) {
                   if (value != null) {
-                    setState(() {
-                      _statusOverrides[userId] = value;
-                    });
+                    setState(() => _statusOverrides[userId] = value);
                     context.read<ApplicationsCubit>().updateStatus(
-                      widget.jobId,
-                      userId,
-                      value,
-                    );
+                        widget.jobId, userId, value);
                   }
                 },
               ),
@@ -433,7 +423,6 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                 onPressed: _loadingUserId == userId
                     ? null
                     : () async {
-
                   setState(() => _loadingUserId = userId);
 
                   final chatCubit = context.read<ChatCubit>();
@@ -451,11 +440,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
 
                   if (convoId == null) {
                     convoId = await chatCubit.startConversation(
-                      userId,
-                      widget.jobId,
-                      companyId!,
-                    );
-
+                        userId, widget.jobId, companyId!);
                     if (convoId != null) {
                       await prefs.setInt(key, convoId);
                     }
@@ -475,9 +460,8 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
 
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => ChatDetailsScreen(
-                        conversationId: convoId!,
-                      ),
+                      builder: (_) =>
+                          ChatDetailsScreen(conversationId: convoId!),
                     ),
                   );
                 },

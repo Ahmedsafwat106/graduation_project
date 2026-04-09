@@ -58,7 +58,13 @@ class ApiService {
       }),
     );
 
-    return _handle(r, "Login Failed");
+    if (r.statusCode == 200 || r.statusCode == 201) {
+      return jsonDecode(r.body);
+    }
+
+    final decoded = jsonDecode(r.body);
+    final message = decoded["message"] ?? "Login Failed";
+    throw Exception(message);
   }
 
   Future<Map<String, dynamic>> addJob(
@@ -223,24 +229,23 @@ class ApiService {
     throw Exception("Failed to load user count");
   }
 
-  Future<List> getAllApplicants(String token, int jobId) async {
+  Future<List> getAllApplicants(String token, int jobId, {String item = ""}) async {
+    String url =
+        "http://devjob.runasp.net/api/jobs/get-all-applicants?jobId=$jobId";
+    if (item.trim().isNotEmpty) {
+      url += "&item=${Uri.encodeComponent(item)}";
+    }
+
     final r = await http.get(
-      Uri.parse(
-        "http://devjob.runasp.net/api/jobs/get-all-applicants?jobId=$jobId",
-      ),
-      headers: {
-        "Authorization": "Bearer $token",
-      },
+      Uri.parse(url),
+      headers: {"Authorization": "Bearer $token"},
     );
 
     if (r.statusCode == 200) {
       final decoded = jsonDecode(r.body);
-
-      if (decoded["success"] == true &&
-          decoded["getApplicantDtos"] != null) {
+      if (decoded["success"] == true && decoded["getApplicantDtos"] != null) {
         return decoded["getApplicantDtos"];
       }
-
       return [];
     }
 
@@ -283,21 +288,8 @@ class ApiService {
       int userId,
       int jobId,
       ) async {
-
-    final url = "http://devjob.runasp.net/api/jobs/add-saved-job";
-
-    print("===== ADD SAVED JOB DEBUG =====");
-    print("URL => $url");
-    print("TOKEN => $token");
-    print("USER ID => $userId");
-    print("JOB ID => $jobId");
-    print("BODY => ${jsonEncode({
-      "userId": userId,
-      "jobId": jobId,
-    })}");
-
     final r = await http.post(
-      Uri.parse(url),
+      Uri.parse("http://devjob.runasp.net/api/jobs/add-saved-job"),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
@@ -308,12 +300,11 @@ class ApiService {
       }),
     );
 
-    print("STATUS CODE => ${r.statusCode}");
-    print("RESPONSE BODY => ${r.body}");
-    print("================================");
+    print("SAVE/UNSAVE STATUS => ${r.statusCode}");
+    print("SAVE/UNSAVE BODY => ${r.body}");
 
     if (r.statusCode != 200) {
-      throw Exception("Save Job Failed: ${r.body}");
+      throw Exception("Save/Unsave Job Failed: ${r.body}");
     }
   }
   Future<List> getSavedJobs(String token, int userId) async {
@@ -892,7 +883,9 @@ class ApiService {
       return jsonDecode(text);
     }
 
-    throw Exception("$msg: ${r.body}");
+    final decoded = jsonDecode(r.body);
+    final message = decoded["message"] ?? msg;
+    throw Exception(message);
   }
 
   Future<void> sendOneSignalId(String token, String oneSignalId) async {
@@ -978,11 +971,77 @@ class ApiService {
         return decoded;
       }
 
-      if (decoded is Map && decoded["jobs"] != null) {
-        return decoded["jobs"];
+      if (decoded is Map) {
+        if (decoded["jobs"] != null && decoded["jobs"] is List) {
+          return decoded["jobs"];
+        }
+
+        if (decoded["data"] != null && decoded["data"] is List) {
+          return decoded["data"];
+        }
+
+        if (decoded["result"] != null && decoded["result"] is List) {
+          return decoded["result"];
+        }
+
+        return [];
       }
     }
 
-    throw Exception("Failed to load all jobs: ${r.body}");
+    throw Exception("Failed to load all jobs");
+  }
+
+  Future<List> searchConversations(String token, String query) async {
+    final r = await http.get(
+      Uri.parse("http://devjob.runasp.net/api/chat/search?item=${Uri.encodeComponent(query)}"),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+      if (decoded["success"] == true && decoded["chatSummaryDto"] != null) {
+        return decoded["chatSummaryDto"];
+      }
+      return [];
+    }
+    throw Exception("Search Failed: ${r.body}");
+  }
+
+  Future<List> searchJobs(String query) async {
+
+    final r = await http.get(
+      Uri.parse(
+        "http://devjob.runasp.net/api/jobs/search?q=${Uri.encodeComponent(query)}",
+      ),
+    );
+
+    print("JOB SEARCH STATUS => ${r.statusCode}");
+    print("JOB SEARCH BODY => ${r.body}");
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+      if (decoded is List) return decoded;
+      if (decoded is Map && decoded["jobs"] != null) return decoded["jobs"];
+      return [];
+    }
+    throw Exception("Job Search Failed: ${r.body}");
+  }
+
+  Future<List> searchSavedJobs(String token, String query) async {
+    final r = await http.get(
+      Uri.parse(
+        "http://devjob.runasp.net/api/jobs/search-saved?item=${Uri.encodeComponent(query)}",
+      ),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (r.statusCode == 200) {
+      final decoded = jsonDecode(r.body);
+      if (decoded["success"] == true && decoded["displaySavedJobDtos"] != null) {
+        return decoded["displaySavedJobDtos"];
+      }
+      return [];
+    }
+    throw Exception("Search Saved Jobs Failed: ${r.body}");
   }
 }

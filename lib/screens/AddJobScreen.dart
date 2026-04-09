@@ -5,7 +5,6 @@ import '../features/jobs/jobs_state..dart';
 
 class AddJobScreen extends StatefulWidget {
   const AddJobScreen({super.key});
-
   @override
   State<AddJobScreen> createState() => _AddJobScreenState();
 }

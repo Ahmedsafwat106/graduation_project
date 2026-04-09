@@ -30,8 +30,13 @@ class _DeveloperDashboardScreenState
   @override
   void initState() {
     super.initState();
-    context.read<JobsCubit>().loadDeveloperDashboard();
-    print("✅ CALLED loadDeveloperDashboard");
+
+    final cubit = context.read<JobsCubit>();
+
+    if (cubit.cachedAllJobs.isEmpty) {
+      cubit.loadDeveloperDashboard();
+    }
+
     context.read<JobsCubit>().connectJobHub();
 
     context.read<ChatCubit>().stream.listen((state) {
@@ -194,8 +199,14 @@ class _DeveloperDashboardScreenState
               ),
 
               BlocBuilder<JobsCubit, JobsState>(
-                builder: (context, state) {
+                buildWhen: (previous, current) {
 
+                  return current is DeveloperDashboardLoaded ||
+                      current is DeveloperApplyCountUpdated ||
+                      current is StatusUpdatedForDeveloper ||
+                      current is MessageCountUpdated;
+                },
+                builder: (context, state) {
                   if (state is DeveloperDashboardLoaded) {
                     _counts = Map<String, dynamic>.from(state.counts);
                   }
@@ -212,7 +223,6 @@ class _DeveloperDashboardScreenState
                     padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
                     child: Column(
                       children: [
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -221,9 +231,7 @@ class _DeveloperDashboardScreenState
                             _modernCountCard(_counts["interview"] ?? 0, "Interviews"),
                           ],
                         ),
-
                         const SizedBox(height: 18),
-
                         const Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
@@ -235,9 +243,7 @@ class _DeveloperDashboardScreenState
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 12),
-
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
