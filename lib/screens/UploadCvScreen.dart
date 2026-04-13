@@ -36,7 +36,7 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
 
           if (state is CvLoading) {
             return const Center(
-              child: CircularProgressIndicator(),
+              child:CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3),
             );
           }
 
@@ -46,7 +46,6 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
             return Column(
               children: [
 
-                /// HEADER
                 Container(
                   width: double.infinity,
                   padding:

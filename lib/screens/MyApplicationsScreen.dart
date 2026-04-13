@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/applications/applications_cubit.dart';
 import '../features/applications/applications_state..dart';
+import '../widgets/shimmer_widgets.dart';
 
 class MyApplicationsScreen extends StatefulWidget {
   const MyApplicationsScreen({super.key});
@@ -45,8 +46,7 @@ class _MyApplicationsScreenState
           builder: (context, state) {
 
             if (state is ApplicationsLoading) {
-              return const Center(
-                  child: CircularProgressIndicator());
+              return const ShimmerList(card: ShimmerApplicantCard());
             }
 
             if (state is ApplicantHistoryScreenLoaded) {

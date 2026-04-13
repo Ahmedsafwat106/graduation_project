@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
+import '../widgets/shimmer_widgets.dart';
 import 'ApplyJobScreen.dart';
 
 class SavedJobsScreen extends StatefulWidget {
@@ -159,6 +160,10 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
             Expanded(
               child: BlocBuilder<JobsCubit, JobsState>(
                 builder: (context, state) {
+
+                  if (state is JobsLoading && _cachedJobs.isEmpty) {
+                    return const ShimmerList(card: ShimmerJobCard());
+                  }
 
                   if (state is JobsLoading) {
                     return ListView.builder(

@@ -218,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         state is AuthLoading
                             ? const Center(
-                            child: CircularProgressIndicator())
+                            child:  CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3))
                             : SizedBox(
                           width: double.infinity,
                           height: 58,

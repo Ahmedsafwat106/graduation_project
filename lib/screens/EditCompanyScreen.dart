@@ -131,7 +131,7 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
 
                       const SizedBox(height: 30),
                       state is AuthLoading
-                          ? const CircularProgressIndicator()
+                          ? const CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3)
                           : SizedBox(
                         width: double.infinity,
                         height: 55,

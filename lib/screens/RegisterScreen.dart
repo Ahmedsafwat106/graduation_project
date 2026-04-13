@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
+import '../widgets/loading_indicator.dart';
 
 class RegisterScreen extends StatefulWidget {
   final String role;
@@ -220,7 +221,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 25),
 
                         state is AuthLoading
-                            ? const Center(child: CircularProgressIndicator())
+                            ?   const LoadingIndicator()
                             : SizedBox(
                           width: double.infinity,
                           height: 58,

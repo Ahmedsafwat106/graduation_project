@@ -88,7 +88,7 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
               builder: (context, state) {
                 if (state is JobsLoading) {
                   return const Center(
-                      child: CircularProgressIndicator());
+                      child: CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3));
                 }
 
                 if (state is JobsLoaded) {
@@ -250,9 +250,7 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
                                   color: Colors.red,
                                   label: "Delete",
                                   onTap: () {
-                                    context
-                                        .read<JobsCubit>()
-                                        .deleteJob(jobId);
+                                    _confirmDelete(context, jobId);
                                   },
                                 ),
                               ],
@@ -311,4 +309,33 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
       ),
     );
   }
+}
+
+void _confirmDelete(BuildContext context, int jobId) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      title: const Text("Delete Job"),
+      content: const Text("Are you sure you want to delete this job?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            context.read<JobsCubit>().deleteJob(jobId);
+          },
+          child: const Text(
+            "Delete",
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+      ],
+    ),
+  );
 }

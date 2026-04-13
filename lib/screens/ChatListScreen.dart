@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/chat/ChatCubit.dart';
 import '../features/chat/ChatState.dart';
+import '../widgets/shimmer_widgets.dart';
 import 'ChatDetailsScreen.dart';
 
 class ChatListScreen extends StatefulWidget {
@@ -127,7 +128,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 builder: (context, state) {
 
                   if (state is ChatLoading && _cachedChats.isEmpty) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const ShimmerList(card: ShimmerChatCard());
                   }
 
                   if (state is ChatLoaded) {

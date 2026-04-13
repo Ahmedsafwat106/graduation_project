@@ -63,7 +63,35 @@ class AuthCubit extends Cubit<AuthState> {
         print("⚠️ GET USER DATA ERROR => $e");
       }
 
-      final int? fixedUserId = userData?["id"];
+      int? fixedUserId;
+
+      if (userData?["id"] != null) {
+        fixedUserId = userData!["id"];
+      } else if (userData?["userId"] != null) {
+        final raw = userData!["userId"];
+        if (raw is List && raw.isNotEmpty) {
+          fixedUserId = raw[0] is int ? raw[0] : int.tryParse(raw[0].toString());
+        } else if (raw is int) {
+          fixedUserId = raw;
+        }
+      }
+
+      if (fixedUserId == null && token.isNotEmpty) {
+        try {
+          final parts = token.split(".");
+          if (parts.length == 3) {
+            String payload = parts[1];
+            while (payload.length % 4 != 0) payload += "=";
+            final decoded = jsonDecode(utf8.decode(base64Url.decode(payload)));
+            final sub = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+            if (sub != null) {
+              fixedUserId = int.tryParse(sub.toString());
+            }
+          }
+        } catch (e) {
+          print("❌ Token userId parse error: $e");
+        }
+      }
       final String? appUser = userData?["appUser"];
       final String? name = userData?["name"];
 

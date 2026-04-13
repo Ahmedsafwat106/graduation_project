@@ -746,17 +746,51 @@ class ApiService {
     if (r.statusCode == 200) {
       final decoded = jsonDecode(r.body);
 
+      // استخراج الـ userId
       int? fixedId;
-
-      if (decoded["userId"] is List &&
-          decoded["userId"].isNotEmpty) {
-        fixedId = decoded["userId"][0];
+      if (decoded["userId"] is List && decoded["userId"].isNotEmpty) {
+        fixedId = decoded["userId"][0] is int
+            ? decoded["userId"][0]
+            : int.tryParse(decoded["userId"][0].toString());
+      } else if (decoded["userId"] is int) {
+        fixedId = decoded["userId"];
+      } else if (decoded["id"] is int) {
+        fixedId = decoded["id"];
       }
+
+      // استخراج الـ appUser
+      String? appUser = decoded["appUser"] ?? decoded["AppUser"];
+
+      // لو appUser أو fixedId null - استخرجهم من الـ token
+      if (appUser == null || fixedId == null) {
+        try {
+          final parts = token.split(".");
+          if (parts.length == 3) {
+            String payload = parts[1];
+            while (payload.length % 4 != 0) {
+              payload += "=";
+            }
+            final tokenDecoded = jsonDecode(
+              utf8.decode(base64Url.decode(payload)),
+            );
+            final sub = tokenDecoded[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+
+            appUser ??= sub?.toString();
+            fixedId ??= int.tryParse(sub?.toString() ?? "");
+          }
+        } catch (e) {
+          print("❌ Token decode error: $e");
+        }
+      }
+
+      print("✅ fixedId => $fixedId");
+      print("✅ appUser => $appUser");
 
       return {
         "id": fixedId,
         "name": decoded["name"],
-        "appUser": decoded["appUser"],
+        "appUser": appUser,
       };
     }
 

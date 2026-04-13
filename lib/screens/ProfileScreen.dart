@@ -65,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             if (state is ProfileLoading) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3),
               );
             }
             if (state is ProfileFailure) {

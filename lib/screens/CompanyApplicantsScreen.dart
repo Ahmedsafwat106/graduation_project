@@ -7,6 +7,7 @@ import '../features/applications/applications_state..dart';
 import '../features/chat/ChatCubit.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
+import '../widgets/shimmer_widgets.dart';
 import 'ChatDetailsScreen.dart';
 
 class CompanyApplicantsScreen extends StatefulWidget {
@@ -210,7 +211,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                 child: BlocBuilder<ApplicationsCubit, ApplicationsState>(
                   builder: (context, state) {
                     if (state is ApplicationsLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const ShimmerList(card: ShimmerApplicantCard());
                     }
 
                     if (state is ApplicantsScreenLoaded) {
@@ -469,10 +470,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                     ? const SizedBox(
                   height: 18,
                   width: 18,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
+                  child:CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3)
                 )
                     : const Text(
                   "Start Chat",

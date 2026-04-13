@@ -191,7 +191,7 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
 
                         if (state is CvLoading) {
                           return const Center(
-                              child: CircularProgressIndicator());
+                              child: CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3));
                         }
 
                         if (state is CvsLoaded) {

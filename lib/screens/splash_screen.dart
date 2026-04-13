@@ -98,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                   child: Center(
-                    /// ===== LOGO CARD =====
+
                     child: Container(
                       width: 110,
                       height: 110,
@@ -151,11 +151,7 @@ class _SplashScreenState extends State<SplashScreen>
                 SizedBox(
                   width: 26,
                   height: 26,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
+                  child:CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3)
                 ),
                 const SizedBox(height: 20),
 

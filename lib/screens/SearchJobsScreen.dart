@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
+import '../widgets/loading_indicator.dart';
 import 'ApplyJobScreen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -136,7 +137,7 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
             child: BlocBuilder<JobsCubit, JobsState>(
               builder: (context, state) {
                 if (_isSearching && state is JobsLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  const LoadingIndicator();
                 }
 
                 if (_isSearching && state is JobsLoaded) {

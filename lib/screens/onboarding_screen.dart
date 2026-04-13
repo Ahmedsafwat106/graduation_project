@@ -21,19 +21,19 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   final List<Map<String, String>> pages = [
     {
-      "image": "assets/images/onboarding1.jpg",
+      "image": "assets/images/onboarding1.png",
       "title": "Find your dream job easily",
       "subtitle":
       "Connect with top tech companies looking for talented developers like you",
     },
     {
-      "image": "assets/images/onboarding2.jpg",
+      "image": "assets/images/onboarding2.png",
       "title": "Smart AI matching for better hiring",
       "subtitle":
       "Our intelligent algorithm matches you with the perfect opportunities based on your skills",
     },
     {
-      "image": "assets/images/onboarding3.jpg",
+      "image": "assets/images/onboarding3.png",
       "title": "Secure, fast, and modern hiring platform",
       "subtitle":
       "Join thousands of developers and companies building the future together",

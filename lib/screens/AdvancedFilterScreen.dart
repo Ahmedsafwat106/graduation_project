@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
+import '../widgets/loading_indicator.dart';
 
 class AdvancedFilterScreen extends StatefulWidget {
   const AdvancedFilterScreen({super.key});
@@ -37,7 +38,7 @@ class _AdvancedFilterScreenState
           if (state is SkillsLoaded) {
             skills = state.skills;
           } else if (state is JobsLoading) {
-            return const Center(child: CircularProgressIndicator());
+            const LoadingIndicator();
           }
 
           return Column(

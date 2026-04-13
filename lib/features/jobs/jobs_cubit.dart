@@ -318,8 +318,14 @@ class JobsCubit extends Cubit<JobsState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
+
+      print("===== SAVE JOB =====");
+      print("userId => $userId");
+      print("jobId => $jobId");
+      print("token empty? => ${token.isEmpty}");
+
       await api.addSavedJob(token, userId, jobId);
-      print("✅ SAVE/UNSAVE COMPLETED");
+      print("✅ SAVE COMPLETED");
     } catch (e) {
       print("❌ SAVE ERROR => $e");
       emit(JobsFailure(e.toString()));

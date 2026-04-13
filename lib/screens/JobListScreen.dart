@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
+import '../widgets/shimmer_widgets.dart';
 import 'ApplyJobScreen.dart';
 
 enum JobLoadType { all, recommended }
@@ -165,7 +166,7 @@ class _JobListScreenState extends State<JobListScreen>
               },
               builder: (context, state) {
                 if (state is JobsLoading && _jobs.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const ShimmerList(card: ShimmerJobCard());
                 }
 
                 if (state is JobsFailure && _jobs.isEmpty) {

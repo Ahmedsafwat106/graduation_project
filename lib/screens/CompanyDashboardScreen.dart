@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/api_service.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
+import '../widgets/loading_indicator.dart';
 
 class CompanyDashboardScreen extends StatefulWidget {
   const CompanyDashboardScreen({super.key});
@@ -36,7 +37,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
           builder: (context, state) {
 
             if (state is JobsLoading && _counts.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
+              const LoadingIndicator();
             }
 
             if (state is CompanyDashboardLoaded) {
@@ -299,8 +300,44 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                                     ),
                                   ),
                                 ),
-                                const Icon(Icons.more_vert,
-                                    color: Colors.grey),
+                                PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_vert, color: Colors.grey),
+                                  onSelected: (value) {
+                                    if (value == "edit") {
+                                      Navigator.pushNamed(
+                                        context,
+                                        "/edit-job",
+                                        arguments: job,
+                                      );
+                                    }
+
+                                    else if (value == "delete") {
+                                      _confirmDelete(context, job["id"]);
+                                    }
+                                  },
+                                  itemBuilder: (context) => [
+                                    const PopupMenuItem(
+                                      value: "edit",
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.edit, size: 18),
+                                          SizedBox(width: 8),
+                                          Text("Edit"),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: "delete",
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.delete, size: 18, color: Colors.red),
+                                          SizedBox(width: 8),
+                                          Text("Delete"),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
                               ],
                             ),
 
@@ -561,4 +598,33 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
       ),
     );
   }
+}
+
+void _confirmDelete(BuildContext context, int jobId) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      title: const Text("Delete Job"),
+      content: const Text("Are you sure you want to delete this job?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            context.read<JobsCubit>().deleteJob(jobId);
+          },
+          child: const Text(
+            "Delete",
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+      ],
+    ),
+  );
 }

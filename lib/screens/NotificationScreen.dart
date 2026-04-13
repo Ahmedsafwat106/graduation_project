@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/notification/NotificationState.dart';
 import '../features/notification/notification_cubit.dart';
 import '../models/NotificationCard.dart';
+import '../widgets/shimmer_widgets.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -97,9 +98,7 @@ class _NotificationScreenState
                 builder: (context, state) {
 
                   if (state is NotificationLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
+                    return const ShimmerList(card: ShimmerNotificationCard(), count: 6);
                   }
 
                   if (state is NotificationLoaded) {

@@ -147,7 +147,7 @@ class _EditJobScreenState extends State<EditJobScreen> {
                       const SizedBox(height: 30),
 
                       state is AuthLoading
-                          ? const CircularProgressIndicator()
+                          ? const CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3)
                           : SizedBox(
                         width: double.infinity,
                         height: 55,
@@ -191,9 +191,7 @@ class _EditJobScreenState extends State<EditJobScreen> {
                               );
                             },
                             child: state is AuthLoading
-                                ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
+                                ? const CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3)
                                 : const Text(
                               "Save Changes",
                               style: TextStyle(

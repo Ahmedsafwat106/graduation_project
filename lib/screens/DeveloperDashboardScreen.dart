@@ -86,10 +86,45 @@ class _DeveloperDashboardScreenState
                       () => Navigator.pushNamed(context, "/chats")),
               _bottomIcon(Icons.favorite_border, () async {
                 final prefs = await SharedPreferences.getInstance();
-                final userId = prefs.getInt("userId");
+                int? userId = prefs.getInt("userId");
+
+                if (userId == null) {
+                  final token = prefs.getString("token") ?? "";
+                  if (token.isNotEmpty) {
+                    try {
+                      final parts = token.split(".");
+                      if (parts.length == 3) {
+                        String payload = parts[1];
+                        while (payload.length % 4 != 0) payload += "=";
+                        final decoded = jsonDecode(
+                          utf8.decode(base64Url.decode(payload)),
+                        );
+
+                        final sub = decoded[
+                        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+                        ];
+                        if (sub != null) {
+                          userId = int.tryParse(sub.toString());
+
+                          if (userId != null) {
+                            await prefs.setInt("userId", userId);
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      print("❌ Token parse error: $e");
+                    }
+                  }
+                }
+
+                print("👤 final userId => $userId");
+
                 if (userId != null) {
-                  Navigator.pushNamed(context, "/saved-jobs",
-                      arguments: userId);
+                  Navigator.pushNamed(context, "/saved-jobs", arguments: userId);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please login again")),
+                  );
                 }
               }),
               _bottomIcon(Icons.history,
