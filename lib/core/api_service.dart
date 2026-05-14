@@ -66,6 +66,26 @@ class ApiService {
     final message = decoded["message"] ?? "Login Failed";
     throw Exception(message);
   }
+  Future<Map<String, dynamic>> refreshToken(
+      String token, String refreshToken) async {
+    final request = http.Request(
+      "GET",
+      Uri.parse("http://devjob.runasp.net/api/Auth/generate-access-token"),
+    );
+    request.headers["Content-Type"] = "application/json";
+    request.body = jsonEncode({
+      "Token": token,
+      "RefreshToken": refreshToken,
+    });
+    final streamed = await request.send();
+    final r = await http.Response.fromStream(streamed);
+
+    print("REFRESH TOKEN STATUS => ${r.statusCode}");
+    print("REFRESH TOKEN BODY => ${r.body}");
+
+    if (r.statusCode == 200) return jsonDecode(r.body);
+    throw Exception("Refresh Token Failed: ${r.body}");
+  }
 
   Future<Map<String, dynamic>> addJob(
       String token,
@@ -758,10 +778,8 @@ class ApiService {
         fixedId = decoded["id"];
       }
 
-      // استخراج الـ appUser
       String? appUser = decoded["appUser"] ?? decoded["AppUser"];
 
-      // لو appUser أو fixedId null - استخرجهم من الـ token
       if (appUser == null || fixedId == null) {
         try {
           final parts = token.split(".");

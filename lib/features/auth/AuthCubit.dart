@@ -51,6 +51,16 @@ class AuthCubit extends Cubit<AuthState> {
       await prefs.setString("token", token);
       await prefs.setString("role", role);
 
+      final refreshTkn =
+          result["refreshToken"] ??
+              result["RefreshToken"] ??
+              "";
+
+      if (refreshTkn.isNotEmpty) {
+        await prefs.setString("refreshToken", refreshTkn);
+        print("✅ REFRESH TOKEN SAVED");
+      }
+
       print("🔐 TOKEN SAVED SUCCESSFULLY");
 
       Map<String, dynamic>? userData;
@@ -208,12 +218,32 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> tryAutoLogin() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
+    final refresh = prefs.getString("refreshToken");
 
-    if (token != null && token.isNotEmpty) {
-      emit(AuthAuthenticated(token));
-    } else {
+    if (token == null || token.isEmpty) {
       emit(AuthInitial());
+      return;
     }
+
+    if (refresh != null && refresh.isNotEmpty) {
+      try {
+        final result = await api.refreshToken(token, refresh);
+        if (result["success"] == true && result["token"] != null) {
+          final newToken = result["token"];
+          final newRefresh = result["refreshToken"] ?? refresh;
+
+          await prefs.setString("token", newToken);
+          await prefs.setString("refreshToken", newRefresh);
+
+          print("✅ Token refreshed successfully");
+          emit(AuthAuthenticated(newToken));
+          return;
+        }
+      } catch (e) {
+        print("⚠️ Refresh failed: $e");
+      }
+    }
+    emit(AuthAuthenticated(token));
   }
 
   Future<void> logout() async {

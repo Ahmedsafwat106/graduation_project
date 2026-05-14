@@ -380,6 +380,31 @@ class _JobListScreenState extends State<JobListScreen>
             ],
           ),
 
+          if (job["source"] != null && job["source"].toString().isNotEmpty) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.link, size: 11, color: Colors.blue),
+                  const SizedBox(width: 3),
+                  Text(
+                    job["source"].toString(),
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (widget.loadType == JobLoadType.recommended &&
               job["matchScore"] != null) ...[
             const SizedBox(height: 8),

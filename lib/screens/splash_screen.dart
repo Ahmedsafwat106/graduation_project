@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../features/auth/AuthCubit.dart';
+import '../features/auth/AuthState.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -36,22 +40,28 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _navigateNext() async {
     await Future.delayed(const Duration(seconds: 3));
-
     if (!mounted) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token") ?? "";
-    final role = prefs.getString("role") ?? "";
+    final authCubit = context.read<AuthCubit>();
 
-    if (token.isNotEmpty) {
-      if (role == "company") {
-        Navigator.pushReplacementNamed(context, "/company-dashboard");
-      } else {
-        Navigator.pushReplacementNamed(context, "/developer-dashboard");
+    authCubit.stream.listen((state) {
+      if (!mounted) return;
+      if (state is AuthAuthenticated) {
+        final prefs_role = "";
+        SharedPreferences.getInstance().then((prefs) {
+          final role = prefs.getString("role") ?? "";
+          if (role == "company") {
+            Navigator.pushReplacementNamed(context, "/company-dashboard");
+          } else {
+            Navigator.pushReplacementNamed(context, "/developer-dashboard");
+          }
+        });
+      } else if (state is AuthInitial) {
+        Navigator.pushReplacementNamed(context, "/onboarding");
       }
-    } else {
-      Navigator.pushReplacementNamed(context, "/onboarding");
-    }
+    });
+
+    await authCubit.tryAutoLogin();
   }
 
   @override
