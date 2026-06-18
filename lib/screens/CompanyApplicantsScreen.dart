@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../features/applications/applications_cubit.dart';
@@ -69,7 +70,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
       case "Reviewed":
         return Colors.orange;
       case "Interview":
-        return const Color(0xFF1FA463);
+        return AppColors.primary;
       case "Rejected":
         return Colors.red;
       default:
@@ -99,7 +100,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                    colors: [AppColors.primary, AppColors.primaryDark],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -154,7 +155,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                       child: TextField(
                         onChanged: _onSearch,
                         decoration: const InputDecoration(
-                          icon: Icon(Icons.search, color: Color(0xFF1FA463)),
+                          icon: Icon(Icons.search, color: AppColors.primary),
                           hintText: "Search applicants...",
                           border: InputBorder.none,
                         ),
@@ -190,7 +191,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                                     _rtNew ?? c["totalNew"] ?? 0, "New", Colors.blue),
                                 _countItem(
                                     _rtInterview ?? c["totalInterview"] ?? 0,
-                                    "Interview", const Color(0xFF1FA463)),
+                                    "Interview", AppColors.primary),
                                 _countItem(
                                     _rtAccepted ?? c["totalReviewed"] ?? 0,
                                     "Reviewed", Colors.orange),
@@ -315,13 +316,13 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1FA463).withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   "${user["matchScore"] ?? 0}%",
                   style: const TextStyle(
-                    color: Color(0xFF1FA463),
+                    color: AppColors.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -402,12 +403,12 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
             child: Container(
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                  colors: [AppColors.primary, AppColors.primaryDark],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.green.withOpacity(0.25),
+                    color: AppColors.primary.withOpacity(0.25),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
@@ -470,7 +471,7 @@ class _CompanyApplicantsScreenState extends State<CompanyApplicantsScreen> {
                     ? const SizedBox(
                   height: 18,
                   width: 18,
-                  child:CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3)
+                  child:CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3)
                 )
                     : const Text(
                   "Start Chat",

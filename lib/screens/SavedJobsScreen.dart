@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../features/jobs/jobs_cubit.dart';
@@ -44,7 +45,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                  colors: [AppColors.primary, AppColors.primaryDark],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -136,7 +137,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                       },
                       decoration: InputDecoration(
                         icon: const Icon(Icons.search,
-                            color: Color(0xFF1FA463)),
+                            color: AppColors.primary),
                         hintText: "Search saved jobs...",
                         border: InputBorder.none,
                         suffixIcon: _isSearching
@@ -211,7 +212,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                   }
 
                   return RefreshIndicator(
-                    color: const Color(0xFF1FA463),
+                    color: AppColors.primary,
                     onRefresh: () async {
                       _searchController.clear();
                       setState(() => _isSearching = false);
@@ -276,12 +277,12 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                 width: 45,
                 height: 45,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1FA463).withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
                   hasExternalLink ? Icons.open_in_new : Icons.bookmark,
-                  color: const Color(0xFF1FA463),
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -301,7 +302,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                       const Text(
                         "External Job",
                         style: TextStyle(
-                          color: Color(0xFF1FA463),
+                          color: AppColors.primary,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -376,13 +377,13 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color:
-                    const Color(0xFF1FA463).withOpacity(0.08),
+                    AppColors.primary.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     s.toString(),
                     style: const TextStyle(
-                      color: Color(0xFF1FA463),
+                      color: AppColors.primary,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -402,10 +403,10 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: hasExternalLink
-                      ? [Color(0xFF1FA463), Color(0xFF1FA463)]
+                      ? [AppColors.primary, AppColors.primary]
                       : [
-                    const Color(0xFF1FA463),
-                    const Color(0xFF159957)
+                    AppColors.primary,
+                    AppColors.primaryDark
                   ],
                 ),
                 borderRadius: BorderRadius.circular(18),

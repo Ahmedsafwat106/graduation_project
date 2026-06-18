@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
@@ -96,7 +97,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                    colors: [AppColors.primary, AppColors.primaryDark],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -351,7 +352,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
                                   const SizedBox(width: 8),
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF1FA463),
+                                      color: AppColors.primary,
                                       borderRadius: BorderRadius.circular(14),
                                     ),
                                     child: IconButton(
@@ -384,7 +385,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
                                         (e) => Chip(
                                       label: Text(e),
                                       backgroundColor:
-                                      const Color(0xFFE8F5E9),
+                                      AppColors.primary.withOpacity(0.1),
                                       deleteIconColor: Colors.red,
                                       onDeleted: () {
                                         setState(() => skills.remove(e));
@@ -405,7 +406,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
                         const SizedBox(height: 30),
 
                         state is JobsLoading
-                            ? const CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3)
+                            ? const CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3)
                             : SizedBox(
                           width: double.infinity,
                           height: 55,
@@ -413,14 +414,14 @@ class _AddJobScreenState extends State<AddJobScreen> {
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [
-                                  Color(0xFF1FA463),
-                                  Color(0xFF159957),
+                                  AppColors.primary,
+                                  AppColors.primaryDark,
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(18),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.green.withOpacity(0.25),
+                                  color: AppColors.primary.withOpacity(0.25),
                                   blurRadius: 14,
                                   offset: const Offset(0, 8),
                                 ),
@@ -477,7 +478,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
         autovalidateMode: AutovalidateMode.onUserInteraction,
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon, color: const Color(0xFF1FA463)),
+          prefixIcon: Icon(icon, color: AppColors.primary),
           filled: true,
           fillColor: Colors.white,
           contentPadding:

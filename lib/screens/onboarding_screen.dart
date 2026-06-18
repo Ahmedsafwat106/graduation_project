@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'LoginScreen.dart';
 
@@ -85,7 +86,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                   padding: EdgeInsets.fromLTRB(24, headerPadTop, 24, 18),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                      colors: [AppColors.primary, AppColors.primaryDark],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -201,7 +202,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(40),
                     color: _currentIndex == i
-                        ? const Color(0xFF1FA463)
+                        ? AppColors.primary
                         : Colors.grey.shade300,
                   ),
                 ),
@@ -216,12 +217,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                      colors: [AppColors.primary, AppColors.primaryDark],
                     ),
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.withOpacity(0.3),
+                        color: AppColors.primary.withOpacity(0.3),
                         blurRadius: 18,
                         offset: const Offset(0, 8),
                       ),

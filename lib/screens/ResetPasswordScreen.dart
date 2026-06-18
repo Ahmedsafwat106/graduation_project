@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import '../core/api_service.dart';
 import 'LoginScreen.dart';
 
@@ -33,8 +34,8 @@ class ResetPasswordScreen extends StatelessWidget {
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF1FA463),
-                      Color(0xFF159957),
+                      AppColors.primary,
+                      AppColors.primaryDark,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -141,14 +142,14 @@ class ResetPasswordScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
                               colors: [
-                                Color(0xFF1FA463),
-                                Color(0xFF159957),
+                                AppColors.primary,
+                                AppColors.primaryDark,
                               ],
                             ),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.green.withOpacity(0.3),
+                                color: AppColors.primary.withOpacity(0.3),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -227,7 +228,7 @@ class ResetPasswordScreen extends StatelessWidget {
                         child: const Text(
                           "Back to Login",
                           style: TextStyle(
-                            color: Color(0xFF1FA463),
+                            color: AppColors.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -263,7 +264,7 @@ class ResetPasswordScreen extends StatelessWidget {
           hintText: hint,
           prefixIcon: Icon(
             icon,
-            color: const Color(0xFF1FA463),
+            color: AppColors.primary,
           ),
           border: InputBorder.none,
           contentPadding:

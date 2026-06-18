@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
+const Color _shimmerBase = Color(0xFFE8F0F1);
+const Color _shimmerHighlight = Color(0xFFF4F7F8);
+
 class ShimmerJobCard extends StatelessWidget {
   const ShimmerJobCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: _shimmerBase,
+      highlightColor: _shimmerHighlight,
       child: Container(
         margin: const EdgeInsets.only(bottom: 18),
         padding: const EdgeInsets.all(18),
@@ -112,8 +115,8 @@ class ShimmerApplicantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: _shimmerBase,
+      highlightColor: _shimmerHighlight,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(18),
@@ -201,8 +204,8 @@ class ShimmerChatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: _shimmerBase,
+      highlightColor: _shimmerHighlight,
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),
@@ -267,8 +270,8 @@ class ShimmerNotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: _shimmerBase,
+      highlightColor: _shimmerHighlight,
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),

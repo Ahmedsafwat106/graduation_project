@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../features/jobs/jobs_cubit.dart';
@@ -66,7 +67,7 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F6),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1FA463),
+        backgroundColor: AppColors.primary,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: TextField(
@@ -218,12 +219,12 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1FA463).withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.work_outline,
-                  color: Color(0xFF1FA463),
+                  color: AppColors.primary,
                   size: 22,
                 ),
               ),
@@ -271,13 +272,13 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1FA463).withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   job["jobType"] ?? "",
                   style: const TextStyle(
-                    color: Color(0xFF1FA463),
+                    color: AppColors.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -318,7 +319,7 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
             height: 44,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1FA463),
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),

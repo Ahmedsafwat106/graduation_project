@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
@@ -97,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   padding: const EdgeInsets.fromLTRB(24, 70, 24, 45),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                      colors: [AppColors.primary, AppColors.primaryDark],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -228,12 +229,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Container(
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                                colors: [AppColors.primary, AppColors.primaryDark],
                               ),
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.green.withOpacity(0.3),
+                                  color: AppColors.primary.withOpacity(0.3),
                                   blurRadius: 20,
                                   offset: const Offset(0, 10),
                                 ),
@@ -328,7 +329,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: const Text(
                     "Already have an account?",
                     style: TextStyle(
-                      color: Color(0xFF1FA463),
+                      color: AppColors.primary,
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
                     ),
@@ -382,7 +383,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         controller: c,
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon: Icon(icon, color: const Color(0xFF1FA463)),
+          prefixIcon: Icon(icon, color: AppColors.primary),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 18),
         ),
@@ -414,7 +415,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             obscureText: obscure,
             decoration: InputDecoration(
               hintText: hint,
-              prefixIcon: Icon(icon, color: const Color(0xFF1FA463)),
+              prefixIcon: Icon(icon, color: AppColors.primary),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 18),
               suffixIcon: IconButton(

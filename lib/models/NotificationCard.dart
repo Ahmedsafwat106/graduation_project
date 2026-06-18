@@ -1,7 +1,6 @@
-import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../utils/app_colors.dart';
 
 class NotificationCard extends StatelessWidget {
   final String title;
@@ -23,11 +22,8 @@ class NotificationCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 18),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isRead
-            ? Colors.white
-            : const Color(0xFFE8F5E9),
-        borderRadius:
-        BorderRadius.circular(18),
+        color: isRead ? Colors.white : AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
@@ -37,44 +33,33 @@ class NotificationCard extends StatelessWidget {
         ],
       ),
       child: Row(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Container(
             width: 45,
             height: 45,
             decoration: BoxDecoration(
-              color:
-              Colors.green.withOpacity(0.1),
-              borderRadius:
-              BorderRadius.circular(12),
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
               Icons.notifications_none,
-              color: Colors.green,
+              color: AppColors.primary,
             ),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Text(
                   title,
                   style: const TextStyle(
-                    fontWeight:
-                    FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
                 ),
-
                 const SizedBox(height: 4),
-
                 Text(
                   message,
                   style: const TextStyle(
@@ -82,9 +67,7 @@ class NotificationCard extends StatelessWidget {
                     fontSize: 13,
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 Text(
                   time,
                   style: const TextStyle(
@@ -95,14 +78,12 @@ class NotificationCard extends StatelessWidget {
               ],
             ),
           ),
-
           if (!isRead)
             Container(
               width: 8,
               height: 8,
-              decoration:
-              const BoxDecoration(
-                color: Colors.green,
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
                 shape: BoxShape.circle,
               ),
             ),

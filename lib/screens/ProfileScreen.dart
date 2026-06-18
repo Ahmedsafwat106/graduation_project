@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -65,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             if (state is ProfileLoading) {
               return const Center(
-                child: CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3),
+                child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3),
               );
             }
             if (state is ProfileFailure) {
@@ -84,8 +85,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Color(0xFF1FA463),
-                          Color(0xFF159957),
+                          AppColors.primary,
+                          AppColors.primaryDark,
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -108,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Icon(
                                     Icons.person,
                                     size: 55,
-                                    color: Color(0xFF1FA463),
+                                    color: AppColors.primary,
                                   ),
                                 ),
 
@@ -122,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: Icon(
                                       Icons.edit,
                                       size: 18,
-                                      color: Color(0xFF1FA463),
+                                      color: AppColors.primary,
                                     ),
                                   ),
                                 )
@@ -191,15 +192,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [
-                                      Color(0xFF1FA463),
-                                      Color(0xFF159957),
+                                      AppColors.primary,
+                                      AppColors.primaryDark,
                                     ],
                                   ),
                                   borderRadius:
                                   BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.green
+                                      color: AppColors.primary
                                           .withOpacity(0.3),
                                       blurRadius: 18,
                                       offset:
@@ -287,12 +288,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 45,
             decoration: BoxDecoration(
               color:
-              const Color(0xFF1FA463).withOpacity(0.1),
+              AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
               icon,
-              color: const Color(0xFF1FA463),
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(width: 14),

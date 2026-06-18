@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/cv/cv_cubit.dart';
@@ -36,7 +37,7 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
 
           if (state is CvLoading) {
             return const Center(
-              child:CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3),
+              child:CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3),
             );
           }
 
@@ -53,8 +54,8 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Color(0xFF1FA463),
-                        Color(0xFF159957),
+                        AppColors.primary,
+                        AppColors.primaryDark,
                       ],
                     ),
                     borderRadius: BorderRadius.only(
@@ -99,8 +100,8 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
-                                    Color(0xFF1FA463),
-                                    Color(0xFF159957),
+                                    AppColors.primary,
+                                    AppColors.primaryDark,
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(24),
@@ -133,8 +134,8 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [
-                                      Color(0xFF1FA463),
-                                      Color(0xFF159957),
+                                      AppColors.primary,
+                                      AppColors.primaryDark,
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(18),
@@ -208,8 +209,8 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF1FA463),
-                      Color(0xFF159957),
+                      AppColors.primary,
+                      AppColors.primaryDark,
                     ],
                   ),
                   borderRadius: BorderRadius.only(
@@ -256,7 +257,7 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                               width: 80,
                               height: 80,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1FA463)
+                                color: AppColors.primary
                                     .withOpacity(0.1),
                                 borderRadius:
                                 BorderRadius.circular(22),
@@ -264,7 +265,7 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                               child: const Icon(
                                 Icons.upload_file_rounded,
                                 size: 40,
-                                color: Color(0xFF1FA463),
+                                color: AppColors.primary,
                               ),
                             ),
 
@@ -288,7 +289,7 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                                 backgroundColor:
                                 const Color(0xFFF4F7F6),
                                 foregroundColor:
-                                const Color(0xFF1FA463),
+                                AppColors.primary,
                                 elevation: 0,
                                 padding:
                                 const EdgeInsets.symmetric(
@@ -332,15 +333,15 @@ class _UploadCvScreenState extends State<UploadCvScreen> {
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
                               colors: [
-                                Color(0xFF1FA463),
-                                Color(0xFF159957),
+                                AppColors.primary,
+                                AppColors.primaryDark,
                               ],
                             ),
                             borderRadius:
                             BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.green
+                                color: AppColors.primary
                                     .withOpacity(0.25),
                                 blurRadius: 16,
                                 offset: const Offset(0, 8),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
@@ -30,8 +31,8 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Color(0xFF1FA463),
-                  Color(0xFF159957),
+                  AppColors.primary,
+                  AppColors.primaryDark,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -88,7 +89,7 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
               builder: (context, state) {
                 if (state is JobsLoading) {
                   return const Center(
-                      child: CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3));
+                      child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3));
                 }
 
                 if (state is JobsLoaded) {
@@ -163,8 +164,7 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
                                       horizontal: 12,
                                       vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: const Color(
-                                        0xFF1FA463)
+                                    color: AppColors.primary
                                         .withOpacity(0.1),
                                     borderRadius:
                                     BorderRadius.circular(
@@ -175,7 +175,7 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
                                     style:
                                     const TextStyle(
                                       color:
-                                      Color(0xFF1FA463),
+                                      AppColors.primary,
                                       fontWeight:
                                       FontWeight.bold,
                                       fontSize: 12,

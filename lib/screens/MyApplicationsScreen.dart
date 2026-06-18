@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/applications/applications_cubit.dart';
 import '../features/applications/applications_state..dart';
@@ -26,7 +27,7 @@ class _MyApplicationsScreenState
   Color _getStatusColor(String status) {
     switch (status) {
       case "Interview":
-        return const Color(0xFF1FA463);
+        return AppColors.primary;
       case "Rejected":
         return Colors.red;
       case "Waiting":
@@ -63,8 +64,8 @@ class _MyApplicationsScreenState
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Color(0xFF1FA463),
-                          Color(0xFF159957),
+                          AppColors.primary,
+                          AppColors.primaryDark,
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -157,7 +158,7 @@ class _MyApplicationsScreenState
                               _countItem(
                                 counts["interview"] ?? 0,
                                 "Interview",
-                                const Color(0xFF1FA463),
+                                AppColors.primary,
                               ),
                               _countItem(
                                 counts["waiting"] ?? 0,
@@ -279,8 +280,8 @@ class _MyApplicationsScreenState
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [
-                      Color(0xFF1FA463),
-                      Color(0xFF159957),
+                      AppColors.primary,
+                      AppColors.primaryDark,
                     ],
                   ),
                   borderRadius:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import '../core/api_service.dart';
 import 'ResetPasswordScreen.dart';
 
@@ -10,7 +11,7 @@ class ForgotPasswordScreen extends StatelessWidget {
     final email = TextEditingController();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4FFFA),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -21,13 +22,13 @@ class ForgotPasswordScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50).withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.lock_reset_rounded,
                   size: 42,
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.primary,
                 ),
               ),
 
@@ -38,7 +39,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.primary,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -144,15 +145,15 @@ class ForgotPasswordScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(18),
                           gradient: const LinearGradient(
                             colors: [
-                              Color(0xFF1FA463),
-                              Color(0xFF159957),
+                              AppColors.primary,
+                              AppColors.primaryDark,
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF4CAF50)
+                              color: AppColors.primary
                                   .withOpacity(0.35),
                               blurRadius: 18,
                               offset: const Offset(0, 8),
@@ -180,7 +181,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                         child: const Text(
                           "Back to Login",
                           style: TextStyle(
-                            color: Color(0xFF4CAF50),
+                            color: AppColors.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

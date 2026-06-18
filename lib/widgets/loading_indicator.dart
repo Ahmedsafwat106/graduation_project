@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 
 class LoadingIndicator extends StatelessWidget {
   const LoadingIndicator({super.key});
@@ -7,7 +8,7 @@ class LoadingIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Center(
       child: CircularProgressIndicator(
-        color: Color(0xFF1FA463),
+        color: AppColors.primary,
         strokeWidth: 3,
       ),
     );

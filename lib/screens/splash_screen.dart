@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -79,8 +80,8 @@ class _SplashScreenState extends State<SplashScreen>
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF1FA463),
-              Color(0xFF159957),
+              AppColors.primary,
+              AppColors.primaryDark,
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -125,7 +126,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       child: const Icon(
                         Icons.workspace_premium_rounded,
-                        color: Color(0xFF1FA463),
+                        color: AppColors.primary,
                         size: 55,
                       ),
                     ),
@@ -161,7 +162,7 @@ class _SplashScreenState extends State<SplashScreen>
                 SizedBox(
                   width: 26,
                   height: 26,
-                  child:CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3)
+                  child:CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3)
                 ),
                 const SizedBox(height: 20),
 

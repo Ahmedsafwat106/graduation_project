@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -115,7 +116,7 @@ class _JobListScreenState extends State<JobListScreen>
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.filter_list,
-                        color: Color(0xFF1FA463)),
+                        color: AppColors.primary),
                     onPressed: () {
                       Navigator.pushNamed(context, "/advanced-filter")
                           .then((_) {
@@ -185,7 +186,7 @@ class _JobListScreenState extends State<JobListScreen>
                         const SizedBox(height: 16),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1FA463),
+                            backgroundColor: AppColors.primary,
                           ),
                           onPressed: () {
                             if (widget.loadType == JobLoadType.recommended) {
@@ -216,7 +217,7 @@ class _JobListScreenState extends State<JobListScreen>
                 }
 
                 return RefreshIndicator(
-                  color: const Color(0xFF1FA463),
+                  color: AppColors.primary,
                   onRefresh: () async {
                     if (widget.loadType == JobLoadType.recommended) {
                       await context
@@ -295,7 +296,7 @@ class _JobListScreenState extends State<JobListScreen>
 
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1FA463).withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
@@ -303,7 +304,7 @@ class _JobListScreenState extends State<JobListScreen>
                     _savedJobIds.contains(jobId)
                         ? Icons.bookmark
                         : Icons.bookmark_border,
-                    color: const Color(0xFF1FA463),
+                    color: AppColors.primary,
                   ),
                   onPressed: () {
                     if (userId == null || jobId == null) return;
@@ -365,13 +366,13 @@ class _JobListScreenState extends State<JobListScreen>
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1FA463).withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   job["jobType"] ?? "",
                   style: const TextStyle(
-                    color: Color(0xFF1FA463),
+                    color: AppColors.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -431,7 +432,7 @@ class _JobListScreenState extends State<JobListScreen>
             height: 48,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1FA463),
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),

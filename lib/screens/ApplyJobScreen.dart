@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../features/applications/applications_cubit.dart';
@@ -72,8 +73,8 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xFF1FA463),
-                    Color(0xFF159957),
+                    AppColors.primary,
+                    AppColors.primaryDark,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -191,7 +192,7 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
 
                         if (state is CvLoading) {
                           return const Center(
-                              child: CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3));
+                              child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3));
                         }
 
                         if (state is CvsLoaded) {
@@ -259,14 +260,14 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [
-                              Color(0xFF1FA463),
-                              Color(0xFF159957),
+                              AppColors.primary,
+                              AppColors.primaryDark,
                             ],
                           ),
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.green.withOpacity(0.25),
+                              color: AppColors.primary.withOpacity(0.25),
                               blurRadius: 14,
                               offset: const Offset(0, 8),
                             ),

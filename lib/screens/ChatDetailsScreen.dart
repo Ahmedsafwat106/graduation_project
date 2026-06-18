@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../features/chat/ChatCubit.dart';
@@ -145,7 +146,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
             ListTile(
               leading: const Icon(
                 Icons.edit_outlined,
-                color: Color(0xFF1FA463),
+                color: AppColors.primary,
               ),
               title: const Text("Edit Message"),
               onTap: () {
@@ -170,7 +171,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: const BorderSide(
-                            color: Color(0xFF1FA463),
+                            color: AppColors.primary,
                             width: 2,
                           ),
                         ),
@@ -198,7 +199,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                         },
                         child: const Text(
                           "Save",
-                          style: TextStyle(color: Color(0xFF1FA463)),
+                          style: TextStyle(color: AppColors.primary),
                         ),
                       ),
                     ],
@@ -250,7 +251,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
           decoration: BoxDecoration(
             gradient: isMe
                 ? const LinearGradient(
-              colors: [Color(0xFF1FA463), Color(0xFF159957)],
+              colors: [AppColors.primary, AppColors.primaryDark],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             )
@@ -367,7 +368,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                colors: [AppColors.primary, AppColors.primaryDark],
               ),
               shape: BoxShape.circle,
             ),
@@ -396,7 +397,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
             padding: const EdgeInsets.fromLTRB(16, 50, 16, 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                colors: [AppColors.primary, AppColors.primaryDark],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -459,7 +460,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
               },
               builder: (context, state) {
                 if (state is ChatLoading) {
-                  return const Center(child:CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3));
+                  return const Center(child:CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3));
                 }
 
                 if (state is ChatMessagesLoaded) {

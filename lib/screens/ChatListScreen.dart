@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/chat/ChatCubit.dart';
 import '../features/chat/ChatState.dart';
@@ -42,7 +43,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF1FA463), Color(0xFF159957)],
+                  colors: [AppColors.primary, AppColors.primaryDark],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -101,7 +102,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         context.read<ChatCubit>().searchConversations(value);
                       },
                       decoration: InputDecoration(
-                        icon: const Icon(Icons.search, color: Color(0xFF1FA463)),
+                        icon: const Icon(Icons.search, color: AppColors.primary),
                         hintText: "Search conversations...",
                         border: InputBorder.none,
                         suffixIcon: _isSearching
@@ -212,8 +213,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [
-                                      Color(0xFF1FA463),
-                                      Color(0xFF159957),
+                                      AppColors.primary,
+                                      AppColors.primaryDark,
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(18),

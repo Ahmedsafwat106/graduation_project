@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/api_service.dart';
@@ -146,8 +148,8 @@ class _DeveloperDashboardScreenState
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF1FA463),
-                      Color(0xFF159957),
+                      AppColors.primary,
+                      AppColors.primaryDark,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -285,8 +287,8 @@ class _DeveloperDashboardScreenState
                             borderRadius: BorderRadius.circular(15),
                           ),
                           child: const TabBar(
-                            indicatorColor: Color(0xFF1FA463),
-                            labelColor: Color(0xFF1FA463),
+                            indicatorColor: AppColors.primary,
+                            labelColor: AppColors.primary,
                             unselectedLabelColor: Colors.grey,
                             tabs: [
                               Tab(text: "All Jobs"),
@@ -337,7 +339,7 @@ class _DeveloperDashboardScreenState
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1FA463),
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 4),
@@ -350,7 +352,7 @@ class _DeveloperDashboardScreenState
 
   Widget _bottomIcon(IconData icon, VoidCallback onTap) {
     return IconButton(
-      icon: Icon(icon, color: const Color(0xFF1FA463), size: 26),
+      icon: Icon(icon, color: AppColors.primary, size: 26),
       onPressed: onTap,
     );
   }
@@ -410,14 +412,14 @@ class _DeveloperDashboardScreenState
                 leading: CircleAvatar(
                   backgroundColor: acc["role"] == "company"
                       ? Colors.blue.withOpacity(0.15)
-                      : const Color(0xFF1FA463).withOpacity(0.15),
+                      : AppColors.primary.withOpacity(0.15),
                   child: Icon(
                     acc["role"] == "company"
                         ? Icons.business
                         : Icons.person,
                     color: acc["role"] == "company"
                         ? Colors.blue
-                        : const Color(0xFF1FA463),
+                        : AppColors.primary,
                   ),
                 ),
                 title: Text(
@@ -428,7 +430,7 @@ class _DeveloperDashboardScreenState
                     acc["role"] == "company" ? "Company" : "Developer"),
                 trailing: isActive
                     ? const Icon(Icons.check_circle,
-                    color: Color(0xFF1FA463))
+                    color: AppColors.primary)
                     : null,
                 onTap: () async {
                   Navigator.pop(context);
@@ -458,10 +460,88 @@ class _DeveloperDashboardScreenState
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1FA463).withOpacity(0.1),
+                  color: Colors.blue.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.add, color: Color(0xFF1FA463)),
+                child: const Icon(Icons.language, color: Colors.blue),
+              ),
+              title: const Text("Change Language",
+                  style: TextStyle(fontWeight: FontWeight.w600)),
+              trailing: Wrap(
+                spacing: 12,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: context.locale == const Locale('en')
+                          ? Colors.blue
+                          : Colors.grey.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          context.setLocale(const Locale('en'));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          child: Text(
+                            "EN",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: context.locale == const Locale('en')
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: context.locale == const Locale('ar')
+                          ? Colors.blue
+                          : Colors.grey.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          context.setLocale(const Locale('ar'));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          child: Text(
+                            "AR",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: context.locale == const Locale('ar')
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.add, color: AppColors.primary),
               ),
               title: const Text("Add Account",
                   style: TextStyle(fontWeight: FontWeight.w600)),

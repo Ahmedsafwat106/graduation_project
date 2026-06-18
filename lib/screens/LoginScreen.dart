@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
@@ -43,8 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xFF1FA463),
-                    Color(0xFF159957),
+                    AppColors.primary,
+                    AppColors.primaryDark,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -207,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: const Text(
                               "Forgot Password?",
                               style: TextStyle(
-                                color: Color(0xFF1FA463),
+                                color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -218,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         state is AuthLoading
                             ? const Center(
-                            child:  CircularProgressIndicator(color: Color(0xFF1FA463), strokeWidth: 3))
+                            child:  CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3))
                             : SizedBox(
                           width: double.infinity,
                           height: 58,
@@ -226,15 +227,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [
-                                  Color(0xFF1FA463),
-                                  Color(0xFF159957),
+                                  AppColors.primary,
+                                  AppColors.primaryDark,
                                 ],
                               ),
                               borderRadius:
                               BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.green
+                                  color: AppColors.primary
                                       .withOpacity(0.3),
                                   blurRadius: 20,
                                   offset:
@@ -250,14 +251,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [
-                                      Color(0xFF1FA463),
-                                      Color(0xFF159957),
+                                      AppColors.primary,
+                                      AppColors.primaryDark,
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.green.withOpacity(0.3),
+                                      color: AppColors.primary.withOpacity(0.3),
                                       blurRadius: 20,
                                       offset: const Offset(0, 10),
                                     ),
@@ -338,7 +339,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: const Text(
                 "Create Account",
                 style: TextStyle(
-                  color: Color(0xFF1FA463),
+                  color: AppColors.primary,
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                 ),
@@ -403,7 +404,7 @@ class _LoginScreenState extends State<LoginScreen> {
         obscureText: isPass ? _obscure : false,
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon: Icon(icon, color: const Color(0xFF1FA463)),
+          prefixIcon: Icon(icon, color: AppColors.primary),
           border: InputBorder.none,
           contentPadding:
           const EdgeInsets.symmetric(vertical: 18),

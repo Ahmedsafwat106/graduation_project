@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/notification/NotificationState.dart';
 import '../features/notification/notification_cubit.dart';
@@ -37,8 +38,8 @@ class _NotificationScreenState
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xFF1FA463),
-                    Color(0xFF159957),
+                    AppColors.primary,
+                    AppColors.primaryDark,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,

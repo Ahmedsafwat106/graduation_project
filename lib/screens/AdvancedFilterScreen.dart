@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/jobs/jobs_cubit.dart';
 import '../features/jobs/jobs_state..dart';
@@ -50,8 +51,8 @@ class _AdvancedFilterScreenState
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF1FA463),
-                      Color(0xFF159957),
+                      AppColors.primary,
+                      AppColors.primaryDark,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -165,13 +166,13 @@ class _AdvancedFilterScreenState
                               selected:
                               selectedSkills.contains(skill),
                               selectedColor:
-                              const Color(0xFFE8F5E9),
+                              AppColors.primary.withOpacity(0.1),
                               checkmarkColor:
-                              const Color(0xFF1FA463),
+                              AppColors.primary,
                               labelStyle: TextStyle(
                                 color: selectedSkills
                                     .contains(skill)
-                                    ? const Color(0xFF1FA463)
+                                    ? AppColors.primary
                                     : Colors.black87,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -205,16 +206,16 @@ class _AdvancedFilterScreenState
                               "${minimumSalary.round()} EGP",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF1FA463),
+                                color: AppColors.primary,
                                 fontSize: 16,
                               ),
                             ),
                             SliderTheme(
                               data: SliderTheme.of(context).copyWith(
                                 activeTrackColor:
-                                const Color(0xFF1FA463),
+                                AppColors.primary,
                                 thumbColor:
-                                const Color(0xFF1FA463),
+                                AppColors.primary,
                                 inactiveTrackColor:
                                 Colors.grey.shade300,
                               ),
@@ -245,14 +246,14 @@ class _AdvancedFilterScreenState
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
                               colors: [
-                                Color(0xFF1FA463),
-                                Color(0xFF159957),
+                                AppColors.primary,
+                                AppColors.primaryDark,
                               ],
                             ),
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.green.withOpacity(0.25),
+                                color: AppColors.primary.withOpacity(0.25),
                                 blurRadius: 14,
                                 offset: const Offset(0, 8),
                               ),
@@ -347,7 +348,7 @@ class _AdvancedFilterScreenState
       contentPadding: EdgeInsets.zero,
       title: Text(value),
       value: isSelected,
-      activeColor: const Color(0xFF1FA463),
+      activeColor: AppColors.primary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
