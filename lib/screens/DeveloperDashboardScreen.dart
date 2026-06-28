@@ -20,9 +20,7 @@ class DeveloperDashboardScreen extends StatefulWidget {
       _DeveloperDashboardScreenState();
 }
 
-class _DeveloperDashboardScreenState
-    extends State<DeveloperDashboardScreen> {
-
+class _DeveloperDashboardScreenState extends State<DeveloperDashboardScreen> {
   Map<String, dynamic> _counts = {
     "applied": 0,
     "messages": 0,
@@ -32,15 +30,11 @@ class _DeveloperDashboardScreenState
   @override
   void initState() {
     super.initState();
-
     final cubit = context.read<JobsCubit>();
-
     if (cubit.cachedAllJobs.isEmpty) {
       cubit.loadDeveloperDashboard();
     }
-
     context.read<JobsCubit>().connectJobHub();
-
     context.read<ChatCubit>().stream.listen((state) {
       if (state is MessageCountUpdated) {
         if (mounted) {
@@ -60,12 +54,10 @@ class _DeveloperDashboardScreenState
         backgroundColor: const Color(0xFFF4F7F6),
 
         bottomNavigationBar: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: const BoxDecoration(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(color: Colors.black12, blurRadius: 10)
-            ],
+            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -74,22 +66,15 @@ class _DeveloperDashboardScreenState
                 final prefs = await SharedPreferences.getInstance();
                 final token = prefs.getString("token") ?? "";
                 if (token.isEmpty) return;
-
                 final api = ApiService();
                 final data = await api.getUserData(token);
-
-                Navigator.pushNamed(
-                  context,
-                  "/edit-profile",
-                  arguments: data,
-                );
+                Navigator.pushNamed(context, "/edit-profile", arguments: data);
               }),
               _bottomIcon(Icons.chat_bubble_outline,
                       () => Navigator.pushNamed(context, "/chats")),
               _bottomIcon(Icons.favorite_border, () async {
                 final prefs = await SharedPreferences.getInstance();
                 int? userId = prefs.getInt("userId");
-
                 if (userId == null) {
                   final token = prefs.getString("token") ?? "";
                   if (token.isNotEmpty) {
@@ -98,42 +83,27 @@ class _DeveloperDashboardScreenState
                       if (parts.length == 3) {
                         String payload = parts[1];
                         while (payload.length % 4 != 0) payload += "=";
-                        final decoded = jsonDecode(
-                          utf8.decode(base64Url.decode(payload)),
-                        );
-
-                        final sub = decoded[
-                        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
-                        ];
+                        final decoded = jsonDecode(utf8.decode(base64Url.decode(payload)));
+                        final sub = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
                         if (sub != null) {
                           userId = int.tryParse(sub.toString());
-
-                          if (userId != null) {
-                            await prefs.setInt("userId", userId);
-                          }
+                          if (userId != null) await prefs.setInt("userId", userId);
                         }
                       }
-                    } catch (e) {
-                      print("❌ Token parse error: $e");
-                    }
+                    } catch (e) { print("❌ Token parse error: $e"); }
                   }
                 }
-
-                print("👤 final userId => $userId");
-
                 if (userId != null) {
                   Navigator.pushNamed(context, "/saved-jobs", arguments: userId);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please login again")),
-                  );
+                      const SnackBar(content: Text("Please login again")));
                 }
               }),
               _bottomIcon(Icons.history,
                       () => Navigator.pushNamed(context, "/my-applications")),
-              _bottomIcon(Icons.account_circle_outlined, () {
-                _showAccountSheet(context);
-              }),
+              _bottomIcon(Icons.account_circle_outlined,
+                      () => _showAccountSheet(context)),
             ],
           ),
         ),
@@ -144,60 +114,47 @@ class _DeveloperDashboardScreenState
 
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(20, 45, 20, 25),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary,
-                      AppColors.primaryDark,
-                    ],
+                    colors: [AppColors.primary, AppColors.primaryDark],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(35),
-                    bottomRight: Radius.circular(35),
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     Row(
                       children: [
-
                         const CircleAvatar(
-                          radius: 26,
+                          radius: 22,
                           backgroundImage: AssetImage("assets/images/icon.png"),
                         ),
-
-                        const SizedBox(width: 12),
-
+                        const SizedBox(width: 10),
                         const Expanded(
                           child: Text(
                             "Welcome back 👋",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-
                         IconButton(
-                          icon: const Icon(
-                            Icons.notifications_none,
-                            color: Colors.white,
-                            size: 26,
-                          ),
+                          icon: const Icon(Icons.notifications_none,
+                              color: Colors.white, size: 24),
                           onPressed: () =>
                               Navigator.pushNamed(context, "/notifications"),
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 18),
-
+                    const SizedBox(height: 12),
                     GestureDetector(
                       onTap: () {
                         final jobsState = context.read<JobsCubit>().state;
@@ -207,25 +164,23 @@ class _DeveloperDashboardScreenState
                         } else if (jobsState is JobsLoaded) {
                           jobs = jobsState.jobs;
                         }
-                        Navigator.pushNamed(
-                          context,
-                          "/SearchJobsScreen",
-                          arguments: jobs,
-                        );
+                        Navigator.pushNamed(context, "/SearchJobsScreen",
+                            arguments: jobs);
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.search, color: Colors.grey),
+                            Icon(Icons.search, color: Colors.grey, size: 20),
                             SizedBox(width: 10),
                             Text(
                               "Search jobs, companies...",
-                              style: TextStyle(color: Colors.grey, fontSize: 15),
+                              style: TextStyle(color: Colors.grey, fontSize: 14),
                             ),
                           ],
                         ),
@@ -237,7 +192,6 @@ class _DeveloperDashboardScreenState
 
               BlocBuilder<JobsCubit, JobsState>(
                 buildWhen: (previous, current) {
-
                   return current is DeveloperDashboardLoaded ||
                       current is DeveloperApplyCountUpdated ||
                       current is StatusUpdatedForDeveloper ||
@@ -257,39 +211,147 @@ class _DeveloperDashboardScreenState
                   }
 
                   return Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
                     child: Column(
                       children: [
+                        // ===== Count Cards =====
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _modernCountCard(_counts["applied"] ?? 0, "Applied"),
-                            _modernCountCard(_counts["messages"] ?? 0, "Messages"),
-                            _modernCountCard(_counts["interview"] ?? 0, "Interviews"),
+                            _compactCountCard(
+                                _counts["applied"] ?? 0, "Applied", Icons.work_outline),
+                            const SizedBox(width: 10),
+                            _compactCountCard(
+                                _counts["messages"] ?? 0, "Messages", Icons.chat_bubble_outline),
+                            const SizedBox(width: 10),
+                            _compactCountCard(
+                                _counts["interview"] ?? 0, "Interviews", Icons.event_note_outlined),
                           ],
                         ),
-                        const SizedBox(height: 18),
-                        const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Explore Opportunities",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Color(0xFF1E1E1E),
+                        const SizedBox(height: 10),
+
+                        GestureDetector(
+                          onTap: () => Navigator.pushNamed(
+                              context, "/mock-interview-instructions"),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF1B4D54), Color(0xFFC19A6B)],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF1B4D54).withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.videocam_outlined,
+                                      color: Colors.white, size: 22),
+                                ),
+                                const SizedBox(width: 12),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "AI Mock Interview",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        "Practice with AI & get instant feedback",
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.arrow_forward_ios,
+                                    color: Colors.white70, size: 14),
+                              ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Explore Opportunities",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: Color(0xFF1E1E1E),
+                              ),
+                            ),
+                            Builder(
+                              builder: (ctx) => Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 6,
+                                    )
+                                  ],
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.filter_list,
+                                      color: AppColors.primary, size: 20),
+                                  padding: const EdgeInsets.all(8),
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () {
+                                    Navigator.pushNamed(ctx, "/advanced-filter")
+                                        .then((_) {
+                                      final tab = DefaultTabController.of(ctx);
+                                      if (tab.index == 1) {
+                                        ctx.read<JobsCubit>().loadRecommendedJobs(
+                                            forceRefresh: true);
+                                      } else {
+                                        ctx.read<JobsCubit>().loadJobs(
+                                            forceRefresh: true);
+                                      }
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(15),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: const TabBar(
                             indicatorColor: AppColors.primary,
                             labelColor: AppColors.primary,
                             unselectedLabelColor: Colors.grey,
+                            labelStyle: TextStyle(
+                                fontSize: 13, fontWeight: FontWeight.w600),
                             tabs: [
                               Tab(text: "All Jobs"),
                               Tab(text: "Recommended"),
@@ -317,35 +379,45 @@ class _DeveloperDashboardScreenState
     );
   }
 
-  Widget _modernCountCard(int number, String label) {
-    return Container(
-      width: 90,
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            number.toString(),
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+  Widget _compactCountCard(int number, String label, IconData icon) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(label,
-              style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        ],
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: AppColors.primary, size: 18),
+            const SizedBox(width: 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  number.toString(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 10, color: Colors.grey),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -359,9 +431,7 @@ class _DeveloperDashboardScreenState
 
   void _showAccountSheet(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String> accounts =
-        prefs.getStringList("saved_accounts") ?? [];
-
+    final List<String> accounts = prefs.getStringList("saved_accounts") ?? [];
     final currentToken = prefs.getString("token") ?? "";
 
     String currentEmail = "";
@@ -398,13 +468,10 @@ class _DeveloperDashboardScreenState
             const SizedBox(height: 20),
             const Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                "Accounts",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              child: Text("Accounts",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 12),
-
             ...accounts.map((a) {
               final acc = jsonDecode(a);
               final isActive = acc["email"] == currentEmail;
@@ -414,23 +481,15 @@ class _DeveloperDashboardScreenState
                       ? Colors.blue.withOpacity(0.15)
                       : AppColors.primary.withOpacity(0.15),
                   child: Icon(
-                    acc["role"] == "company"
-                        ? Icons.business
-                        : Icons.person,
-                    color: acc["role"] == "company"
-                        ? Colors.blue
-                        : AppColors.primary,
+                    acc["role"] == "company" ? Icons.business : Icons.person,
+                    color: acc["role"] == "company" ? Colors.blue : AppColors.primary,
                   ),
                 ),
-                title: Text(
-                  acc["name"] ?? acc["email"],
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                    acc["role"] == "company" ? "Company" : "Developer"),
+                title: Text(acc["name"] ?? acc["email"],
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(acc["role"] == "company" ? "Company" : "Developer"),
                 trailing: isActive
-                    ? const Icon(Icons.check_circle,
-                    color: AppColors.primary)
+                    ? const Icon(Icons.check_circle, color: AppColors.primary)
                     : null,
                 onTap: () async {
                   Navigator.pop(context);
@@ -443,19 +502,15 @@ class _DeveloperDashboardScreenState
                   }
                   if (context.mounted) {
                     if (acc["role"] == "company") {
-                      Navigator.pushReplacementNamed(
-                          context, "/company-dashboard");
+                      Navigator.pushReplacementNamed(context, "/company-dashboard");
                     } else {
-                      Navigator.pushReplacementNamed(
-                          context, "/developer-dashboard");
+                      Navigator.pushReplacementNamed(context, "/developer-dashboard");
                     }
                   }
                 },
               );
             }).toList(),
-
             const Divider(height: 24),
-
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(10),
@@ -470,70 +525,11 @@ class _DeveloperDashboardScreenState
               trailing: Wrap(
                 spacing: 12,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: context.locale == const Locale('en')
-                          ? Colors.blue
-                          : Colors.grey.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          context.setLocale(const Locale('en'));
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          child: Text(
-                            "EN",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: context.locale == const Locale('en')
-                                  ? Colors.white
-                                  : Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: context.locale == const Locale('ar')
-                          ? Colors.blue
-                          : Colors.grey.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          context.setLocale(const Locale('ar'));
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          child: Text(
-                            "AR",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: context.locale == const Locale('ar')
-                                  ? Colors.white
-                                  : Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  _langButton(context, 'en', 'EN'),
+                  _langButton(context, 'ar', 'AR'),
                 ],
               ),
             ),
-
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(10),
@@ -550,7 +546,6 @@ class _DeveloperDashboardScreenState
                 Navigator.pushNamed(context, "/login");
               },
             ),
-
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(10),
@@ -561,19 +556,14 @@ class _DeveloperDashboardScreenState
                 child: const Icon(Icons.logout, color: Colors.red),
               ),
               title: const Text("Logout",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600, color: Colors.red)),
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red)),
               onTap: () async {
                 Navigator.pop(context);
                 accounts.removeWhere((a) {
-                  try {
-                    return jsonDecode(a)["email"] == currentEmail;
-                  } catch (_) {
-                    return false;
-                  }
+                  try { return jsonDecode(a)["email"] == currentEmail; }
+                  catch (_) { return false; }
                 });
                 await prefs.setStringList("saved_accounts", accounts);
-
                 if (accounts.isNotEmpty) {
                   final nextAcc = jsonDecode(accounts.last);
                   await prefs.setString("token", nextAcc["token"]);
@@ -584,11 +574,9 @@ class _DeveloperDashboardScreenState
                   }
                   if (context.mounted) {
                     if (nextAcc["role"] == "company") {
-                      Navigator.pushReplacementNamed(
-                          context, "/company-dashboard");
+                      Navigator.pushReplacementNamed(context, "/company-dashboard");
                     } else {
-                      Navigator.pushReplacementNamed(
-                          context, "/developer-dashboard");
+                      Navigator.pushReplacementNamed(context, "/developer-dashboard");
                     }
                   }
                 } else {
@@ -601,6 +589,33 @@ class _DeveloperDashboardScreenState
             ),
             const SizedBox(height: 16),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _langButton(BuildContext context, String locale, String label) {
+    final isActive = context.locale == Locale(locale);
+    return Container(
+      decoration: BoxDecoration(
+        color: isActive ? Colors.blue : Colors.grey.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.setLocale(Locale(locale)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: isActive ? Colors.white : Colors.black,
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 class ApiService {
+  final Dio _dio = Dio();
   static const base = "http://devjob.runasp.net/api/Auth";
   static const baseCv = "http://devjob.runasp.net/api/CV";
 
@@ -1096,4 +1099,96 @@ class ApiService {
     }
     throw Exception("Search Saved Jobs Failed: ${r.body}");
   }
+
+  Future<Map<String, dynamic>> startInterview(
+      String token, {
+        required int cvId,
+        required String track,
+        required String level,
+      }) async {
+    final url = "http://devjob.runasp.net/api/mockinterview/start-interview";
+    final r = await http.post(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "cvId": cvId,
+        "Track": track,
+        "level": level,
+      }),
+    );
+    print("START INTERVIEW STATUS => ${r.statusCode}");
+    if (r.statusCode == 200) return jsonDecode(r.body);
+    throw Exception("Start Interview Failed: ${r.body}");
+  }
+
+  Future<void> uploadVideoToS3(String uploadUrl, String filePath) async {
+    final bytes = await File(filePath).readAsBytes();
+    final r = await http.put(
+      Uri.parse(uploadUrl),
+      headers: {"Content-Type": "video/mp4"},
+      body: bytes,
+    );
+    print("S3 UPLOAD STATUS => ${r.statusCode}");
+    if (r.statusCode != 200 && r.statusCode != 204) {
+      throw Exception("S3 Upload Failed: ${r.statusCode}");
+    }
+  }
+
+  Future<void> confirmUpload(String token, String videoId) async {
+    final r = await http.post(
+      Uri.parse("http://devjob.runasp.net/api/mockinterview/confirm-upload/$videoId"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    print("CONFIRM UPLOAD STATUS => ${r.statusCode}");
+    print("CONFIRM UPLOAD BODY => ${r.body}");
+  }
+
+  Future<Map<String, dynamic>> submitGetNextQuestion({
+    required String token,
+    required String interviewId,
+    required String videoId,
+  }) async {
+
+    final url = "http://devjob.runasp.net/api/mockinterview/submit-get-nextQuestion/$videoId";
+
+    print("🔗 URL => $url");
+    print("📦 VIDEO ID => $videoId");
+
+    final r = await http.post(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+
+    );
+
+    print("GET NEXT QUESTION STATUS => ${r.statusCode}");
+    print("💬 GET NEXT QUESTION RESPONSE => ${r.body}");
+
+    if (r.statusCode == 200) return jsonDecode(r.body);
+    throw Exception("Failed to get next question: ${r.body}");
+  }
+
+  Future<Map<String, dynamic>> getInterviewReport(String token, int interviewId) async {
+    final url = "http://devjob.runasp.net/api/mockinterview/reports/$interviewId";
+    final r = await http.post(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+    print("GET REPORT STATUS => ${r.statusCode}");
+    if (r.statusCode == 200) return jsonDecode(r.body);
+    throw Exception("Failed to get interview report: ${r.body}");
+  }
+
 }

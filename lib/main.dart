@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:graduation_project/screens/MockInterviewInstructionsScreen.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'core/api_service.dart';
@@ -11,7 +12,9 @@ import 'features/cv/cv_cubit.dart';
 import 'features/jobs/jobs_cubit.dart';
 import 'features/notification/notification_cubit.dart';
 import 'features/profile/profile_cubit.dart';
+import 'features/interview/MockInterviewCubit.dart';
 import 'screens/splash_screen.dart';
+import 'screens/MockInterviewScreen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/LoginScreen.dart';
 import 'screens/RegisterScreen.dart';
@@ -99,6 +102,10 @@ class DevJobApp extends StatelessWidget {
 
         BlocProvider(
           create: (_) => NotificationCubit(ApiService()),
+        ),
+
+        BlocProvider<MockInterviewCubit>(
+          create: (_) => MockInterviewCubit(ApiService()),
         ),
       ],
       child: MaterialApp(
@@ -267,6 +274,21 @@ class DevJobApp extends StatelessWidget {
               final jobs = settings.arguments as List? ?? [];
               return MaterialPageRoute(
                 builder: (_) => SearchJobsScreen(jobs: jobs),
+              );
+
+            case "/mock-interview-instructions":
+              return MaterialPageRoute(
+                builder: (_) => const MockInterviewInstructionsScreen(),
+              );
+
+            case "/mock-interview":
+
+              final args = settings.arguments as Map<String, String>? ?? {};
+              return MaterialPageRoute(
+                builder: (_) => MockInterviewScreen(
+                  track: args["track"] ?? "Backend",
+                  interviewLevel: args["interviewLevel"] ?? "Mid level",
+                ),
               );
           }
 

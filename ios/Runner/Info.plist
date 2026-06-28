@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to the camera to record mock interviews.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs access to the microphone to record your audio during mock interviews.</string>
 </dict>
 </plist>
