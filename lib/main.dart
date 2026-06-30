@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:graduation_project/screens/MockInterviewInstructionsScreen.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'features/theme/theme_cubit.dart';
 import 'core/api_service.dart';
 import 'features/applications/applications_cubit.dart';
 import 'features/auth/AuthCubit.dart';
@@ -68,14 +69,30 @@ Future<void> main() async {
   );
 }
 
-class DevJobApp extends StatelessWidget {
+class DevJobApp extends StatefulWidget {
   const DevJobApp({super.key});
+
+  @override
+  State<DevJobApp> createState() => _DevJobAppState();
+}
+
+class _DevJobAppState extends State<DevJobApp> {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<ThemeCubit>(
+      create: (_) => ThemeCubit(),
+      child: const _AppContent(),
+    );
+  }
+}
+
+class _AppContent extends StatelessWidget {
+  const _AppContent();
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-
         BlocProvider<AuthCubit>(
           create: (_) => AuthCubit(ApiService()),
         ),
@@ -108,191 +125,252 @@ class DevJobApp extends StatelessWidget {
           create: (_) => MockInterviewCubit(ApiService()),
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
 
-        locale: context.locale,
-        supportedLocales: context.supportedLocales,
-        localizationsDelegates: context.localizationDelegates,
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
 
-        theme: ThemeData(
-          textTheme: GoogleFonts.cairoTextTheme(),
-          primaryTextTheme: GoogleFonts.cairoTextTheme(),
-          pageTransitionsTheme: const PageTransitionsTheme(
-            builders: {
-              TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-            },
-          ),
-        ),
+            locale: context.locale,
+            supportedLocales: context.supportedLocales,
+            localizationsDelegates: context.localizationDelegates,
 
-        title: "DevJob",
-        initialRoute: "/splash",
+            themeMode: themeMode,
 
-        onGenerateRoute: (settings) {
-          switch (settings.name) {
+            theme: ThemeData(
+              brightness: Brightness.light,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF1B4D54),
+                brightness: Brightness.light,
+                primary: const Color(0xFF1B4D54),
+                secondary: const Color(0xFFC19A6B),
+                surface: Colors.white,
+                background: const Color(0xFFF4F7F6),
+              ),
+              scaffoldBackgroundColor: const Color(0xFFF4F7F6),
+              cardColor: Colors.white,
+              textTheme: GoogleFonts.cairoTextTheme(
+                ThemeData.light().textTheme,
+              ),
+              primaryTextTheme: GoogleFonts.cairoTextTheme(
+                ThemeData.light().primaryTextTheme,
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: const Color(0xFFF7F9FB),
+                border: InputBorder.none,
+                hintStyle: const TextStyle(color: Color(0xFF9E9E9E)),
+              ),
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: {
+                  TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                  TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                },
+              ),
+            ),
 
-            case "/splash":
-              return MaterialPageRoute(
-                builder: (_) => const SplashScreen(),
-              );
+            // ── Dark Theme ───────────────────────────────────────────────
+            darkTheme: ThemeData(
+              brightness: Brightness.dark,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF1B4D54),
+                brightness: Brightness.dark,
+                primary: const Color(0xFF4ECDC4),
+                secondary: const Color(0xFFC19A6B),
+                surface: const Color(0xFF1E2A2C),
+                background: const Color(0xFF121A1C),
+              ),
+              scaffoldBackgroundColor: const Color(0xFF121A1C),
+              cardColor: const Color(0xFF1E2A2C),
+              dividerColor: const Color(0xFF2E3E41),
+              textTheme: GoogleFonts.cairoTextTheme(
+                ThemeData.dark().textTheme,
+              ),
+              primaryTextTheme: GoogleFonts.cairoTextTheme(
+                ThemeData.dark().primaryTextTheme,
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: const Color(0xFF243035),
+                border: InputBorder.none,
+                hintStyle: const TextStyle(color: Color(0xFF7A9BA0)),
+              ),
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: {
+                  TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                  TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                },
+              ),
+            ),
 
-            case "/onboarding":
-              return MaterialPageRoute(
-                builder: (_) => const OnBoardingScreen(),
-              );
+            title: "DevJob",
+            initialRoute: "/splash",
 
-            case "/login":
-              return MaterialPageRoute(
-                builder: (_) => const LoginScreen(),
-              );
+            onGenerateRoute: (settings) {
+              switch (settings.name) {
 
-            case "/register":
-              final role = settings.arguments as String? ?? "developer";
-              return MaterialPageRoute(
-                builder: (_) => RegisterScreen(role: role),
-              );
+                case "/splash":
+                  return MaterialPageRoute(
+                    builder: (_) => const SplashScreen(),
+                  );
 
-            case "/forgot":
-              return MaterialPageRoute(
-                builder: (_) => const ForgotPasswordScreen(),
-              );
+                case "/onboarding":
+                  return MaterialPageRoute(
+                    builder: (_) => const OnBoardingScreen(),
+                  );
 
-            case "/reset":
-              final args = settings.arguments as Map<String, String>? ?? {};
-              return MaterialPageRoute(
-                builder: (_) => ResetPasswordScreen(
-                  token: args["token"] ?? "",
-                  email: args["email"] ?? "",
-                ),
-              );
+                case "/login":
+                  return MaterialPageRoute(
+                    builder: (_) => const LoginScreen(),
+                  );
 
-            case "/developer-dashboard":
-              return MaterialPageRoute(
-                builder: (_) => const DeveloperDashboardScreen(),
-              );
+                case "/register":
+                  final role = settings.arguments as String? ?? "developer";
+                  return MaterialPageRoute(
+                    builder: (_) => RegisterScreen(role: role),
+                  );
 
-            case "/company-dashboard":
-              return MaterialPageRoute(
-                builder: (_) => const CompanyDashboardScreen(),
-              );
+                case "/forgot":
+                  return MaterialPageRoute(
+                    builder: (_) => const ForgotPasswordScreen(),
+                  );
 
-            case "/jobs":
-              return MaterialPageRoute(
-                builder: (_) => const JobListScreen(
-                  loadType: JobLoadType.all,
-                ),
-              );
+                case "/reset":
+                  final args = settings.arguments as Map<String, String>? ?? {};
+                  return MaterialPageRoute(
+                    builder: (_) => ResetPasswordScreen(
+                      token: args["token"] ?? "",
+                      email: args["email"] ?? "",
+                    ),
+                  );
 
-            case "/upload-cv":
-              return MaterialPageRoute(
-                builder: (_) => const UploadCvScreen(),
-              );
+                case "/developer-dashboard":
+                  return MaterialPageRoute(
+                    builder: (_) => const DeveloperDashboardScreen(),
+                  );
 
-            case "/profile":
-              return MaterialPageRoute(
-                builder: (_) => const ProfileScreen(),
-              );
+                case "/company-dashboard":
+                  return MaterialPageRoute(
+                    builder: (_) => const CompanyDashboardScreen(),
+                  );
 
-            case "/edit-profile":
-              final data = settings.arguments as Map<String, dynamic>;
-              return MaterialPageRoute(
-                builder: (_) => EditProfileScreen(data: data),
-              );
+                case "/jobs":
+                  return MaterialPageRoute(
+                    builder: (_) => const JobListScreen(
+                      loadType: JobLoadType.all,
+                    ),
+                  );
 
-            case "/edit-company":
-              final data = settings.arguments as Map<String, dynamic>;
-              return MaterialPageRoute(
-                builder: (_) => EditCompanyScreen(data: data),
-              );
+                case "/upload-cv":
+                  return MaterialPageRoute(
+                    builder: (_) => const UploadCvScreen(),
+                  );
 
-            case "/add-job":
-              return MaterialPageRoute(
-                builder: (_) => const AddJobScreen(),
-              );
+                case "/profile":
+                  return MaterialPageRoute(
+                    builder: (_) => const ProfileScreen(),
+                  );
 
-            case "/company-jobs":
-              return MaterialPageRoute(
-                builder: (_) => const CompanyJobsScreen(),
-              );
+                case "/edit-profile":
+                  final data = settings.arguments as Map<String, dynamic>;
+                  return MaterialPageRoute(
+                    builder: (_) => EditProfileScreen(data: data),
+                  );
 
-            case "/company-applicants":
-              final jobId = settings.arguments as int;
-              return MaterialPageRoute(
-                builder: (_) => CompanyApplicantsScreen(jobId: jobId),
-              );
+                case "/edit-company":
+                  final data = settings.arguments as Map<String, dynamic>;
+                  return MaterialPageRoute(
+                    builder: (_) => EditCompanyScreen(data: data),
+                  );
 
-            case "/my-applications":
-              return MaterialPageRoute(
-                builder: (_) => const MyApplicationsScreen(),
-              );
+                case "/add-job":
+                  return MaterialPageRoute(
+                    builder: (_) => const AddJobScreen(),
+                  );
 
-            case "/saved-jobs":
-              final userId = settings.arguments as int;
-              return MaterialPageRoute(
-                builder: (_) => SavedJobsScreen(userId: userId),
-              );
+                case "/company-jobs":
+                  return MaterialPageRoute(
+                    builder: (_) => const CompanyJobsScreen(),
+                  );
 
-            case "/advanced-filter":
-              return MaterialPageRoute(
-                builder: (_) => const AdvancedFilterScreen(),
-              );
+                case "/company-applicants":
+                  final jobId = settings.arguments as int;
+                  return MaterialPageRoute(
+                    builder: (_) => CompanyApplicantsScreen(jobId: jobId),
+                  );
 
-            case "/notifications":
-              return MaterialPageRoute(
-                builder: (_) => const NotificationScreen(),
-              );
+                case "/my-applications":
+                  return MaterialPageRoute(
+                    builder: (_) => const MyApplicationsScreen(),
+                  );
 
-            case "/chats":
-              return MaterialPageRoute(
-                builder: (_) => const ChatListScreen(),
-              );
+                case "/saved-jobs":
+                  final userId = settings.arguments as int;
+                  return MaterialPageRoute(
+                    builder: (_) => SavedJobsScreen(userId: userId),
+                  );
 
-            case "/chat-details":
-              final args = settings.arguments as Map?;
-              final conversationId = args?["conversationId"];
+                case "/advanced-filter":
+                  return MaterialPageRoute(
+                    builder: (_) => const AdvancedFilterScreen(),
+                  );
 
-              if (conversationId == null) {
-                return MaterialPageRoute(
-                  builder: (_) => const Scaffold(
-                    body: Center(child: Text("Invalid Conversation")),
-                  ),
-                );
+                case "/notifications":
+                  return MaterialPageRoute(
+                    builder: (_) => const NotificationScreen(),
+                  );
+
+                case "/chats":
+                  return MaterialPageRoute(
+                    builder: (_) => const ChatListScreen(),
+                  );
+
+                case "/chat-details":
+                  final args = settings.arguments as Map?;
+                  final conversationId = args?["conversationId"];
+
+                  if (conversationId == null) {
+                    return MaterialPageRoute(
+                      builder: (_) => const Scaffold(
+                        body: Center(child: Text("Invalid Conversation")),
+                      ),
+                    );
+                  }
+                  return MaterialPageRoute(
+                    builder: (_) => ChatDetailsScreen(
+                      conversationId: conversationId,
+                    ),
+                  );
+
+                case "/edit-job":
+                  final job = settings.arguments as Map;
+                  return MaterialPageRoute(
+                    builder: (_) => EditJobScreen(job: job),
+                  );
+                case "/SearchJobsScreen":
+                  final jobs = settings.arguments as List? ?? [];
+                  return MaterialPageRoute(
+                    builder: (_) => SearchJobsScreen(jobs: jobs),
+                  );
+
+                case "/mock-interview-instructions":
+                  return MaterialPageRoute(
+                    builder: (_) => const MockInterviewInstructionsScreen(),
+                  );
+
+                case "/mock-interview":
+                  final args = settings.arguments as Map<String, String>? ?? {};
+                  return MaterialPageRoute(
+                    builder: (_) => MockInterviewScreen(
+                      track: args["track"] ?? "Backend",
+                      interviewLevel: args["interviewLevel"] ?? "Mid level",
+                    ),
+                  );
               }
-              return MaterialPageRoute(
-                builder: (_) => ChatDetailsScreen(
-                  conversationId: conversationId,
-                ),
-              );
 
-            case "/edit-job":
-              final job = settings.arguments as Map;
-              return MaterialPageRoute(
-                builder: (_) => EditJobScreen(job: job),
-              );
-            case "/SearchJobsScreen":
-              final jobs = settings.arguments as List? ?? [];
-              return MaterialPageRoute(
-                builder: (_) => SearchJobsScreen(jobs: jobs),
-              );
-
-            case "/mock-interview-instructions":
-              return MaterialPageRoute(
-                builder: (_) => const MockInterviewInstructionsScreen(),
-              );
-
-            case "/mock-interview":
-
-              final args = settings.arguments as Map<String, String>? ?? {};
-              return MaterialPageRoute(
-                builder: (_) => MockInterviewScreen(
-                  track: args["track"] ?? "Backend",
-                  interviewLevel: args["interviewLevel"] ?? "Mid level",
-                ),
-              );
-          }
-
-          return null;
+              return null;
+            },
+          );
         },
       ),
     );
