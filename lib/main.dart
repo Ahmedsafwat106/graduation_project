@@ -169,7 +169,6 @@ class _AppContent extends StatelessWidget {
               ),
             ),
 
-            // ── Dark Theme ───────────────────────────────────────────────
             darkTheme: ThemeData(
               brightness: Brightness.dark,
               colorScheme: ColorScheme.fromSeed(
