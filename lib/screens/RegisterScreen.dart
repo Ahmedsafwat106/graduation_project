@@ -6,6 +6,8 @@ import '../features/auth/AuthState.dart';
 import '../features/theme/theme_cubit.dart';
 import '../widgets/loading_indicator.dart';
 import '../widgets/theme_toggle_button.dart';
+import '../widgets/language_toggle_button.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class RegisterScreen extends StatefulWidget {
   final String role;
@@ -106,7 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(24, 60, 12, 45),
+                  padding: const EdgeInsets.fromLTRB(24, 50, 24, 30),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [AppColors.primary, AppColors.primaryDark],
@@ -114,18 +116,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(40),
-                      bottomRight: Radius.circular(40),
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
                     ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Align(
-                        alignment: Alignment.topRight,
+                        alignment: AlignmentDirectional.topEnd,
                         child: Padding(
                           padding: const EdgeInsets.only(top: 8),
-                          child: ThemeToggleButton(color: Colors.white),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              LanguageToggleButton(color: Colors.white),
+                              SizedBox(width: 8),
+                              ThemeToggleButton(color: Colors.white),
+                            ],
+                          ),
                         ),
                       ),
                       const Text(
@@ -169,7 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                         Center(
                           child: Text(
-                            "Create Account",
+                            "create_account".tr(),
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -210,7 +219,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                         if (role == "developer") ...[
                           _modernField(
-                            "Full Name",
+                            "full_name".tr(),
                             devName,
                             Icons.person_outline,
                             fieldColor: fieldColor,
@@ -218,7 +227,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textPrimary: textPrimary,
                           ),
                           _modernField(
-                            "Email",
+                            "email".tr(),
                             devEmail,
                             Icons.email_outlined,
                             fieldColor: fieldColor,
@@ -226,7 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textPrimary: textPrimary,
                           ),
                           _modernFieldPass(
-                            "Password",
+                            "password".tr(),
                             devPass,
                             Icons.lock_outline,
                             obscure: _obscureDevPass,
@@ -238,7 +247,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textPrimary: textPrimary,
                           ),
                           _modernFieldPass(
-                            "Confirm Password",
+                            "confirm_password".tr(),
                             devConfirm,
                             Icons.lock_outline,
                             obscure: _obscureDevConfirm,
@@ -251,7 +260,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ] else ...[
                           _modernField(
-                            "Company Name",
+                            "company_name".tr(),
                             comName,
                             Icons.business_outlined,
                             fieldColor: fieldColor,
@@ -259,7 +268,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textPrimary: textPrimary,
                           ),
                           _modernField(
-                            "Email",
+                            "email".tr(),
                             comEmail,
                             Icons.email_outlined,
                             fieldColor: fieldColor,
@@ -267,7 +276,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textPrimary: textPrimary,
                           ),
                           _modernField(
-                            "Serial Number",
+                            "serial_number".tr(),
                             comSerial,
                             Icons.confirmation_number_outlined,
                             fieldColor: fieldColor,
@@ -275,7 +284,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textPrimary: textPrimary,
                           ),
                           _modernField(
-                            "Phone Number",
+                            "phone_number".tr(),
                             comPhone,
                             Icons.phone_outlined,
                             fieldColor: fieldColor,
@@ -283,7 +292,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textPrimary: textPrimary,
                           ),
                           _modernFieldPass(
-                            "Password",
+                            "password".tr(),
                             comPass,
                             Icons.lock_outline,
                             obscure: _obscureComPass,
@@ -295,7 +304,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textPrimary: textPrimary,
                           ),
                           _modernFieldPass(
-                            "Confirm Password",
+                            "confirm_password".tr(),
                             comConfirm,
                             Icons.lock_outline,
                             obscure: _obscureComConfirm,
@@ -398,10 +407,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                               );
                                         }
                                       },
-                                      child: const Center(
+                                      child: Center(
                                         child: Text(
-                                          "Sign Up",
-                                          style: TextStyle(
+                                          "sign_up".tr(),
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
@@ -420,7 +429,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 12),
 
                 Text(
-                  "By signing up you agree to our Terms & Conditions",
+                  "agree_terms".tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -432,9 +441,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Text(
-                    "Already have an account?",
-                    style: TextStyle(
+                  child: Text(
+                    "already_have_account".tr(),
+                    style: const TextStyle(
                       color: AppColors.primary,
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
@@ -476,7 +485,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         alignment: Alignment.center,
         child: Text(
-          r == "developer" ? "Developer" : "Company",
+          r == "developer" ? "developer".tr() : "company".tr(),
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,

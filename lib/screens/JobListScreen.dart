@@ -230,6 +230,7 @@ class _JobListScreenState extends State<JobListScreen>
                     }
                   },
                   child: ListView.builder(
+                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
                     itemCount: _jobs.length,
                     itemBuilder: (context, index) {
@@ -430,50 +431,63 @@ class _JobListScreenState extends State<JobListScreen>
           SizedBox(
             width: double.infinity,
             height: 48,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              onPressed: () async {
-                if (canApplyInsideApp) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ApplyJobScreen(job: job),
-                    ),
-                  );
-                } else if (hasExternalLink) {
-                  final uri = Uri.parse(externalUrl!);
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri,
-                        mode: LaunchMode.externalApplication);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Can't open link")),
-                    );
-                  }
-                }
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (hasExternalLink) ...[
-                    const Icon(Icons.open_in_new,
-                        color: Colors.white, size: 18),
-                    const SizedBox(width: 6),
-                  ],
-                  Text(
-                    canApplyInsideApp ? "Apply Now" : "Apply External",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
                 ],
+              ),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                onPressed: () async {
+                  if (canApplyInsideApp) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ApplyJobScreen(job: job),
+                      ),
+                    );
+                  } else if (hasExternalLink) {
+                    final uri = Uri.parse(externalUrl!);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri,
+                          mode: LaunchMode.externalApplication);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Can't open link")),
+                      );
+                    }
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (hasExternalLink) ...[
+                      const Icon(Icons.open_in_new,
+                          color: Colors.white, size: 18),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      canApplyInsideApp ? "Apply Now" : "Apply External",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

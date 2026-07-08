@@ -4,7 +4,12 @@ class MockInterviewInitial extends MockInterviewState {}
 
 class MockInterviewLoading extends MockInterviewState {}
 
-class MockInterviewUploading extends MockInterviewState {}
+class MockInterviewUploading extends MockInterviewState {
+  final double progress;
+  final String label;
+
+  MockInterviewUploading({this.progress = 0.0, this.label = "Uploading…"});
+}
 
 class MockInterviewStarted extends MockInterviewState {
   final int interviewId;

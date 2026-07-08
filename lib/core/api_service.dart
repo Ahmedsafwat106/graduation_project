@@ -769,7 +769,7 @@ class ApiService {
     if (r.statusCode == 200) {
       final decoded = jsonDecode(r.body);
 
-      // استخراج الـ userId
+
       int? fixedId;
       if (decoded["userId"] is List && decoded["userId"].isNotEmpty) {
         fixedId = decoded["userId"][0] is int
@@ -1124,16 +1124,39 @@ class ApiService {
     throw Exception("Start Interview Failed: ${r.body}");
   }
 
-  Future<void> uploadVideoToS3(String uploadUrl, String filePath) async {
-    final bytes = await File(filePath).readAsBytes();
-    final r = await http.put(
-      Uri.parse(uploadUrl),
-      headers: {"Content-Type": "video/mp4"},
-      body: bytes,
+  Future<void> uploadVideoToS3(
+      String uploadUrl,
+      String filePath, {
+        void Function(int sent, int total)? onProgress,
+      }) async {
+    final file = File(filePath);
+    final fileSize = await file.length();
+
+    final response = await _dio.put(
+      uploadUrl,
+      data: file.openRead(),
+      options: Options(
+        headers: {
+          "Content-Type": "video/mp4",
+          "Content-Length": fileSize,
+        },
+
+        responseType: ResponseType.stream,
+
+        followRedirects: false,
+        validateStatus: (status) =>
+        status != null && (status == 200 || status == 204),
+      ),
+      onSendProgress: (sent, total) {
+        final pct = total > 0 ? (sent / total * 100).toStringAsFixed(1) : "?";
+        print("⬆️ Upload progress: $sent/$total ($pct%)");
+        onProgress?.call(sent, total);
+      },
     );
-    print("S3 UPLOAD STATUS => ${r.statusCode}");
-    if (r.statusCode != 200 && r.statusCode != 204) {
-      throw Exception("S3 Upload Failed: ${r.statusCode}");
+
+    print("S3 UPLOAD STATUS => ${response.statusCode}");
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception("S3 Upload Failed: ${response.statusCode}");
     }
   }
 

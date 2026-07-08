@@ -77,9 +77,9 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
           decoration: const InputDecoration(
             hintText: "Search jobs...",
             border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.white70),
+            hintStyle: TextStyle(color: Colors.grey),
           ),
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: AppColors.primaryDark),
         ),
       ),
       body: Column(
@@ -169,6 +169,7 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
                 return AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   child: ListView.builder(
+                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                     key: ValueKey(_displayedJobs.length),
                     padding: const EdgeInsets.all(16),
                     itemCount: _displayedJobs.length,
@@ -316,47 +317,60 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
 
           SizedBox(
             width: double.infinity,
-            height: 44,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              onPressed: () async {
-                if (canApplyInsideApp) {
-                  _saveRecent(query);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ApplyJobScreen(job: job),
-                    ),
-                  );
-                } else if (hasExternalLink) {
-                  final uri = Uri.parse(externalUrl!);
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(
-                        uri, mode: LaunchMode.externalApplication);
-                  }
-                }
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (hasExternalLink) ...[
-                    const Icon(Icons.open_in_new,
-                        color: Colors.white, size: 16),
-                    const SizedBox(width: 6),
-                  ],
-                  Text(
-                    canApplyInsideApp ? "Apply Now" : "Apply External",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+            height: 48,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
                 ],
+              ),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                onPressed: () async {
+                  if (canApplyInsideApp) {
+                    _saveRecent(query);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ApplyJobScreen(job: job),
+                      ),
+                    );
+                  } else if (hasExternalLink) {
+                    final uri = Uri.parse(externalUrl!);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(
+                          uri, mode: LaunchMode.externalApplication);
+                    }
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (hasExternalLink) ...[
+                      const Icon(Icons.open_in_new,
+                          color: Colors.white, size: 16),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      canApplyInsideApp ? "Apply Now" : "Apply External",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

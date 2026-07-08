@@ -174,13 +174,14 @@ class _DeveloperDashboardScreenState extends State<DeveloperDashboardScreen> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        child: const Row(
+
+                        child: Row(
                           children: [
-                            Icon(Icons.search, color: Colors.grey, size: 20),
-                            SizedBox(width: 10),
+                            const Icon(Icons.search, color: Colors.grey, size: 20),
+                            const SizedBox(width: 10),
                             Text(
-                              "Search jobs, companies...",
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
+                              "search_jobs".tr(),
+                              style: const TextStyle(color: Colors.grey, fontSize: 14),
                             ),
                           ],
                         ),
@@ -214,7 +215,6 @@ class _DeveloperDashboardScreenState extends State<DeveloperDashboardScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
                     child: Column(
                       children: [
-                        // ===== Count Cards =====
                         Row(
                           children: [
                             _compactCountCard(
@@ -251,6 +251,7 @@ class _DeveloperDashboardScreenState extends State<DeveloperDashboardScreen> {
                                 ),
                               ],
                             ),
+
                             child: Row(
                               children: [
                                 Container(
@@ -263,21 +264,21 @@ class _DeveloperDashboardScreenState extends State<DeveloperDashboardScreen> {
                                       color: Colors.white, size: 22),
                                 ),
                                 const SizedBox(width: 12),
-                                const Expanded(
+                                Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "AI Mock Interview",
-                                        style: TextStyle(
+                                        "ai_mock_interview".tr(),
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       Text(
-                                        "Practice with AI & get instant feedback",
-                                        style: TextStyle(
+                                        "practice_ai".tr(),
+                                        style: const TextStyle(
                                           color: Colors.white70,
                                           fontSize: 11,
                                         ),

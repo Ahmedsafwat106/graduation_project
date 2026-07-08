@@ -72,7 +72,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               children: [
 
                 Container(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 80),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -83,8 +83,8 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(35),
-                      bottomRight: Radius.circular(35),
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
                     ),
                   ),
                   child: Row(
@@ -188,30 +188,27 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                   ),
                 ),
 
-                Transform.translate(
-                  offset: const Offset(0, -50),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _modernStatCard(
-                          _counts["activeJob"] ?? 0,
-                          "Active Jobs",
-                          Icons.work_outline,
-                        ),
-                        _modernStatCard(
-                          _counts["applicants"] ?? 0,
-                          "Applicants",
-                          Icons.people_outline,
-                        ),
-                        _modernStatCard(
-                          _counts["hires"] ?? 0,
-                          "Hires",
-                          Icons.person_add_alt_1_outlined,
-                        ),
-                      ],
-                    ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _modernStatCard(
+                        _counts["activeJob"] ?? 0,
+                        "Active Jobs",
+                        Icons.work_outline,
+                      ),
+                      _modernStatCard(
+                        _counts["applicants"] ?? 0,
+                        "Applicants",
+                        Icons.people_outline,
+                      ),
+                      _modernStatCard(
+                        _counts["hires"] ?? 0,
+                        "Hires",
+                        Icons.person_add_alt_1_outlined,
+                      ),
+                    ],
                   ),
                 ),
 

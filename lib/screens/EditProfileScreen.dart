@@ -37,6 +37,15 @@ class _EditProfileScreenState
   }
 
   @override
+  void dispose() {
+    first.dispose();
+    last.dispose();
+    phone.dispose();
+    city.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F6),
@@ -49,6 +58,10 @@ class _EditProfileScreenState
               ),
             );
             Navigator.pop(context);
+          } else if (state is ProfileFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
           }
         },
         builder: (context, state) {
@@ -148,7 +161,7 @@ class _EditProfileScreenState
                       ),
 
                       const SizedBox(height: 30),
-                      state is AuthLoading
+                      state is ProfileLoading
                           ? const CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3)
                           : SizedBox(
                         width: double.infinity,
@@ -190,6 +203,12 @@ class _EditProfileScreenState
                               ),
                             ),
                             onPressed: () {
+                              if (first.text.trim().isEmpty || last.text.trim().isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("First Name and Last Name are required")),
+                                );
+                                return;
+                              }
                               context
                                   .read<ProfileCubit>()
                                   .updateUserProfile(

@@ -31,6 +31,15 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
   }
 
   @override
+  void dispose() {
+    company.dispose();
+    phone.dispose();
+    city.dispose();
+    field.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F6),
@@ -41,6 +50,10 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
               const SnackBar(content: Text("Company Updated ✓")),
             );
             Navigator.pop(context);
+          } else if (state is ProfileFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
           }
         },
         builder: (context, state) {
@@ -131,7 +144,7 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
                       ),
 
                       const SizedBox(height: 30),
-                      state is AuthLoading
+                      state is ProfileLoading
                           ? const CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3)
                           : SizedBox(
                         width: double.infinity,
@@ -162,6 +175,12 @@ class _EditCompanyScreenState extends State<EditCompanyScreen> {
                               ),
                             ),
                             onPressed: () {
+                              if (company.text.trim().isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Company Name is required")),
+                                );
+                                return;
+                              }
                               context.read<ProfileCubit>().updateCompany(
                                 company.text,
                                 phone.text,

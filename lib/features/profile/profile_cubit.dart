@@ -37,6 +37,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       final token = prefs.getString("token") ?? "";
       await api.updateUserProfile(token, first, last, phone, city);
       emit(ProfileSuccess("PROFILE_UPDATED"));
+      await loadUserProfile();
     } catch (e) {
       emit(ProfileFailure(e.toString()));
     }
@@ -50,6 +51,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       final token = prefs.getString("token") ?? "";
       await api.updateCompanyProfile(token, company, phone, city, field);
       emit(ProfileSuccess("COMPANY_UPDATED"));
+      await loadUserProfile();
     } catch (e) {
       emit(ProfileFailure(e.toString()));
     }

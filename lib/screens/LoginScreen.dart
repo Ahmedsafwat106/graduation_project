@@ -5,6 +5,8 @@ import '../features/auth/AuthCubit.dart';
 import '../features/auth/AuthState.dart';
 import '../features/theme/theme_cubit.dart';
 import '../widgets/theme_toggle_button.dart';
+import '../widgets/language_toggle_button.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'ForgotPasswordScreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -52,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 60, 12, 50),
+              padding: const EdgeInsets.fromLTRB(24, 50, 24, 30),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -63,8 +65,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(40),
-                  bottomRight: Radius.circular(40),
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
                 ),
               ),
               child: Column(
@@ -72,10 +74,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
 
                   Align(
-                    alignment: Alignment.topRight,
+                    alignment: AlignmentDirectional.topEnd,
                     child: Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: ThemeToggleButton(color: Colors.white),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          LanguageToggleButton(color: Colors.white),
+                          SizedBox(width: 8),
+                          ThemeToggleButton(color: Colors.white),
+                        ],
+                      ),
                     ),
                   ),
                   const Text(
@@ -151,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         Center(
                           child: Text(
-                            "Welcome Back",
+                            "welcome_back_login".tr(),
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -164,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         Center(
                           child: Text(
-                            "Sign in to continue",
+                            "sign_in_continue".tr(),
                             style: TextStyle(
                               color: textSecondary,
                               fontSize: 15,
@@ -204,14 +213,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         if (role == "developer") ...[
                           _modernField(
-                            "Email Address",
+                            "email_address".tr(),
                             devEmail,
                             Icons.email_outlined,
                             fieldColor: fieldColor,
                             textSecondary: textSecondary,
                           ),
                           _modernField(
-                            "Password",
+                            "password".tr(),
                             devPass,
                             Icons.lock_outline,
                             isPass: true,
@@ -220,14 +229,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ] else ...[
                           _modernField(
-                            "Company Email",
+                            "company_email".tr(),
                             cmpEmail,
                             Icons.business_center_outlined,
                             fieldColor: fieldColor,
                             textSecondary: textSecondary,
                           ),
                           _modernField(
-                            "Password",
+                            "password".tr(),
                             cmpPass,
                             Icons.lock_outline,
                             isPass: true,
@@ -247,9 +256,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 builder: (_) => const ForgotPasswordScreen(),
                               ),
                             ),
-                            child: const Text(
-                              "Forgot Password?",
-                              style: TextStyle(
+                            child: Text(
+                              "forgot_password".tr(),
+                              style: const TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -306,10 +315,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                               role,
                                             );
                                       },
-                                      child: const Center(
+                                      child: Center(
                                         child: Text(
-                                          "Login",
-                                          style: TextStyle(
+                                          "login".tr(),
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
@@ -341,7 +350,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
-                    "or",
+                    "or".tr(),
                     style: TextStyle(
                       color: isDark ? const Color(0xFF7A9BA0) : Colors.grey,
                     ),
@@ -360,9 +369,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
             GestureDetector(
               onTap: () => Navigator.pushNamed(context, "/register"),
-              child: const Text(
-                "Create Account",
-                style: TextStyle(
+              child: Text(
+                "create_account".tr(),
+                style: const TextStyle(
                   color: AppColors.primary,
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
@@ -403,7 +412,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         alignment: Alignment.center,
         child: Text(
-          r == "developer" ? "Developer" : "Company",
+          r == "developer" ? "developer".tr() : "company".tr(),
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,

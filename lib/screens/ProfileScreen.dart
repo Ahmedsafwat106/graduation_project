@@ -113,17 +113,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
 
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(6),
-                                    child: Icon(
-                                      Icons.edit,
-                                      size: 18,
-                                      color: AppColors.primary,
+                                GestureDetector(
+                                  onTap: () {
+                                    if (role == "company") {
+                                      Navigator.pushNamed(context, "/edit-company", arguments: data);
+                                    } else {
+                                      Navigator.pushNamed(context, "/edit-profile", arguments: data);
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(6),
+                                      child: Icon(
+                                        Icons.edit,
+                                        size: 18,
+                                        color: AppColors.primary,
+                                      ),
                                     ),
                                   ),
                                 )

@@ -106,7 +106,20 @@ class MockInterviewCubit extends Cubit<MockInterviewState> {
       }
 
       if (filePath.isNotEmpty && uploadUrl.isNotEmpty) {
-        await api.uploadVideoToS3(uploadUrl, filePath);
+        await api.uploadVideoToS3(
+          uploadUrl,
+          filePath,
+          onProgress: (sent, total) {
+            if (total > 0) {
+              final progress = sent / total;
+              final pct = (progress * 100).toStringAsFixed(0);
+              emit(MockInterviewUploading(
+                progress: progress,
+                label: "Uploading… $pct%",
+              ));
+            }
+          },
+        );
       }
 
       try {
